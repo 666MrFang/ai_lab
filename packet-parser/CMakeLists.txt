@@ -16,6 +16,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 add_library(packet_parser
     src/packet_parser.cpp
     src/ipv4_parser.cpp
+    src/ipv6_parser.cpp
 )
 
 target_include_directories(packet_parser

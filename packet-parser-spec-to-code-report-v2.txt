@@ -1,0 +1,99 @@
+Step 1-4 执行完毕，测试通过。以下按 v0.2 Phase 10-13 输出。
+
+## Implementation Status
+
+在既有 IPv6 支持基础上，按 STOP-3 裁决 删除 payload_length==0 回退，改为字段字面值语义；
+删除违反特殊值规则的测试。IPv4 源文件未改动。
+
+## Requirement Status
+
+| ID | 需求 | 结果 | 证据 |
+|---|---|---|---|
+| R1 | 按 EtherType 0x86DD 分发 | PASS | src/packet_parser.cpp:56 分支；test_valid_ipv6 |
+| R2 | 解析 40 字节基础头 | PASS | src/ipv6_parser.cpp；test_valid_ipv6 |
+| R3 | 校验版本==6 | PASS | test_invalid_ipv6_version |
+| R4 | 声明长度不超可用字节 | PASS | src/ipv6_parser.cpp:84；test_ipv6_payload_length_exceeds_packet |
+| R5 | 地址格式化 | PASS | test_ipv6_to_string 7 组用例 |
+| R6 | 保持 IPv4 行为 | PASS（测试范围内） | src/ipv4_parser.cpp 未改；全部 IPv4 用例通过 |
+| R7 | 增加测试 | PASS | 5 个 IPv6 测试函数 |
+| R8 | 遵循现有风格 | PASS | 结构镜像 IPv4 解析器 |
+
+## Changes
+
+- src/ipv6_parser.cpp：删除 payload_length==0 -> length-40 回退分支（现已无 payload_length == 0 判断）；
+  保留 > length-40 校验。
+- test/test_packet_parser.cpp：删除 test_ipv6_payload_length_zero 函数及 main() 调用；
+  保留 test_ipv6_exact_header。
+- 其余文件（include/packet_parser.h、src/packet_parser.cpp、CMakeLists.txt）本次未再改动。
+
+## Assumptions
+
+| ID | 假设 | 判定 |
+|---|---|---|
+| A1 | 基础头 40 字节 | ACCEPT（SPEC） |
+| A2 | 版本值 == 6 | ACCEPT（SPEC） |
+| A3 | payload_length==0 回退 | REJECT -> 采用字段字面值；jumbogram 列为 out-of-scope |
+| A4 | 单地址指针接口 | ACCEPT |
+| A5 | 用 ether_type 判别 | ACCEPT |
+| A6 | ParsedPacket 尺寸变化 | POTENTIAL_RISK |
+
+## Test Results
+
+实际执行：
+
+    cmake --build build            -> OK
+    ctest --test-dir build         -> 100% tests passed, 0 failed (1/1)
+    build\test_packet_parser.exe   -> All tests passed. (exit=0)
+
+## Regression Status
+
+- 源码层：src/ipv4_parser.cpp 未被修改；src/packet_parser.cpp 仅为 EtherType 分发包装，
+  IPv4 分支参数/偏移/错误文案未变。
+- 证据限制：仅"现有测试范围内未观察到回归"；并未证明全部历史行为不变。
+  结构布局变化（ParsedPacket 增大）为源码级 ABI 变化。
+
+## Verified（有证据支撑）
+
+- IPv6 基础头字段提取（tc=0x2a、flow=0x12345 等非零判别值）。
+- 版本/长度校验。
+- 地址格式化：完整、前导/中间/尾部压缩、全零、等长零串取首个、单零组不压缩。
+- 精确 40 字节边界（字段 0、无载荷 -> 输出 0）。
+- IPv4 路径在现有测试范围内无回归。
+
+## Not Fully Verified（证据不完整）
+
+- jumbogram 场景：现输出字段字面值 0，属已文档化的 out-of-scope，而非正确解析。
+- 扩展头链、分片与 next_header 续接行为。
+- ipv6_to_string 非法输入（null/短缓冲）未测。
+
+## Out of Scope
+
+O1 扩展头遍历、O2 分片、O3 L4 协议解析、O4 Jumbo Payload 选项、O5 文档更新。
+
+## Known Risks
+
+- POTENTIAL_RISK：ParsedPacket 新增成员改变结构布局；无外部消费者证据，未触发 STOP-5，
+  但需消费者重编译。
+- 技术风险：ipv6_to_string 无空指针/长度防护；payload_length 仅 16 位。
+- 仓库将 build/ 纳入 git，构建后二进制改动显示为 M（噪声）。
+
+## Plan Deviations
+
+1. 原 0.1 计划签名 ipv6_to_string(const IPv6Header&) -> 改为 const uint8_t* addr。
+   原因：无法区分 src/dst。影响 R5。依据：Phase 8 接口无歧义要求。
+2. 原 0.1 计划含 payload_length==0 -> length-40。经 v0.2 Phase 6 判定 A3 不支持
+   -> 依你裁决改为字面值。影响 R2/R4。
+3. 删除测试 test_ipv6_payload_length_zero。原因：v0.2 Phase 11 禁止测试定义未决语义。
+
+## Evidence Audit
+
+| Claim | Evidence | Assessment |
+|---|---|---|
+| IPv4 无观察到的回归 | diff + IPv4 用例通过 | SUPPORTED（测试范围内） |
+| 基础头解析正确 | 非零判别值 + 字段断言 | SUPPORTED（测试范围内） |
+| 长度校验正确 | 超长用例 + 精确边界 | SUPPORTED（测试范围内） |
+| 地址压缩正确 | 7 组格式化用例 | SUPPORTED（测试范围内） |
+| jumbogram 支持 | 明示 out-of-scope | UNSUPPORTED（有意排除） |
+| 扩展头支持 | 无实现/无测试 | UNSUPPORTED |
+
+未做进一步代码改动；工作区状态为「已按裁决调整且测试通过」。

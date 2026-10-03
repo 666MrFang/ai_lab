@@ -1,0 +1,120 @@
+All phases complete. Per the skill, the final report below.
+
+> Note: spec-to-code is not a registered loadable skill (the skill tool only exposes
+> customize-opencode), so I read D:\ai_lab\spec_to_code\SKILL.md and executed its 13
+> phases manually.
+
+---
+
+## Phase 1-3: Explore / Understand / Pattern
+
+- Entry point: PacketParser::parse (src/packet_parser.cpp:7).
+- Call chain: parse -> parse_ethernet -> EtherType dispatch -> parse_ipv4
+  (src/ipv4_parser.cpp:5) / parse_ipv6 (src/ipv6_parser.cpp:7) ->
+  payload_offset += 14 -> valid=true.
+- Contracts: parser returns bool; outputs via refs; payload_offset is header-relative
+  (caller adds 14); error is empty on success, English lowercase phrase on failure;
+  no exceptions.
+- Build/test: CMake + Ninja, C++17; cmake --build build;
+  ctest --test-dir build / build\test_packet_parser.exe.
+- Existing IPv6 implementation was already present in the working tree from earlier in
+  this session (uncommitted). This run focused on completing/reviewing and closing a
+  test-coverage gap.
+
+## Phase 4: Requirements
+
+| ID | Requirement | Source |
+|---|---|---|
+| R1 | Dispatch on IPv6 EtherType 0x86DD | user |
+| R2 | Parse IPv6 base header (40 bytes) | user |
+| R3 | Validate version == 6 | existing pattern |
+| R4 | Validate declared payload length vs available bytes | existing IPv4 contract |
+| R5 | Format IPv6 address | user ("IPv6 支持"), mirrors ipv4_to_string |
+| R6 | Preserve IPv4 behavior | user req 2 |
+| R7 | Add tests | user req 3 |
+| R8 | Follow existing style | user req 1 |
+
+Out of scope: O1 extension-header traversal, O2 fragmentation, O3 TCP/UDP/ICMPv6 parsing,
+O4 Jumbo Payload option parsing, O5 docs/README.
+
+## Phase 5-8: Design / Assumptions / Plan / Plan Review
+
+Assumption table (Phase 6):
+
+| ID | Assumption | Evidence | Decision |
+|---|---|---|---|
+| A1 | IPv6 base header is 40 bytes | RFC 8200 3 (protocol spec) | Accept |
+| A2 | payload_length==0 -> use remaining bytes | RFC 8200 3 (0 = Jumbo/unspecified); extension headers O1/O4 out of scope; for a complete frame remaining bytes == payload | Accept (documented) |
+| A3 | ipv6_to_string takes a single address pointer | same shape as ipv4_to_string(uint32_t); header holds two addresses | Accept (recorded as plan deviation) |
+| A4 | No explicit version discriminator field; use ether_type | existing ParsedPacket has ether_type; zero IPv4-path change | Accept |
+
+No requirement lacks a step; every step maps to a requirement (R2/R3/R4 ->
+ipv6_parser.cpp; R1 -> dispatch; R5 -> ipv6_to_string; R7 -> tests; R8 -> style).
+Layout/ABI change (ParsedPacket grows) is inherent to R1/R2 and accepted.
+
+## Phase 9-10: Implementation / Regression
+
+- Implementation was present; this run added the missing boundary tests (Phase 11
+  requirement) to test/test_packet_parser.cpp:
+  - test_ipv6_to_string: added single-zero-group case (must not compress).
+  - test_ipv6_exact_header: exactly 40-byte header, field 0 -> valid, offset 54, payload 0.
+  - test_ipv6_payload_length_zero: field 0 with trailing bytes -> payload = remaining 4.
+- Regression review: src/ipv4_parser.cpp untouched; packet_parser.cpp change is a
+  dispatch wrapper only; IPv4 branch args/offsets/error text unchanged. No regression
+  observed within existing test coverage.
+
+## Test Results
+
+cmake --build build  -> OK
+ctest: 100% tests passed, 0 failed (1/1)
+test_packet_parser.exe: All tests passed. (exit=0)
+
+## Phase 12: Evidence Audit
+
+| Claim | Evidence | Assessment |
+|---|---|---|
+| IPv4 behavior unchanged | diff review + all prior IPv4 tests pass | Supported within tested scope |
+| IPv6 base header parsing correct | discriminating values (tc=0x2a, flow=0x12345) + address bytes | Supported within tested scope |
+| Bit-field extraction correct | nonzero traffic_class/flow_label tested | Supported within tested scope |
+| Address compression correct | full/leading/middle/trailing/all-zero/equal-run/single-zero | Supported within tested scope |
+| Length validation correct | short header, exceeds-packet, exact-fit, zero+trailing | Supported within tested scope |
+| A2 fallback behavior | test_ipv6_payload_length_zero | Supported for complete-frame case only |
+| Extension headers supported | none | Unsupported / out of scope |
+
+## Phase 13: Verification Report
+
+Implementation Status: IPv6 base-header parsing, EtherType dispatch, address formatting,
+and tests are implemented in the working tree (uncommitted); this run added three
+boundary-format tests.
+
+Requirement Status: R1 PASS - R2 PASS - R3 PASS - R4 PASS - R5 PASS - R6 PASS -
+R7 PASS - R8 PASS.
+
+Changes:
+- include/packet_parser.h - IPv6Header, ParsedPacket::ipv6, parse_ipv6/ipv6_to_string decls.
+- src/ipv6_parser.cpp (new) - parse_ipv6, ipv6_to_string.
+- src/packet_parser.cpp - EtherType dispatch only.
+- CMakeLists.txt - source registration.
+- test/test_packet_parser.cpp - IPv6 tests + boundary tests; test_non_ipv4_packet uses ARP.
+
+Test Results: build OK; ctest 1/1 passed; exe "All tests passed." (exit 0).
+
+Regression Status: No regression observed within existing test coverage; IPv4 source
+untouched.
+
+Verified: base-header field extraction, version/length validation, address formatting,
+unmodified IPv4 path.
+
+Not Fully Verified: A2 jumbogram semantics beyond the complete-frame case;
+extension-header behavior (not implemented).
+
+Out of Scope: O1-O5 above.
+
+Known Risks: ipv6_to_string has no null/short-buffer guard; payload_length 16-bit only;
+ParsedPacket layout/ABI change requires consumer rebuild; build/ artifacts are
+git-tracked (noise).
+
+Plan Deviations: (1) ipv6_to_string signature changed from const IPv6Header& to
+const uint8_t* addr - original plan signature could not select src vs dst. (2) Added
+payload_length==0 fallback as A2. (3) Added boundary tests beyond the original plan's
+list. All recorded; no changes made outside the planned files.

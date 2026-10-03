@@ -56,6 +56,23 @@ struct IPv4Header {
 };
 
 // ============================================================
+// IPv6 header
+// ============================================================
+
+struct IPv6Header {
+    uint8_t version = 0;
+    uint8_t traffic_class = 0;
+    uint32_t flow_label = 0;
+
+    uint16_t payload_length = 0;
+    uint8_t next_header = 0;
+    uint8_t hop_limit = 0;
+
+    uint8_t src_addr[16]{};
+    uint8_t dst_addr[16]{};
+};
+
+// ============================================================
 // Parsed packet
 // ============================================================
 
@@ -64,6 +81,7 @@ struct ParsedPacket {
 
     EthernetHeader ethernet;
     IPv4Header ipv4;
+    IPv6Header ipv6;
 
     std::size_t payload_offset = 0;
     std::size_t payload_length = 0;
@@ -100,6 +118,15 @@ private:
         std::size_t& payload_length,
         std::string& error
     ) const;
+
+    bool parse_ipv6(
+        const uint8_t* data,
+        std::size_t length,
+        IPv6Header& ipv6,
+        std::size_t& payload_offset,
+        std::size_t& payload_length,
+        std::string& error
+    ) const;
 };
 
 // ============================================================
@@ -107,6 +134,8 @@ private:
 // ============================================================
 
 std::string ipv4_to_string(uint32_t addr);
+
+std::string ipv6_to_string(const uint8_t* addr);
 
 } // namespace packet_parser
 

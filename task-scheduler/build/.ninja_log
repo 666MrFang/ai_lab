@@ -1,0 +1,5 @@
+# ninja log v7
+1	259	8127386135650494	CMakeFiles/task_scheduler.dir/src/scheduler.cpp.obj	ecb2d4d169106f63
+4	279	8127386135680484	CMakeFiles/test_scheduler.dir/test/test_scheduler.cpp.obj	6a824fae24fc25ae
+260	338	8127386138239682	libtask_scheduler.a	868bf2bceaff1721
+338	425	8127386139024466	test_scheduler.exe	16191d696c9aa5c0

@@ -1,0 +1,19 @@
+Start testing: Oct 03 21:50 中国标准时间
+----------------------------------------------------------
+1/1 Testing: task_scheduler_tests
+1/1 Test: task_scheduler_tests
+Command: "D:/ai_lab/task-scheduler/build/test_scheduler.exe"
+Directory: D:/ai_lab/task-scheduler/build
+"task_scheduler_tests" start time: Oct 03 21:50 中国标准时间
+Output:
+----------------------------------------------------------
+All tests passed.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"task_scheduler_tests" end time: Oct 03 21:50 中国标准时间
+"task_scheduler_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 03 21:50 中国标准时间

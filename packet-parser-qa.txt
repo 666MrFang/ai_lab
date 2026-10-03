@@ -1,0 +1,786 @@
+============================================================
+【第 2 轮】
+============================================================
+
+用户：
+------------------------------------------------------------
+你现在只负责分析项目，不允许修改任何文件。
+
+目标：
+我要后续给 packet-parser 增加 IPv6 支持。
+
+请完成：
+
+1. 分析项目目录结构
+2. 找出 IPv4 parser 的入口
+3. 找出 IPv4 header 的数据结构
+4. 找出 IPv4 parser 的主要解析流程
+5. 找出 TCP/UDP parser 是如何被调用的
+6. 找出测试代码
+7. 找出项目中已有的错误处理方式
+8. 总结 IPv4 parser 的代码风格和实现范式
+
+最后输出：
+
+A. 项目结构
+B. 关键文件
+C. IPv4 解析调用链
+D. IPv4 parser 的实现模式
+E. 如果增加 IPv6，哪些地方可能需要修改
+
+不要修改任何文件。
+------------------------------------------------------------
+
+助手：
+------------------------------------------------------------
+分析完成，未修改任何文件。以下为结果。
+
+## A. 项目结构
+
+packet-parser/
+├── CMakeLists.txt              # CMake+Ninja，C++17；库 packet_parser + 测试可执行文件
+├── README.md                   # 描述为 Ethernet/IPv4 parser（目录树里写的 tests/ 实际是 test/）
+├── docs/
+│   └── packet_format.md        # 文档不完整，仅 22 行，在第 2 节截断
+├── include/
+│   └── packet_parser.h         # 唯一公共头：结构体 + 类 + 工具函数声明
+├── src/
+│   ├── packet_parser.cpp       # parse 总入口、parse_ethernet、ipv4_to_string
+│   └── ipv4_parser.cpp         # parse_ipv4 具体实现
+├── test/
+│   └── test_packet_parser.cpp  # assert + main() 的朴素测试
+└── build/                      # 已构建产物，且被 git 跟踪（.exe/.a/.obj 等）
+
+注：build/ 与编译产物被提交进了 git（git ls-files 可见），属既有状态。
+
+## B. 关键文件
+
+| 文件 | 职责 |
+|---|---|
+| include/packet_parser.h | 定义 EthernetHeader(26)、IPv4Header(36)、ParsedPacket(62)、PacketParser(78)、ipv4_to_string(109) |
+| src/packet_parser.cpp | PacketParser::parse(7) 顶层流程；parse_ethernet(69)；ipv4_to_string(101) |
+| src/ipv4_parser.cpp | PacketParser::parse_ipv4(5) 唯一实现 |
+| test/test_packet_parser.cpp | 8 个测试，main(220) 顺序调用 |
+| CMakeLists.txt | 源文件清单(16-19)，新增源文件需在此登记 |
+
+## C. IPv4 解析调用链
+
+PacketParser::parse                         src/packet_parser.cpp:7
+ ├─ length==0 检查                          :14
+ ├─ data==nullptr 检查                       :19
+ ├─ parse_ethernet(data,length,...)          :28  → src/packet_parser.cpp:69
+ │    └─ 长度<14 检查，读 dst/src MAC、ether_type
+ ├─ ether_type != ETHERTYPE_IPV4 检查        :40  （硬编码 0x0800）
+ ├─ const ip_offset = 14                     :49  （硬编码以太网头长度）
+ ├─ parse_ipv4(data+14, length-14, ...)      :51  → src/ipv4_parser.cpp:5
+ └─ payload_offset += 14                     :62  （把相对偏移转成整包偏移）
+    packet.valid = true                      :64
+
+parse_ipv4 内部：最小长度→version/ihl→总长→id→flags/frag→ttl/protocol→
+checksum→src/dst→payload 相对偏移与长度。
+
+关于 TCP/UDP parser（第 5 问）：项目中并不存在 TCP/UDP parser。
+全仓库仅有的相关代码是头文件里的协议号常量 IP_PROTOCOL_ICMP/TCP/UDP(18-20)
+和 IPv4 的 protocol 字段；解析器只把协议号存进 IPv4Header::protocol，
+没有任何分发/调用 TCP/UDP 的逻辑。docs/packet_format.md:13-15 只是文字
+示意，未实现。
+
+## D. IPv4 parser 的实现模式
+
+- 方法签名：const 成员函数，输入 (const uint8_t*, std::size_t)，输出全部
+  通过引用参数 (IPv4Header&, size_t&, size_t&, std::string& error)，返回 bool。
+- 错误处理：就地 error = "..." + return false；错误串为纯英文小写短语
+  （如 "invalid ipv4 ihl"）。上层 parse 用同一 packet.error 透传，不抛异常。
+- 长度校验：每个阶段先用 constexpr 常量（如 minimum_ipv4_header_length = 20）
+  做下界检查再读字节，读字段严格按字节序偏移。
+- 字节序：大端组装用 static_cast<T>(hi) << n | static_cast<T>(lo)；
+  位域用掩码+移位（>>4 &0x0f、>>13 &0x07）。
+- 风格：// ---- 分节注释；snake_case 变量、constexpr 常量；std:: 全限定；
+  无异常、无动态分配（仅 ipv4_to_string 用 ostringstream）。
+- 偏移语义：parse_ipv4 返回相对 IPv4 头的 payload_offset，由调用方 parse
+  加上 ip_offset。parse_ipv6 应沿用此范式。
+
+## E. 若增加 IPv6，可能需要修改的地方
+
+1. include/packet_parser.h
+   - 新增 IPv6Header（128bit src/dst 需 uint8_t[16] 或双 uint64_t，
+     注意沿用大端组装风格）。
+   - ParsedPacket 增加 IPv6 成员（并需决定如何标识"本包是 v4 还是 v6"）。
+   - PacketParser 增加 parse_ipv6(...) 声明；新增 ipv6_to_string（IPv6 有
+     压缩写法 ::，比 v4 复杂）。
+2. src/packet_parser.cpp
+   - parse() 中 ether_type != ETHERTYPE_IPV4(40) 的单一判断需扩展为 v4/v6 分发；
+     ip_offset=14 可复用。
+   - 需决定 parse_ipv6 的调用位置与 payload_offset 修正逻辑，保持 IPv4 现有
+     行为不变。
+3. 新增 src/ipv6_parser.cpp，并在 CMakeLists.txt:16-19 登记源文件
+   （CMake 未用 glob，必须显式添加）。
+4. test/test_packet_parser.cpp
+   - 现有测试会冲突：test_non_ipv4_packet(139-157) 正是把 EtherType 改成
+     0x86DD 并断言错误 "unsupported ethernet protocol"；一旦支持 IPv6，
+     该测试语义与断言必须调整（需明确这是"计划变更"而非乱改）。
+   - 需新增 IPv6 正常/异常用例，沿用 assert + main 调用风格。
+5. 常量：ETHERTYPE_IPV6(16) 已存在但当前未被使用，可直接复用。
+6. docs/packet_format.md 与 README.md 描述仍停留在 IPv4（README 仅 25 行），
+   若 plan 含文档更新需一并处理。
+
+需你确认的关键设计点（会影响改动范围）：ParsedPacket 如何表达协议类型
+（新增枚举字段？还是靠 valid+成员？），这决定头文件与 parse 的改动方式，
+且与"保持 IPv4 行为不变"直接相关。请提供此前确认的 plan，我再据此实现。
+------------------------------------------------------------
+
+
+============================================================
+【第 3 轮】
+============================================================
+
+用户：
+------------------------------------------------------------
+基于刚才的分析，现在只做设计，不修改代码。
+
+请详细说明：
+
+1. IPv6 parser 应该放在哪里
+2. 哪些现有结构可以复用
+3. 哪些结构需要新增
+4. IPv4 parser 中哪些代码模式应该保持一致
+5. IPv6 和 IPv4 的关键差异
+6. IPv6 parser 的输入和输出
+7. 错误处理应该如何与现有代码保持一致
+8. 测试应该增加哪些 case
+
+要求：
+
+- 不修改现有 IPv4 行为
+- 不进行无关重构
+- 尽量复用现有接口
+- 遵循现有项目代码风格
+
+最后给出一个最小修改方案。
+------------------------------------------------------------
+
+助手：
+------------------------------------------------------------
+设计如下，未修改任何文件。
+
+## 1. IPv6 parser 放在哪里
+
+- 新增 src/ipv6_parser.cpp，与 src/ipv4_parser.cpp 平级、一一对应，承载
+  PacketParser::parse_ipv6 的定义。
+- 声明放在现有唯一公共头 include/packet_parser.h 的 PacketParser 类内
+  （与 parse_ipv4 并列）。
+- ipv6_to_string 放在 src/ipv6_parser.cpp（对应 ipv4_to_string 在
+  packet_parser.cpp 的位置，就近与解析实现放一起也可，二选一，建议放
+  ipv6_parser.cpp）。
+- 必须在 CMakeLists.txt:16-19 的 add_library(packet_parser ...) 源文件清单
+  显式加入 src/ipv6_parser.cpp（该项目未用 glob）。
+
+不建议把 v6 实现塞进 packet_parser.cpp：会破坏"一个协议一个文件"的现有划分。
+
+## 2. 可复用的现有结构
+
+- EthernetHeader / parse_ethernet（packet_parser.cpp:69）：完全复用，无需改动。
+  它已产出 ether_type，IPv6 判别所需信息已具备。
+- ParsedPacket：复用其中的 ethernet、payload_offset、payload_length、error、
+  valid；只需追加 IPv6 成员。
+- PacketParser::parse 入口（packet_parser.cpp:7）：复用其空指针/空包检查、
+  以太网解析、valid/error 收尾逻辑。
+- 常量 ETHERTYPE_IPV6 = 0x86DD（packet_parser.h:16）：已存在，直接复用。
+- 偏移语义：复用"parse_ipvX 返回相对本层头的 payload_offset，由 parse() 加上
+  ip_offset=14"的约定（packet_parser.cpp:49,62）。
+- 错误串透传机制：复用同一个 packet.error 与 bool 返回约定。
+- ipv4_to_string 的 ostringstream 风格：作为 ipv6_to_string 的形式参照
+  （但算法复杂度不同，见第 5 点）。
+
+## 3. 需要新增的结构
+
+- IPv6Header（放入 packet_parser.h，紧随 IPv4Header），字段建议：
+  - uint8_t version
+  - uint8_t traffic_class
+  - uint32_t flow_label（20 位）
+  - uint16_t payload_length
+  - uint8_t next_header
+  - uint8_t hop_limit
+  - uint8_t src_addr[16] / uint8_t dst_addr[16]（128 位，现有无 128 位类型；
+    用字节数组最贴合"逐字节读取"风格）
+- ParsedPacket 增加成员：IPv6Header ipv6;
+- 协议判别字段（决策点），二选一：
+  - 方案 A（最小）：不加新字段，用已存的 ethernet.ether_type 区分。
+  - 方案 B（更清晰）：在 ParsedPacket 加 enum class IPVersion 或 uint8_t
+    ip_version。
+  - 推荐 方案 B，因为消费方不必再回看 ether_type；且给新字段带默认值不会
+    破坏现有 IPv4 代码/测试。
+- parse_ipv6(...) 声明（PacketParser 私有区，与 parse_ipv4 并列）。
+- ipv6_to_string 声明与实现：注意签名建议传 const IPv6Header& 而非裸数组
+  （比 v4 的 uint32_t 更需要上下文）。
+
+## 4. IPv4 parser 中应保持一致的模式
+
+- 方法签名风格：const 成员函数；输入 (const uint8_t* data, std::size_t length)；
+  输出用引用参数；返回 bool。
+- 长度下界先用 constexpr std::size_t（IPv6 为 minimum_ipv6_header_length = 40）
+  再读数据。
+- 先校验、后读取：每个字段解析前都有边界判断。
+- 大端组装统一用 static_cast<uint32_t>(data[i]) << n | ...（traffic class/
+  flow label 会用到）。
+- 位域用掩码 + 移位（>>4 &0x0f 等），沿用现有写法。
+- 错误处理用 error = "..."; return false;，成功路径 error 保持空。
+- // ---------- 分节注释；snake_case；std:: 全限定；不抛异常、无动态分配
+  （to_string 除外）。
+- payload_offset 相对本层头返回，由 parse() 统一 += ip_offset。
+
+## 5. IPv6 与 IPv4 的关键差异
+
+| 维度 | IPv4 | IPv6 |
+|---|---|---|
+| 头长度 | 可变，ihl*4，有 options | 固定 40 字节，无 IHL/options |
+| 版本 | 高 4 位 = 4 | 高 4 位 = 6 |
+| 首 32 位 | version/IHL/DSCP/ECN | version(4)+traffic class(8)+flow label(20) |
+| 长度字段 | total_length（含头） | payload_length（不含 40 字节头），值 0 可能表示 jumbogram |
+| 校验和 | 有 header checksum | 无首部校验和 |
+| TTL/协议 | ttl / protocol | hop_limit / next_header |
+| 分片 | 基础头内有 flags/fragment offset | 基础头无分片字段，靠扩展头 |
+| 地址 | 32 位 | 128 位 |
+| 上层定位 | protocol 即 L4 | next_header 可能是扩展头，未必直接是 L4 |
+| 地址字符串 | 点分十进制 | 需 RFC 5952 压缩（::）、最长零串、小写 hex |
+
+其中地址字符串格式化是新增代码里最复杂的一处，不能照抄 ipv4_to_string。
+
+## 6. IPv6 parser 的输入与输出
+
+- 输入：const uint8_t* data 指向 IPv6 头起始（即以太网头之后，由 parse()
+  传 data + 14）；std::size_t length 为剩余可用字节数。
+- 输出（引用参数）：
+  - IPv6Header& ipv6：填充解析结果；
+  - std::size_t& payload_offset：相对 IPv6 头 = 40；
+  - std::size_t& payload_length：上层载荷长度；
+  - std::string& error：失败原因。
+- 返回：bool（成功 true）。
+- payload_length 取值决策：镜像 IPv4"用长度字段"的做法，但需处理
+  40 + payload_length <= length 校验；当字段为 0（jumbogram/offload）时，
+  建议回退为 length - 40。此点需在 plan 中明确，避免与 IPv4 语义不一致。
+
+## 7. 错误处理如何保持一致
+
+- 沿用 error = "..."; return false; 与空错误串表示成功，不抛异常。
+- 复用 parse() 中同一个 packet.error，不新增错误通道。
+- 错误串保持英文小写短语风格，建议文案：
+  - "packet is shorter than minimum ipv6 header"
+  - "invalid ipv6 version"
+  - "ipv6 payload length exceeds packet length"
+- parse() 中的分发必须保留原有落空文案 "unsupported ethernet protocol"
+  （packet_parser.cpp:41），仅当 ether_type 既非 IPv4 也非 IPv6 时才触发。
+
+## 8. 测试应增加的 case
+
+在 test/test_packet_parser.cpp 内，沿用 assert + main() 顺序调用风格：
+
+1. create_ipv6_packet() 辅助函数（EtherType=0x86DD + 40 字节头 + 载荷）。
+2. test_valid_ipv6：校验 valid、version=6、traffic_class、flow_label、
+   payload_length、next_header、hop_limit、128 位 src/dst、
+   payload_offset==54、payload_length。
+3. test_ipv6_to_string：全地址、中间 :: 压缩、开头/结尾零串、多个等长零串
+   取最长（或最靠前）、全零 ::、回环 ::1。
+4. test_short_ipv6_packet：长度 < 40 → "packet is shorter than minimum
+   ipv6 header"。
+5. test_invalid_ipv6_version：版本位为非 6 → "invalid ipv6 version"。
+6. test_ipv6_payload_length_exceeds_packet：长度字段 > 实际可用 → 对应错误。
+
+冲突提醒（不可回避）：现有 test_non_ipv4_packet（test_packet_parser.cpp:139-157）
+把 EtherType 改成 0x86DD 并断言错误为 "unsupported ethernet protocol"。
+支持 IPv6 后该断言必然失败，必须把它改成真正的非 v4/v6 类型（如 ARP 0x0806）
+才能继续验证"不支持协议"分支。这不是乱改，而是功能变更的必要连带修改，
+需在 plan 里列明。
+
+---
+
+## 最小修改方案
+
+严格限定在以下文件，IPv4 路径逻辑不改动（仅被分发条件包裹）：
+
+1. include/packet_parser.h
+   - 新增 IPv6Header 结构（紧随 IPv4Header）。
+   - ParsedPacket 增加 IPv6Header ipv6;（及可选的 ip_version 判别字段）。
+   - PacketParser 私有区增加 parse_ipv6(...) 声明，签名与 parse_ipv4 平行。
+   - 增加 ipv6_to_string(...) 声明。
+2. 新增 src/ipv6_parser.cpp
+   - 实现 parse_ipv6 与 ipv6_to_string，完全套用第 4 点模式。
+3. src/packet_parser.cpp（唯一改动点，约 40-62 行）
+   - 保持 parse_ethernet、parse_ipv4、ipv4_to_string 原样。
+   - 把 if (ether_type != ETHERTYPE_IPV4) { error=...; return } 改为
+     if (v4) {...} else if (v6) {...} else {error=...; return}，
+     ip_offset=14 复用，IPv6 分支 payload_offset += ip_offset 后 valid=true。
+4. CMakeLists.txt
+   - add_library 源清单加入 src/ipv6_parser.cpp。
+5. test/test_packet_parser.cpp
+   - 增加上述 v6 用例与 main 调用。
+   - 修正 test_non_ipv4_packet 的 EtherType 为 0x0806。
+6. 可选：docs/packet_format.md、README.md 补充 IPv6（不影响功能，可后置）。
+
+改动范围：1 个新源文件 + 3 个现有文件 +（可选）2 个文档。IPv4 子流程
+parse_ipv4 与相关测试预期保持不变。
+------------------------------------------------------------
+
+
+============================================================
+【第 4 轮】
+============================================================
+
+用户：
+------------------------------------------------------------
+请根据前面的分析生成 implementation plan。
+
+格式：
+
+Step 1:
+文件：
+修改：
+
+Step 2:
+文件：
+修改：
+
+Step 3:
+文件：
+修改：
+
+Step 4:
+文件：
+修改：
+
+每一步说明：
+- 为什么修改
+- 修改什么
+- 不应该修改什么
+- 如何验证
+
+不要执行修改。
+------------------------------------------------------------
+
+助手：
+------------------------------------------------------------
+# packet-parser IPv6 支持 — Implementation Plan
+
+前置决策（本 plan 采用的方案）：
+- 协议判别：不新增判别字段，复用已存在的 ethernet.ether_type
+  （0x0800/0x86DD）。这样 IPv4 结果填充逻辑零改动，最贴合"不改现有行为"。
+- ipv6_to_string 签名：std::string ipv6_to_string(const IPv6Header& header);
+- payload_length==0：视为 jumbogram/未指定，回退为 length - 40（需你确认；
+  若希望严格等于字段值，可去掉该回退）。
+- 所有实现遵循 IPv4 的签名/错误/字节序风格，不引入异常与新依赖。
+
+---
+
+## Step 1
+
+文件： include/packet_parser.h
+
+修改：
+1. 在 IPv4Header（36-56 行）之后新增 IPv6Header：
+   - uint8_t version = 0;
+   - uint8_t traffic_class = 0;
+   - uint32_t flow_label = 0;（20 位）
+   - uint16_t payload_length = 0;
+   - uint8_t next_header = 0;
+   - uint8_t hop_limit = 0;
+   - uint8_t src_addr[16]{};
+   - uint8_t dst_addr[16]{};
+2. 在 ParsedPacket（62-72 行）中、IPv4Header ipv4; 之后新增一行：
+   IPv6Header ipv6;
+3. 在 PacketParser 私有区 parse_ipv4(...)（95-102 行）之后，新增 parse_ipv6(...)
+   声明，参数与 parse_ipv4 平行：
+   bool parse_ipv6(const uint8_t* data, std::size_t length, IPv6Header& ipv6,
+   std::size_t& payload_offset, std::size_t& payload_length,
+   std::string& error) const;
+4. 在工具函数区 ipv4_to_string（109 行）之后新增：
+   std::string ipv6_to_string(const IPv6Header& header);
+
+为什么：公共头是唯一的接口契约来源；结构、方法声明、工具函数必须先声明，
+各 .cpp 才能实现并互相引用。
+
+不应该修改：不动 EthernetHeader、IPv4Header 的字段、ipv4_to_string 签名；
+不动 ParsedPacket 既有的 valid/ethernet/ipv4/payload_offset/payload_length/
+error 字段及顺序语义；不新增枚举或判别字段（按前置决策）。
+
+如何验证：仅头文件改动，执行 cmake --build build，现有代码与测试必须仍能
+编译通过（此时新声明未被调用，属正常）。
+
+---
+
+## Step 2
+
+文件： 新增 src/ipv6_parser.cpp
+
+修改：
+1. #include "packet_parser.h"，全部实现放入 namespace packet_parser { ... }。
+2. 实现 PacketParser::parse_ipv6，流程镜像 parse_ipv4：
+   - constexpr std::size_t minimum_ipv6_header_length = 40;
+   - length < 40 → error = "packet is shorter than minimum ipv6 header";
+     return false;
+   - 读首 32 位大端：version = (data[0] >> 4) & 0x0f;；
+     version != 6 → error = "invalid ipv6 version"; return false;
+   - traffic_class = ((data[0] & 0x0f) << 4) | ((data[1] >> 4) & 0x0f);
+   - flow_label = (static_cast<uint32_t>(data[1] & 0x0f) << 16) |
+     (static_cast<uint32_t>(data[2]) << 8) | data[3];
+   - payload_length = static_cast<uint16_t>(data[4]) << 8 | data[5];
+   - next_header = data[6];；hop_limit = data[7];
+   - 逐字节拷贝 src_addr/dst_addr（for 循环，风格同 parse_ethernet 的 MAC 拷贝）。
+   - 长度校验：若字段非 0 且 payload_length > length - 40 →
+     error = "ipv6 payload length exceeds packet length"; return false;；
+     字段为 0 时用 length - 40。
+   - payload_offset = 40;，payload_length 赋最终值；return true;
+3. 实现 ipv6_to_string(const IPv6Header& header)：RFC 5952 风格——16 字节按
+   8 组 16 位、小写 hex、去掉每组前导零、最长连续零组压缩为 ::（出现并列取
+   最靠前者，全零输出 ::）。使用 std::ostringstream，风格对齐 ipv4_to_string。
+
+为什么：把 v6 解析独立成文件，与 ipv4_parser.cpp 的"一协议一文件"划分一致，
+避免污染 packet_parser.cpp。
+
+不应该修改：不改 parse_ipv4、parse_ethernet、ipv4_to_string 的任何实现；
+不复用 IPv4 的可变头长/校验和/分片逻辑（v6 固定 40 字节、无校验和、基础头
+无分片）；不解析扩展头链（next_header 原样存储，扩展头解析超出本次范围）。
+
+如何验证：将文件登记进构建（见 Step 3）后 cmake --build build 编译通过；
+函数级正确性由 Step 4 测试覆盖，本步不要求运行期调用。
+
+---
+
+## Step 3
+
+文件： src/packet_parser.cpp 与 CMakeLists.txt
+
+修改：
+1. CMakeLists.txt：在 add_library(packet_parser ...)（16-19 行）源清单中加入
+   src/ipv6_parser.cpp。
+2. src/packet_parser.cpp 的 PacketParser::parse：把当前 IPv4 专属判断
+   （40-59 行）改为按 ether_type 分发：
+   - if (packet.ethernet.ether_type == ETHERTYPE_IPV4) → 运行现有 parse_ipv4
+     分支（ip_offset=14，成功后 payload_offset += ip_offset，valid=true）。
+   - else if (packet.ethernet.ether_type == ETHERTYPE_IPV6) →
+     parse_ipv6(data + 14, length - 14, packet.ipv6, packet.payload_offset,
+     packet.payload_length, packet.error)；成功后同样 payload_offset += 14、
+     valid = true。
+   - else → 保留原文案 error = "unsupported ethernet protocol"; return packet;
+   - 保持 length==0、data==nullptr、parse_ethernet 三段前置逻辑原样。
+
+为什么：让顶层入口支持两种 EtherType；ip_offset=14 语义不变，两分支复用。
+
+不应该修改：不改 parse_ethernet、parse_ipv4、ipv4_to_string；不改 IPv4 分支内
+任何字段填充、偏移或错误文案；不改 valid/error 的既有语义；不引入新的分发字段。
+
+如何验证：cmake --build build 通过；对照 Step 4 前先跑现有 IPv4 测试，
+确认全部仍通过（IPv4 路径行为未变）。
+
+---
+
+## Step 4
+
+文件： test/test_packet_parser.cpp
+
+修改：
+1. 新增辅助函数 create_ipv6_packet()：以太网头 EtherType=0x86DD（0x86,0xdd）
+   + 40 字节 IPv6 头（version=6、指定 traffic class/flow label、
+   payload_length、next_header=TCP(6)、hop_limit=64、src/dst 各 16 字节）
+   + 少量载荷。
+2. 新增测试函数并挂到 main()：
+   - test_valid_ipv6：valid==true；version==6；traffic_class、flow_label、
+     payload_length、next_header、hop_limit 正确；src/dst 字节正确；
+     payload_offset==54；payload_length 正确。
+   - test_ipv6_to_string：全地址、中间 ::、开头/结尾零串、等长零串取最长、
+     全零 ::、回环 ::1。
+   - test_short_ipv6_packet：<40 字节 → "packet is shorter than minimum
+     ipv6 header"。
+   - test_invalid_ipv6_version：首字节版本位非 6 → "invalid ipv6 version"。
+   - test_ipv6_payload_length_exceeds_packet：长度字段超出实际 →
+     "ipv6 payload length exceeds packet length"。
+3. 修正 test_non_ipv4_packet（139-157 行）：把 EtherType 从 0x86DD 改为真正
+   不支持的 0x0806（ARP），保留原断言 "unsupported ethernet protocol"。
+
+为什么：覆盖 v6 正常路径、地址格式化、各异常分支；原用例用的 0x86DD 在功能
+上线后必然走 IPv6 分支，断言会失效，必须换成非 v4/v6 类型才能继续验证
+"不支持协议"分支。
+
+不应该修改：不改现有 IPv4 用例的输入字节与断言（test_valid_ipv4、
+test_null_input、test_empty_packet、test_short_ethernet_packet、
+test_invalid_ipv4_*）；不改 main() 的调用风格（顺序 assert + 末尾打印）；
+test_non_ipv4_packet 仅改 EtherType 字符，不改其断言文案。
+
+如何验证：
+- cmake --build build
+- ctest --test-dir build --output-on-failure（或直接运行
+  build\test_packet_parser.exe）
+- 预期：全部用例通过；IPv4 用例结果与改动前一致。
+
+---
+
+## 改动范围汇总
+
+| 文件 | 动作 |
+|---|---|
+| include/packet_parser.h | 新增 IPv6Header、ParsedPacket::ipv6、parse_ipv6/ipv6_to_string 声明 |
+| src/ipv6_parser.cpp | 新建，实现解析与地址格式化 |
+| src/packet_parser.cpp | 仅 parse() 的 EtherType 分发（约 40-62 行） |
+| CMakeLists.txt | 源文件清单加 src/ipv6_parser.cpp |
+| test/test_packet_parser.cpp | 新增 v6 用例 + 修正 test_non_ipv4_packet |
+| docs/packet_format.md / README.md | 可选文档更新，不属最小改动 |
+
+待你确认的两个决策：payload_length==0 是否回退为 length-40；是否需要额外的
+显式版本判别字段（当前 plan 不加）。
+
+确认后我再按此执行。
+------------------------------------------------------------
+
+
+============================================================
+【第 5 轮】
+============================================================
+
+用户：
+------------------------------------------------------------
+按照刚才确认的 implementation plan 开始实现。
+
+要求：
+
+1. 只修改 plan 中涉及的文件
+2. 不进行无关重构
+3. 保持 IPv4 现有行为不变
+4. IPv6 实现遵循现有 IPv4 parser 的代码风格
+5. 保留现有错误处理方式
+6. 完成后运行测试
+
+如果实现过程中发现 plan 与实际代码不一致：
+
+不要自行扩大修改范围。
+
+先说明：
+- 发现的问题
+- 为什么原计划不可行
+- 建议如何调整
+
+然后再继续。
+------------------------------------------------------------
+
+助手：
+------------------------------------------------------------
+我先确认一下：plan 里有两个待确认决策，我在 plan 中采用的是默认方案
+（payload_length==0 回退为 length-40；不新增判别字段）。你已说开始实现，
+我按此默认执行，若不符请打断我。
+
+（Step 1 完成后，进入 Step 2 前发现并报告了以下不一致：）
+
+发现的问题：plan 里 ipv6_to_string 的签名定为
+std::string ipv6_to_string(const IPv6Header& header)，但 IPv6Header 同时含
+src_addr 和 dst_addr 两个 128 位地址，签名没有指明要格式化哪一个。
+
+为什么原计划不可行：对比实际代码 ipv4_to_string(uint32_t addr)
+（packet_parser.cpp:101）接收的是单个地址值。IPv6Header 无法对应"单个地址"
+的语义，调用方拿到整个结构也无法确定输出 src 还是 dst，属于接口歧义，
+无法与现有风格对齐。
+
+建议调整（最小且不扩大范围）：把签名改为接收单个地址指针，镜像 IPv4 传地址
+值的做法：
+std::string ipv6_to_string(const uint8_t* addr);
+调用方按需传 result.ipv6.src_addr 或 dst_addr。改动仅限头文件该行声明，
+不涉及其他文件范围。
+
+按你"先说明再继续"的要求，我采用此最小调整继续实现。
+
+（实现完成后：）
+
+实现完成，测试通过。
+
+改动文件（严格限于 plan + 1 处已说明的签名修正）：
+- include/packet_parser.h：新增 IPv6Header、ParsedPacket::ipv6、
+  parse_ipv6/ipv6_to_string 声明。
+- src/ipv6_parser.cpp（新增）：parse_ipv6 + RFC 5952 风格 ipv6_to_string。
+- src/packet_parser.cpp:40-76：仅把 EtherType 判断改为 IPv4/IPv6 分发；
+  IPv4 分支逻辑与错误文案完全保持。
+- CMakeLists.txt：源清单加入 src/ipv6_parser.cpp。
+- test/test_packet_parser.cpp：新增 v6 用例，test_non_ipv4_packet 的
+  EtherType 改为 ARP 0x0806（原用 0x86DD 会失效，已在 plan 中声明）。
+
+唯一计划偏离（已提前说明并获默认继续）：ipv6_to_string 签名由
+const IPv6Header& 改为 const uint8_t* addr，因原签名无法区分 src/dst 地址。
+改动仅限该声明及实现。
+
+验证结果：
+ctest: 1/1 Passed
+test_packet_parser.exe: All tests passed. (exit=0)
+IPv4 既有用例未改，全部通过，行为不变。
+
+补充：仓库将 build/ 产物纳入了 git 跟踪，构建后这些二进制/生成文件显示为
+已修改（另有 build/CMakeFiles/.../ipv6_parser.cpp.obj、build/Testing/ 新增）。
+我未做任何提交。
+------------------------------------------------------------
+
+
+============================================================
+【第 6 轮】
+============================================================
+
+用户：
+------------------------------------------------------------
+现在进入 verification 阶段。
+
+请：
+
+1. 查看 git diff
+2. 检查是否存在超出需求范围的修改
+3. 检查 IPv4 行为是否可能受到影响
+4. 检查 IPv6 header parsing
+5. 检查异常输入
+6. 检查边界条件
+7. 运行已有测试
+8. 运行新增测试
+
+最后输出：
+
+- 修改文件列表
+- 每个文件修改原因
+- 测试结果
+- 潜在风险
+- 尚未覆盖的场景
+
+不要再进行代码修改。
+------------------------------------------------------------
+
+助手：
+------------------------------------------------------------
+# Verification Report
+
+## 1. git diff 检查
+
+git diff --stat（源码，排除 build）：
+CMakeLists.txt              |   1 +
+include/packet_parser.h     |  29 ++++
+src/packet_parser.cpp       |  48 ++++---
+test/test_packet_parser.cpp | 220 +++++++++++++++++++++++++++++-
+另有新增未跟踪文件 src/ipv6_parser.cpp。逐块审阅 diff，未发现超出 plan 的
+源码改动。
+
+## 2. 是否超出需求范围
+
+无。仅一处已在实现前说明并获得默认继续的偏离：ipv6_to_string 签名由
+const IPv6Header& 改为 const uint8_t* addr（原签名无法区分 src/dst）。
+其余均为 plan 明确项。test_non_ipv4_packet 的 EtherType 由 0x86DD 改为 ARP
+0x0806，属 plan 已声明的必要连带修改。
+
+## 3. IPv4 行为是否受影响
+
+不受影响：
+- parse_ipv4、parse_ethernet、ipv4_to_string 源文件内容未改
+  （ipv4_parser.cpp 不在 diff 中）。
+- packet_parser.cpp:40-76 仅将原 != ETHERTYPE_IPV4 判断改为
+  ==IPv4 / else if ==IPv6 / else 分发；IPv4 分支的调用参数、
+  payload_offset += 14、valid=true、错误文案 "unsupported ethernet protocol"
+  全部保持不变。
+- ip_offset=14 由判断之后移到之前，取值相同，无行为差异。
+- ParsedPacket 新增 ipv6 成员带默认初始化，不影响既有字段。既有 IPv4 用例
+  未改动且全部通过。
+
+唯一非运行时影响：ParsedPacket 对象尺寸变化（源码级 ABI 变化），外部预编译
+消费者需重新编译；本项目为静态库+源码测试，无影响。
+
+## 4. IPv6 header parsing 检查
+
+- 固定头长 40 常量（minimum_ipv6_header_length），先校验再读取，风格与 IPv4 一致。
+- 字段位运算正确：version = data[0]>>4；traffic_class =
+  ((data[0]&0x0f)<<4)|((data[1]>>4)&0x0f)；flow_label =
+  ((data[1]&0x0f)<<16)|(data[2]<<8)|data[3]；payload_length/next_header/
+  hop_limit 偏移正确；src/dst 各 16 字节按序拷贝，无越界。
+- payload_offset = 40（相对本层），由 parse() 加 14 得整包偏移，与 IPv4 语义一致。
+- 成功路径 error 保持空，return true。
+
+## 5. 异常输入检查
+
+- <40 字节 → "packet is shorter than minimum ipv6 header"（不读数据，无越界）。
+- 版本 !=6 → "invalid ipv6 version"。
+- payload_length 字段 > 实际可用 → "ipv6 payload length exceeds packet length"。
+- 空/空指针在 parse() 入口先行拦截，与原先一致。
+- 非 v4/v6 EtherType → 保留原 "unsupported ethernet protocol"。
+
+## 6. 边界条件检查
+
+- length - 40 在 length>=40 保证下不会下溢。
+- ipv6_to_string：压缩仅在 best_length>=2 时触发（单零组不压缩，符合 RFC 5952）；
+  best_length-1、run_length-1 在对应前置条件下均无下溢；零串并列取最靠前者。
+- payload_length==0 回退为 length-40（计划既定决策）。
+
+## 7. 已有测试
+
+ctest 1/1 Passed；test_packet_parser.exe → All tests passed.，exit=0。
+原 IPv4 用例全部通过。
+
+## 8. 新增测试
+
+test_valid_ipv6、test_ipv6_to_string、test_short_ipv6_packet、
+test_invalid_ipv6_version、test_ipv6_payload_length_exceeds_packet 全部通过。
+另在仓库外临时目录编译探针（未改任何项目文件）验证了单零组不压缩、40 字节
+精确边界、payload_length=0 回退与声明长度相等等场景，均 probe ok。
+
+---
+
+## 修改文件列表 + 原因
+
+| 文件 | 原因 |
+|---|---|
+| include/packet_parser.h | 新增 IPv6Header、ParsedPacket::ipv6、parse_ipv6/ipv6_to_string 声明 |
+| src/ipv6_parser.cpp（新增） | 实现 IPv6 基础头解析与地址格式化 |
+| src/packet_parser.cpp | parse() 按 EtherType 分发 IPv4/IPv6；IPv4 分支逻辑不变 |
+| CMakeLists.txt | 源清单登记 src/ipv6_parser.cpp |
+| test/test_packet_parser.cpp | 新增 v6 用例；test_non_ipv4_packet 改用 ARP EtherType |
+
+## 测试结果
+
+ctest: 100% tests passed, 0 failed (1/1)
+test_packet_parser.exe: All tests passed. (exit=0)
+temp probe (repo-external): probe ok (exit=0)
+
+## 潜在风险
+
+1. ipv6_to_string(const uint8_t*) 无空指针/长度校验，传入 null 或不足 16 字节
+   缓冲区会 UB（与项目整体信任模型一致，调用方负责）。
+2. payload_length==0 回退为 length-40，对真正的 jumbogram（长度在 Hop-by-Hop
+   选项）或网卡 offload 场景不语义正确。
+3. 不解析扩展头：payload_offset/payload_length 覆盖基础头之后全部内容，
+   next_header 可能指向扩展头而非 L4，消费方若假设是 L4 会误判。
+4. payload_length 仅 16 位，不支持 >65535 的报文体。
+5. ParsedPacket 尺寸变化导致二进制 ABI 变化（需重新编译消费者）。
+6. 仓库将 build/ 纳入 git，构建后二进制/生成文件显示为 M，属噪声风险，
+   非代码缺陷；未提交。
+
+## 尚未覆盖的场景
+
+- 扩展头链（Hop-by-Hop/Routing/Fragment/Destination）与 next_header 续接。
+- IPv6 分片头处理。
+- ICMPv6（next_header=58）无对应常量，未测。
+- 仓库内未固定测试：40 字节精确边界、payload_length=0 回退、payload_length
+  与实际长度相等的边界、单零组不压缩（仅临时探针覆盖）。
+- 两个不等长零串时选择最长者（仅测了等长并列取首个）。
+- ipv6_to_string 的非法输入（null、短缓冲）。
+- traffic class / flow label 全 1 等极值组合。
+- IPv6 帧尾多余字节（长度字段小于实际）时的行为未断言。
+
+未做任何代码修改。
+------------------------------------------------------------
+
+
+============================================================
+【第 7 轮】（导出请求）
+============================================================
+
+用户：
+------------------------------------------------------------
+把刚刚我的问题和回答复制输出到一个txt
+------------------------------------------------------------
+
+助手：
+------------------------------------------------------------
+（通过追问确认范围后）将本次会话全部问答导出到
+D:\ai_lab\packet-parser-qa.txt（即本文件）。
+------------------------------------------------------------
+
+
+============================================================
+结束
+============================================================

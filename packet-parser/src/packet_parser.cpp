@@ -37,28 +37,42 @@ ParsedPacket PacketParser::parse(
     // Check Ethernet protocol
     // --------------------------------------------------------
 
-    if (packet.ethernet.ether_type != ETHERTYPE_IPV4) {
+    const std::size_t ip_offset = 14;
+
+    if (packet.ethernet.ether_type == ETHERTYPE_IPV4) {
+        // ----------------------------------------------------
+        // Parse IPv4 header
+        // ----------------------------------------------------
+
+        if (!parse_ipv4(
+                data + ip_offset,
+                length - ip_offset,
+                packet.ipv4,
+                packet.payload_offset,
+                packet.payload_length,
+                packet.error)) {
+            return packet;
+        }
+    } else if (packet.ethernet.ether_type == ETHERTYPE_IPV6) {
+        // ----------------------------------------------------
+        // Parse IPv6 header
+        // ----------------------------------------------------
+
+        if (!parse_ipv6(
+                data + ip_offset,
+                length - ip_offset,
+                packet.ipv6,
+                packet.payload_offset,
+                packet.payload_length,
+                packet.error)) {
+            return packet;
+        }
+    } else {
         packet.error = "unsupported ethernet protocol";
         return packet;
     }
 
-    // --------------------------------------------------------
-    // Parse IPv4 header
-    // --------------------------------------------------------
-
-    const std::size_t ip_offset = 14;
-
-    if (!parse_ipv4(
-            data + ip_offset,
-            length - ip_offset,
-            packet.ipv4,
-            packet.payload_offset,
-            packet.payload_length,
-            packet.error)) {
-        return packet;
-    }
-
-    // payload_offset is relative to IPv4 header.
+    // payload_offset is relative to the IP header.
     packet.payload_offset += ip_offset;
 
     packet.valid = true;
