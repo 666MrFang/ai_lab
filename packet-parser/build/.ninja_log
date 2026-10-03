@@ -1,0 +1,6 @@
+# ninja log v7
+4	175	8127108923248287	CMakeFiles/packet_parser.dir/src/ipv4_parser.cpp.obj	85b77624b3c2c6fe
+1	224	8127108923218284	CMakeFiles/packet_parser.dir/src/packet_parser.cpp.obj	9241bedfbd6a60e0
+6	235	8127108923268304	CMakeFiles/test_packet_parser.dir/test/test_packet_parser.cpp.obj	424109e7f4f7f910
+224	292	8127108925444111	libpacket_parser.a	a944582e8fe271fa
+292	385	8127108926136691	test_packet_parser.exe	c328685787be5c8b
