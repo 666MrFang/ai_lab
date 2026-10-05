@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"D:/ai_lab/config-loader/build/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

@@ -1,0 +1,5 @@
+# ninja log v7
+4	266	8127400269948837	CMakeFiles/test_config_loader.dir/test/test_config_loader.cpp.obj	5a5d57a944d223a2
+1	273	8127400269918834	CMakeFiles/config_loader.dir/src/config_loader.cpp.obj	c6072f05cee2e966
+274	328	8127400272645756	libconfig_loader.a	fb2008ff13878ff9
+328	396	8127400273190404	test_config_loader.exe	345b5e330925f0bf

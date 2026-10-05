@@ -1,0 +1,19 @@
+Start testing: Oct 03 22:13 中国标准时间
+----------------------------------------------------------
+1/1 Testing: config_loader_tests
+1/1 Test: config_loader_tests
+Command: "D:/ai_lab/config-loader/build/test_config_loader.exe"
+Directory: D:/ai_lab/config-loader/build
+"config_loader_tests" start time: Oct 03 22:13 中国标准时间
+Output:
+----------------------------------------------------------
+All tests passed.
+<end of output>
+Test time =   0.01 sec
+----------------------------------------------------------
+Test Passed.
+"config_loader_tests" end time: Oct 03 22:13 中国标准时间
+"config_loader_tests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Oct 03 22:13 中国标准时间
