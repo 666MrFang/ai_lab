@@ -14,6 +14,9 @@ from domain.models import (
     MarketBreadth,
     MarketHistorySummary,
     MetricBaseline,
+    SectorHistorySummary,
+    SectorMembershipSnapshot,
+    SectorSnapshot,
     StockQuote,
 )
 from errors import ErrorCode, MarketError
@@ -57,4 +60,26 @@ class MarketDataProvider(ABC):
         raise MarketError(
             ErrorCode.REAL_PROVIDER_NOT_IMPLEMENTED,
             f"{type(self).__name__} does not implement get_market_metric_baseline",
+        )
+
+    def get_sector_ranking(
+        self, date: str, direction: str = "top", limit: int = 10
+    ) -> List[SectorSnapshot]:
+        raise MarketError(
+            ErrorCode.REAL_PROVIDER_NOT_IMPLEMENTED,
+            f"{type(self).__name__} does not implement get_sector_ranking",
+        )
+
+    def get_sector_history_summary(
+        self, date: str, sector_name: str
+    ) -> SectorHistorySummary:
+        raise MarketError(
+            ErrorCode.REAL_PROVIDER_NOT_IMPLEMENTED,
+            f"{type(self).__name__} does not implement get_sector_history_summary",
+        )
+
+    def get_sector_membership(self, sector_name: str) -> SectorMembershipSnapshot:
+        raise MarketError(
+            ErrorCode.REAL_PROVIDER_NOT_IMPLEMENTED,
+            f"{type(self).__name__} does not implement get_sector_membership",
         )

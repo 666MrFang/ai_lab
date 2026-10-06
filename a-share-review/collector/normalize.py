@@ -53,11 +53,34 @@ _LIMIT_METRICS = (
 
 def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
     evidence: Dict[str, Any] = {}
+    sector_ranking: Dict[str, Any] = {
+        "date": date,
+        "taxonomy": "industry",
+        "source_family": "ths",
+        "date_semantics": "CURRENT_ONLY",
+        "sectors": [],
+    }
 
     for record in records:
         if not record.success or not isinstance(record.result, dict):
             continue
         result = record.result
+
+        if record.tool == "get_sector_ranking":
+            for sector in result.get("sectors") or []:
+                sector_ranking["sectors"].append(
+                    {
+                        "sector_id": sector.get("sector_id"),
+                        "sector_name": sector.get("sector_name"),
+                        "taxonomy": sector.get("taxonomy", "industry"),
+                        "change_pct": sector.get("change_pct"),
+                        "turnover_cny": sector.get("turnover_cny", sector.get("turnover")),
+                        "up_count": sector.get("up_count"),
+                        "down_count": sector.get("down_count"),
+                        "flat_count": sector.get("flat_count"),
+                        "constituent_count": sector.get("constituent_count"),
+                    }
+                )
 
         if record.tool == "get_market_breadth":
             limit = result.get("limit_state") or {}
@@ -142,4 +165,4 @@ def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
                     "change_pct": stock.get("change_pct"),
                 }
 
-    return {"date": date, "evidence": evidence}
+    return {"date": date, "evidence": evidence, "sector_ranking": sector_ranking}

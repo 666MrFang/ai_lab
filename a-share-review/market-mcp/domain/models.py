@@ -150,6 +150,125 @@ class MarketHistorySummary:
 
 
 # ============================================================
+# Sector (Round 5B): THS industry family + Sina membership family
+# ============================================================
+
+
+@dataclass(frozen=True)
+class SectorSnapshot:
+    """A sector's current cross-sectional snapshot (THS industry family)."""
+
+    date: str
+    sector_id: Optional[str]
+    sector_name: str
+    taxonomy: str
+    source_family: str
+    change_pct: Optional[float]
+    turnover_cny: Optional[float]
+    up_count: Optional[int]
+    down_count: Optional[int]
+    flat_count: Optional[int]
+    constituent_count: Optional[int]
+    date_semantics: str
+    lineage: Optional[DataLineage] = None
+
+    def to_tool_dict(self) -> dict:
+        return {
+            "sector_id": self.sector_id,
+            "sector_name": self.sector_name,
+            "taxonomy": self.taxonomy,
+            "source_family": self.source_family,
+            "change_pct": self.change_pct,
+            "turnover": self.turnover_cny,
+            "turnover_cny": self.turnover_cny,
+            "up_count": self.up_count,
+            "down_count": self.down_count,
+            "flat_count": self.flat_count,
+            "constituent_count": self.constituent_count,
+            "date_semantics": self.date_semantics,
+        }
+
+
+@dataclass(frozen=True)
+class SectorHistorySummary:
+    date: str
+    sector_id: Optional[str]
+    sector_name: str
+    taxonomy: str
+    source_family: str
+    change_pct_5d: Optional[float]
+    change_pct_20d: Optional[float]
+    turnover_cny: Optional[float]
+    turnover_avg_5d_cny: Optional[float]
+    turnover_avg_20d_cny: Optional[float]
+    history_5d_complete: bool
+    history_20d_complete: bool
+    sample_count_5d: int
+    sample_count_20d: int
+    lineage: Optional[DataLineage] = None
+
+    def to_tool_dict(self) -> dict:
+        return {
+            "sector_id": self.sector_id,
+            "sector_name": self.sector_name,
+            "taxonomy": self.taxonomy,
+            "source_family": self.source_family,
+            "change_pct_5d": self.change_pct_5d,
+            "change_pct_20d": self.change_pct_20d,
+            "turnover_cny": self.turnover_cny,
+            "turnover_avg_5d_cny": self.turnover_avg_5d_cny,
+            "turnover_avg_20d_cny": self.turnover_avg_20d_cny,
+            "history_5d_complete": self.history_5d_complete,
+            "history_20d_complete": self.history_20d_complete,
+            "sample_count_5d": self.sample_count_5d,
+            "sample_count_20d": self.sample_count_20d,
+        }
+
+
+@dataclass(frozen=True)
+class SectorMember:
+    stock_code: str
+    stock_name: Optional[str]
+    change_pct: Optional[float]
+    turnover_cny: Optional[float]
+    turnover_rate_pct: Optional[float]
+    market_cap_cny: Optional[float]
+
+    def to_tool_dict(self) -> dict:
+        return {
+            "stock_code": self.stock_code,
+            "stock_name": self.stock_name,
+            "change_pct": self.change_pct,
+            "turnover_cny": self.turnover_cny,
+            "turnover_rate_pct": self.turnover_rate_pct,
+            "market_cap_cny": self.market_cap_cny,
+        }
+
+
+@dataclass(frozen=True)
+class SectorMembershipSnapshot:
+    date: str
+    sector_id: Optional[str]
+    sector_name: str
+    taxonomy: str
+    source_family: str
+    membership_semantics: str
+    stocks: List[SectorMember] = field(default_factory=list)
+    lineage: Optional[DataLineage] = None
+
+    def to_tool_dict(self) -> dict:
+        return {
+            "sector_id": self.sector_id,
+            "sector_name": self.sector_name,
+            "taxonomy": self.taxonomy,
+            "source_family": self.source_family,
+            "membership_semantics": self.membership_semantics,
+            "count": len(self.stocks),
+            "stocks": [stock.to_tool_dict() for stock in self.stocks],
+        }
+
+
+# ============================================================
 # Market breadth / limit ecology
 # ============================================================
 

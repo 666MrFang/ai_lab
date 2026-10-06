@@ -1,9 +1,10 @@
 {
-  "tool": "get_sector_ranking",
+  "tool": "get_stock_news",
   "arguments": {
-    "date": "2026-09-30"
+    "date": "2026-09-30",
+    "stock_code": "600519.SH"
   },
-  "requested_at": "2026-10-06T20:46:08",
+  "requested_at": "2026-10-06T21:47:29",
   "success": false,
   "category": "unimplemented",
   "kind": "unimplemented",
@@ -19,6 +20,6 @@
   "result": {
     "success": false,
     "error_code": "REAL_PROVIDER_NOT_IMPLEMENTED",
-    "error": "get_sector_ranking is not implemented for real market data yet; set MARKET_DATA_MODE=mock to use mock data"
+    "error": "get_stock_news is not implemented for real market data yet; set MARKET_DATA_MODE=mock to use mock data"
   }
 }

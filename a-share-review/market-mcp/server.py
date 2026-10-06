@@ -132,9 +132,20 @@ def get_sector_ranking(
     if mode_error is not None:
         return mode_error
 
-    real_error = unimplemented_error("get_sector_ranking", SETTINGS)
-    if real_error is not None:
-        return real_error
+    if SETTINGS.data_mode == DATA_MODE_REAL:
+        try:
+            sectors = SERVICE.get_sector_ranking(date, direction, limit)
+        except MarketError as exc:
+            return error_payload(
+                exc.error_code, exc.message, date=date, direction=direction
+            )
+        return {
+            "success": True,
+            "date": date,
+            "direction": direction,
+            "count": len(sectors),
+            "sectors": [snapshot.to_tool_dict() for snapshot in sectors],
+        }
 
     if direction not in ("gainers", "losers"):
         return {
@@ -189,6 +200,87 @@ def get_sector_ranking(
             }
             for item in ranking[:limit]
         ]
+    }
+
+
+@mcp.tool()
+def get_sector_history_summary(date: str, sector_name: str) -> dict[str, Any]:
+    """
+    获取指定交易日期某行业板块的 5 日 / 20 日历史表现与成交额基准。
+
+    数据来源为 THS 行业指数历史（source_family="ths"）。仅返回数值事实，
+    不做“主线/龙头”判断，不输出未来预测。
+
+    5d = current session + previous 4 completed sessions；
+    20d = current session + previous 19 completed sessions。
+    complete=false 时对应统计为 null（不得用于语义推断）。
+
+    Args:
+        date: 交易日期，格式 YYYY-MM-DD（通常是最近已完成交易日）。
+        sector_name: THS 行业名称，例如 半导体。
+    """
+
+    mode_error = config_mode_error(SETTINGS)
+    if mode_error is not None:
+        return mode_error
+
+    if SETTINGS.data_mode != DATA_MODE_REAL:
+        return error_payload(
+            ErrorCode.MOCK_NOT_SUPPORTED,
+            "get_sector_history_summary is only available with real market data",
+            date=date,
+            sector_name=sector_name,
+        )
+
+    try:
+        summary = SERVICE.get_sector_history_summary(date, sector_name)
+    except MarketError as exc:
+        return error_payload(
+            exc.error_code, exc.message, date=date, sector_name=sector_name
+        )
+
+    return {
+        "success": True,
+        "date": date,
+        "sector_name": sector_name,
+        **summary.to_tool_dict(),
+    }
+
+
+@mcp.tool()
+def get_sector_membership(sector_name: str) -> dict[str, Any]:
+    """
+    获取某行业板块的当前成分股（独立 Membership Family，source_family="sina"）。
+
+    这是 CURRENT_MEMBERSHIP_ONLY 的独立证据，不是 THS 板块成分：
+    不得与 THS ranking 混合计算“板块内部广度 / 贡献度 / 龙头”。
+    仅当存在 VERIFIED 的 THS→Sina 映射时返回；否则
+    SECTOR_MEMBERSHIP_UNAVAILABLE。
+
+    Args:
+        sector_name: THS 行业名称，例如 半导体。
+    """
+
+    mode_error = config_mode_error(SETTINGS)
+    if mode_error is not None:
+        return mode_error
+
+    if SETTINGS.data_mode != DATA_MODE_REAL:
+        return error_payload(
+            ErrorCode.MOCK_NOT_SUPPORTED,
+            "get_sector_membership is only available with real market data",
+            sector_name=sector_name,
+        )
+
+    try:
+        membership = SERVICE.get_sector_membership(sector_name)
+    except MarketError as exc:
+        return error_payload(exc.error_code, exc.message, sector_name=sector_name)
+
+    return {
+        "success": True,
+        "sector_name": sector_name,
+        **membership.to_tool_dict(),
     }
 
 
@@ -499,9 +591,40 @@ def get_sector_detail(date: str, sector_name: str) -> dict[str, Any]:
     if mode_error is not None:
         return mode_error
 
-    real_error = unimplemented_error("get_sector_detail", SETTINGS)
-    if real_error is not None:
-        return real_error
+    if SETTINGS.data_mode == DATA_MODE_REAL:
+        try:
+            ranking = []
+            for kind in ("top", "bottom"):
+                ranking.extend(SERVICE.get_sector_ranking(date, kind, 1000))
+            snapshot = next((s for s in ranking if s.sector_name == sector_name), None)
+            if snapshot is None:
+                return error_payload(
+                    ErrorCode.SECTOR_NOT_FOUND,
+                    "sector %r not found in THS industry ranking" % sector_name,
+                    date=date, sector_name=sector_name,
+                )
+            history = SERVICE.get_sector_history_summary(date, sector_name)
+        except MarketError as exc:
+            return error_payload(
+                exc.error_code, exc.message, date=date, sector_name=sector_name
+            )
+        return {
+            "success": True,
+            "date": date,
+            "sector_name": sector_name,
+            "sector_id": snapshot.sector_id,
+            "taxonomy": snapshot.taxonomy,
+            "source_family": snapshot.source_family,
+            "change_pct": snapshot.change_pct,
+            "turnover": snapshot.turnover_cny,
+            "turnover_cny": snapshot.turnover_cny,
+            "up_count": snapshot.up_count,
+            "down_count": snapshot.down_count,
+            # Deliberately not provided: membership comes from a different
+            # universe (Sina) and must not be mixed into THS sector facts.
+            "leading_stocks": None,
+            "history": history.to_tool_dict(),
+        }
 
     market_data = load_market_data()
 

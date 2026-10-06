@@ -88,3 +88,17 @@ class MarketService:
         self._validate_date(date)
         provider = self._get_provider()
         return provider.get_market_metric_baseline(date, metric, window)
+
+    def get_sector_ranking(self, date: str, direction: str = "top", limit: int = 10):
+        self._validate_date(date)
+        provider = self._get_provider()
+        return provider.get_sector_ranking(date, direction, limit)
+
+    def get_sector_history_summary(self, date: str, sector_name: str):
+        self._validate_date(date)
+        provider = self._get_provider()
+        return provider.get_sector_history_summary(date, sector_name)
+
+    def get_sector_membership(self, sector_name: str):
+        provider = self._get_provider()
+        return provider.get_sector_membership(sector_name)

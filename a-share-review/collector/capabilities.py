@@ -24,6 +24,9 @@ REQUIRED_CURRENT_TOOLS = (
     "get_market_history_summary",
     "get_market_breadth",
 )
+# Sector ranking is CURRENT_ONLY upstream, so it must be collected every day and
+# stored in full (not just Top-10) to allow future replay/re-ranking.
+REQUIRED_SECTOR_TOOLS = ("get_sector_ranking",)
 REQUIRED_BASELINE_METRICS: Tuple[Tuple[str, int], ...] = (
     ("broken_limit_rate", 5),
     ("broken_limit_rate", 20),
@@ -33,11 +36,7 @@ REQUIRED_BASELINE_METRICS: Tuple[Tuple[str, int], ...] = (
 OPTIONAL_REQUESTS: Tuple[Tuple[str, Dict[str, Any]], ...] = (
     ("get_stock_detail", {"stock_code": "600519.SH"}),
 )
-UNIMPLEMENTED_TOOLS = (
-    "get_sector_ranking",
-    "get_sector_detail",
-    "get_stock_news",
-)
+UNIMPLEMENTED_TOOLS = ("get_stock_news",)
 
 ERROR_NOT_IMPLEMENTED = "REAL_PROVIDER_NOT_IMPLEMENTED"
 
@@ -60,6 +59,10 @@ def stock_key(code: str, date: str) -> str:
 
 def required_requests(date: str) -> List[Tuple[str, Dict[str, Any], str]]:
     requests = [(tool, {"date": date}, "current") for tool in REQUIRED_CURRENT_TOOLS]
+    for tool in REQUIRED_SECTOR_TOOLS:
+        requests.append(
+            (tool, {"date": date, "direction": "top", "limit": 1000}, "current")
+        )
     for metric, window in REQUIRED_BASELINE_METRICS:
         requests.append(
             (
@@ -77,8 +80,6 @@ def optional_requests(date: str) -> List[Tuple[str, Dict[str, Any], str]]:
 
 def unimplemented_requests(date: str) -> List[Tuple[str, Dict[str, Any], str]]:
     extra: Dict[str, Dict[str, Any]] = {
-        "get_sector_ranking": {},
-        "get_sector_detail": {"sector_name": "半导体"},
         "get_stock_news": {"stock_code": "600519.SH"},
     }
     return [(tool, {"date": date, **extra[tool]}, "unimplemented") for tool in UNIMPLEMENTED_TOOLS]

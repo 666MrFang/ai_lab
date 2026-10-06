@@ -85,7 +85,17 @@ def base_responses(broken20=True, promotion20=True):
             "stock": {"code": "600519.SH", "name": "贵州茅台", "close": 1258.62,
                       "change_pct": 1.86},
         },
-        key("get_sector_ranking", date=DATE): dict(NOT_IMPL),
+        key("get_sector_ranking", date=DATE, direction="top", limit=1000): {
+            "success": True, "date": DATE, "direction": "top", "count": 2,
+            "sectors": [
+                {"sector_id": "881121", "sector_name": "半导体", "taxonomy": "industry",
+                 "change_pct": 2.5, "turnover_cny": 1.7e11, "up_count": 80,
+                 "down_count": 20, "flat_count": None, "constituent_count": None},
+                {"sector_id": "881153", "sector_name": "房地产", "taxonomy": "industry",
+                 "change_pct": 0.79, "turnover_cny": 3.0e10, "up_count": 50,
+                 "down_count": 10, "flat_count": None, "constituent_count": None},
+            ],
+        },
         key("get_sector_detail", date=DATE, sector_name="半导体"): dict(NOT_IMPL),
         key("get_stock_news", date=DATE, stock_code="600519.SH"): dict(NOT_IMPL),
     }
@@ -188,8 +198,8 @@ class EvidenceStoreTest(unittest.TestCase):
     # 8
     def test_08_unimplemented_capability_recorded(self):
         collection = collect_with(base_responses())
-        for tool in ("get_sector_ranking", "get_sector_detail", "get_stock_news"):
-            self.assertIn(tool, collection.missing_capabilities)
+        self.assertIn("get_stock_news", collection.missing_capabilities)
+        self.assertNotIn("get_sector_ranking", collection.missing_capabilities)
         self.assertNotEqual(collection.status, STATUS_FAILED)
 
     # 9

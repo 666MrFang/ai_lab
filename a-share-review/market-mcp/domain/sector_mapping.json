@@ -1,0 +1,12 @@
+{
+  "_comment": "Explicit VERIFIED THS industry -> Sina sector membership mapping. No fuzzy / substring / LLM mapping. V0.1 covers only mappings that passed deterministic verification. Unmapped sectors return SECTOR_MEMBERSHIP_UNAVAILABLE.",
+  "mappings": {
+    "ths:881153": {
+      "ths_sector_name": "房地产",
+      "sina_sector_label": "new_fdc",
+      "sina_sector_name": "房地产",
+      "mapping_status": "VERIFIED",
+      "verification": "exact sector name + exact leading stock (陆家嘴) + |delta change_pct| <= 0.01 observed 2026-10-06"
+    }
+  }
+}

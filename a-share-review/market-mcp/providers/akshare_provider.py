@@ -1,4 +1,4 @@
-"""AkShare implementation of the market data provider (Real Provider V0.1).
+﻿"""AkShare implementation of the market data provider (Real Provider V0.1).
 
 Only AkShare interfaces that were actually verified reachable in the current
 environment are used. Each one is pinned with its ``library``/``source``/
@@ -34,9 +34,11 @@ synthetically filled: no mock fallback exists inside the provider.
 
 from __future__ import annotations
 
+import json
 from datetime import date as _date
 from datetime import datetime as _datetime
 from datetime import timedelta
+from pathlib import Path
 from statistics import median as _median
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
@@ -50,6 +52,10 @@ from domain.models import (
     MarketBreadth,
     MarketHistorySummary,
     MetricBaseline,
+    SectorHistorySummary,
+    SectorMember,
+    SectorMembershipSnapshot,
+    SectorSnapshot,
     StockQuote,
     TurnoverBaseline,
 )
@@ -62,7 +68,12 @@ from normalize.dates import (
     to_provider_date,
 )
 from normalize.metrics import change_pct, mean, pct_change_over_closes
-from normalize.units import ratio_to_pct, to_float, yi_yuan_to_cny
+from normalize.units import (
+    ratio_to_pct,
+    to_float,
+    wan_yuan_to_cny,
+    yi_yuan_to_cny,
+)
 from providers.base import MarketDataProvider
 
 # Calendar-day lookback that safely covers 20 trading days + previous close.
@@ -208,6 +219,8 @@ class AkShareProvider(MarketDataProvider):
         self._security_master_cache: Optional[Dict[str, Dict[str, Any]]] = None
         self._index_series_cache: Dict[str, List[Dict[str, Any]]] = {}
         self._pool_cache: Dict[Tuple[str, str], Tuple[Optional[List[Dict[str, Any]]], Optional[str]]] = {}
+        self._sector_taxonomy_cache: Optional[Dict[str, str]] = None
+        self._sector_mapping_cache: Optional[Dict[str, Dict[str, Any]]] = None
 
     def _today(self) -> _date:
         if callable(self._today_override):
@@ -958,4 +971,237 @@ class AkShareProvider(MarketDataProvider):
             sample_end=window_dates[-1] if window_dates else None,
             missing_dates=tuple(missing_dates),
             definition=definition,
+        )
+
+
+    # ------------------------------------------------------------------
+    # Sector (Round 5B): THS industry family + Sina membership family
+    # ------------------------------------------------------------------
+    def _latest_completed_trading_day(self) -> str:
+        days = self._trading_days_up_to(self._today().isoformat())
+        if not days:
+            raise MarketError(ErrorCode.DATA_NOT_AVAILABLE, "no completed trading session")
+        return days[-1]
+
+    def _ths_industry_taxonomy(self) -> Dict[str, str]:
+        """Map THS industry name -> THS code (stable sector identity)."""
+
+        if self._sector_taxonomy_cache is None:
+            frame = self._call("stock_board_industry_name_ths")
+            self._require_columns(frame, ("name", "code"), "stock_board_industry_name_ths")
+            mapping: Dict[str, str] = {}
+            for row in self._to_records(frame):
+                name = _clean_text(row.get("name"))
+                code = _clean_text(row.get("code"))
+                if name and code:
+                    mapping[name] = code
+            if not mapping:
+                raise MarketError(
+                    ErrorCode.DATA_NOT_AVAILABLE, "THS industry taxonomy is empty"
+                )
+            self._sector_taxonomy_cache = mapping
+        return self._sector_taxonomy_cache
+
+    def _sector_mapping(self) -> Dict[str, Dict[str, Any]]:
+        if self._sector_mapping_cache is None:
+            path = Path(__file__).resolve().parent.parent / "domain" / "sector_mapping.json"
+            try:
+                data = json.loads(path.read_text(encoding="utf-8"))
+                self._sector_mapping_cache = data.get("mappings", {})
+            except Exception:
+                self._sector_mapping_cache = {}
+        return self._sector_mapping_cache
+
+    def _resolve_sector_id(self, sector_name: str) -> str:
+        taxonomy = self._ths_industry_taxonomy()
+        code = taxonomy.get(sector_name)
+        if code is None:
+            raise MarketError(
+                ErrorCode.SECTOR_ID_UNRESOLVED,
+                "sector name %r not found in THS industry taxonomy" % sector_name,
+            )
+        return code
+
+    def get_sector_ranking(
+        self, date: str, direction: str = "top", limit: int = 10
+    ) -> List[SectorSnapshot]:
+        normalized_direction = {"gainers": "top", "losers": "bottom"}.get(
+            direction, direction
+        )
+        if normalized_direction not in ("top", "bottom"):
+            raise MarketError(
+                ErrorCode.INVALID_DIRECTION,
+                "direction must be 'top'/'bottom' (or gainers/losers), got %r" % direction,
+            )
+        if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
+            raise MarketError(ErrorCode.INVALID_WINDOW, "limit must be a positive integer")
+        if not self.is_trading_day(date):
+            raise MarketError(ErrorCode.NOT_TRADING_DAY, "%s is not a trading day" % date)
+        latest = self._latest_completed_trading_day()
+        if date != latest:
+            raise MarketError(
+                ErrorCode.HISTORICAL_RANKING_UNAVAILABLE,
+                "sector ranking is CURRENT_ONLY (latest=%s); %s cannot be replayed upstream"
+                % (latest, date),
+            )
+
+        frame = self._call("stock_board_industry_summary_ths")
+        self._require_columns(
+            frame, ("板块", "涨跌幅", "总成交额", "上涨家数", "下跌家数"),
+            "stock_board_industry_summary_ths",
+        )
+        taxonomy = self._ths_industry_taxonomy()
+        lineage = DataLineage(
+            library="akshare", source="ths", endpoint="stock_board_industry_summary_ths"
+        )
+        snapshots: List[SectorSnapshot] = []
+        for row in self._to_records(frame):
+            name = _clean_text(row.get("板块"))
+            if name is None or name not in taxonomy:
+                continue  # SECTOR_ID_UNRESOLVED: never fabricate an id
+            snapshots.append(
+                SectorSnapshot(
+                    date=date,
+                    sector_id=taxonomy[name],
+                    sector_name=name,
+                    taxonomy="industry",
+                    source_family="ths",
+                    change_pct=to_float(row.get("涨跌幅")),
+                    turnover_cny=yi_yuan_to_cny(row.get("总成交额")),
+                    up_count=_to_int(row.get("上涨家数")),
+                    down_count=_to_int(row.get("下跌家数")),
+                    flat_count=None,
+                    constituent_count=None,
+                    date_semantics="CURRENT_ONLY",
+                    lineage=lineage,
+                )
+            )
+        if not snapshots:
+            raise MarketError(
+                ErrorCode.EMPTY_UPSTREAM_RESPONSE, "THS industry ranking is empty"
+            )
+        snapshots.sort(
+            key=lambda item: (item.change_pct if item.change_pct is not None else float("-inf")),
+            reverse=(normalized_direction == "top"),
+        )
+        return snapshots[:limit]
+
+    def get_sector_history_summary(self, date: str, sector_name: str) -> SectorHistorySummary:
+        if not self.is_trading_day(date):
+            raise MarketError(ErrorCode.NOT_TRADING_DAY, "%s is not a trading day" % date)
+        sector_id = self._resolve_sector_id(sector_name)
+        start = to_provider_date(shift_calendar_days(date, -LOOKBACK_CALENDAR_DAYS))
+        end = to_provider_date(date)
+        frame = self._call(
+            "stock_board_industry_index_ths",
+            symbol=sector_name,
+            start_date=start,
+            end_date=end,
+        )
+        self._require_columns(
+            frame, ("日期", "收盘价", "成交额"), "stock_board_industry_index_ths"
+        )
+        rows: List[Dict[str, Any]] = []
+        for row in self._to_records(frame):
+            iso = coerce_to_iso_date(row.get("日期"))
+            if iso is None or iso > date:
+                continue
+            rows.append(
+                {
+                    "date": iso,
+                    "close": to_float(row.get("收盘价")),
+                    "turnover_cny": to_float(row.get("成交额")),
+                }
+            )
+        rows.sort(key=lambda item: item["date"])
+        if not rows or rows[-1]["date"] != date:
+            raise MarketError(
+                ErrorCode.DATA_NOT_AVAILABLE,
+                "sector index does not cover %s for %s" % (date, sector_name),
+            )
+
+        closes = [item["close"] for item in rows]
+        turnovers = [item["turnover_cny"] for item in rows]
+
+        def change_pct_over(periods: int) -> Optional[float]:
+            if len(closes) < periods:
+                return None
+            base = closes[-periods]
+            if base is None or closes[-1] is None or base == 0:
+                return None
+            return round((closes[-1] / base - 1) * 100, 2)
+
+        def avg_over(periods: int) -> Optional[float]:
+            if len(turnovers) < periods:
+                return None
+            return mean(turnovers[-periods:])
+
+        return SectorHistorySummary(
+            date=date,
+            sector_id=sector_id,
+            sector_name=sector_name,
+            taxonomy="industry",
+            source_family="ths",
+            change_pct_5d=change_pct_over(INDEX_TREND_SHORT),
+            change_pct_20d=change_pct_over(INDEX_TREND_LONG),
+            turnover_cny=turnovers[-1],
+            turnover_avg_5d_cny=avg_over(TURNOVER_SHORT),
+            turnover_avg_20d_cny=avg_over(TURNOVER_LONG),
+            history_5d_complete=len(rows) >= INDEX_TREND_SHORT,
+            history_20d_complete=len(rows) >= INDEX_TREND_LONG,
+            sample_count_5d=min(len(rows), INDEX_TREND_SHORT),
+            sample_count_20d=min(len(rows), INDEX_TREND_LONG),
+            lineage=DataLineage(
+                library="akshare", source="ths", endpoint="stock_board_industry_index_ths"
+            ),
+        )
+
+    def get_sector_membership(self, sector_name: str) -> SectorMembershipSnapshot:
+        sector_id = self._resolve_sector_id(sector_name)
+        mapping = self._sector_mapping().get("ths:%s" % sector_id)
+        if not mapping or mapping.get("mapping_status") != "VERIFIED":
+            raise MarketError(
+                ErrorCode.SECTOR_MEMBERSHIP_UNAVAILABLE,
+                "no VERIFIED THS->Sina membership mapping for %s (ths:%s)"
+                % (sector_name, sector_id),
+            )
+        label = mapping["sina_sector_label"]
+        frame = self._call("stock_sector_detail", sector=label)
+        self._require_columns(
+            frame,
+            ("code", "name", "changepercent", "amount", "turnoverratio", "mktcap"),
+            "stock_sector_detail",
+        )
+        members: List[SectorMember] = []
+        for row in self._to_records(frame):
+            code = _clean_text(row.get("code"))
+            if code is None:
+                continue
+            market_cap = to_float(row.get("mktcap"))
+            members.append(
+                SectorMember(
+                    stock_code=code,
+                    stock_name=_clean_text(row.get("name")),
+                    change_pct=to_float(row.get("changepercent")),
+                    turnover_cny=to_float(row.get("amount")),
+                    turnover_rate_pct=to_float(row.get("turnoverratio")),
+                    market_cap_cny=wan_yuan_to_cny(market_cap),
+                )
+            )
+        if not members:
+            raise MarketError(
+                ErrorCode.EMPTY_UPSTREAM_RESPONSE,
+                "Sina membership for %s is empty" % label,
+            )
+        return SectorMembershipSnapshot(
+            date=self._latest_completed_trading_day(),
+            sector_id=sector_id,
+            sector_name=sector_name,
+            taxonomy="industry",
+            source_family="sina",
+            membership_semantics="CURRENT_MEMBERSHIP_ONLY",
+            stocks=members,
+            lineage=DataLineage(
+                library="akshare", source="sina", endpoint="stock_sector_detail"
+            ),
         )

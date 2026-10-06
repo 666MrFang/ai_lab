@@ -73,16 +73,15 @@ class ServerRealModeTest(unittest.TestCase):
             self.server.get_market_history_summary("2026/10/08"),
             self.server.get_market_breadth("2026/10/08"),
             self.server.get_market_metric_baseline("2026/10/08", "limit_up_count", 5),
+            self.server.get_sector_ranking("2026/10/08"),
+            self.server.get_sector_history_summary("2026/10/08", "半导体"),
+            self.server.get_sector_detail("2026/10/08", "半导体"),
         ):
             self.assertFalse(result["success"])
             self.assertEqual(result["error_code"], ErrorCode.INVALID_DATE)
 
     def test_unimplemented_tools_do_not_fallback_to_mock(self):
-        for result in (
-            self.server.get_sector_ranking("2026-10-08"),
-            self.server.get_sector_detail("2026-10-08", "半导体"),
-            self.server.get_stock_news("2026-10-08", "688981.SH"),
-        ):
+        for result in (self.server.get_stock_news("2026-10-08", "688981.SH"),):
             self.assertFalse(result["success"])
             self.assertEqual(result["error_code"], ErrorCode.REAL_PROVIDER_NOT_IMPLEMENTED)
 

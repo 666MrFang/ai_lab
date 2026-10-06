@@ -2,10 +2,10 @@
   "tool": "get_market_metric_baseline",
   "arguments": {
     "date": "2026-09-30",
-    "metric": "broken_limit_rate",
+    "metric": "promotion_rate",
     "window": 20
   },
-  "requested_at": "2026-10-06T21:45:02",
+  "requested_at": "2026-10-06T21:46:49",
   "success": true,
   "category": "required",
   "kind": "baseline",
@@ -20,18 +20,18 @@
   "lineage": [
     {
       "source": "eastmoney",
-      "endpoint": "stock_zt_pool_zbgc_em+stock_zt_pool_em"
+      "endpoint": "stock_zt_pool_previous_em+stock_zt_pool_em"
     }
   ],
   "result": {
     "success": true,
     "date": "2026-09-30",
     "baseline": {
-      "metric": "broken_limit_rate",
+      "metric": "promotion_rate",
       "date": "2026-09-30",
       "unit": "percent",
       "window": 20,
-      "current": 18.75,
+      "current": 21.05,
       "avg": null,
       "median": null,
       "percentile": null,
@@ -49,12 +49,12 @@
       ],
       "evidence_status": "INSUFFICIENT_HISTORY",
       "definition": {
-        "metric": "broken_limit_rate",
+        "metric": "promotion_rate",
         "source": "eastmoney",
-        "endpoint": "stock_zt_pool_zbgc_em+stock_zt_pool_em",
+        "endpoint": "stock_zt_pool_previous_em+stock_zt_pool_em",
         "unit": "percent",
-        "universe_definition": "衍生指标：broken_limit_count / (broken_limit_count + limit_up_count) * 100；分母为 0 时返回 None，绝不填 0。",
-        "date_semantics": "交易日 D（两个股池同源、同 universe）",
+        "universe_definition": "衍生指标：prev(D) ∩ limit_up(D) 的数量 / prev(D) sample_size * 100；sample_size 为 0 时返回 None。",
+        "date_semantics": "交易日 D",
         "historical": true
       }
     }

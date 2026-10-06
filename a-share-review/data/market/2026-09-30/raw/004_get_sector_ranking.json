@@ -1,1169 +1,1288 @@
 {
-  "date": "2026-09-30",
-  "evidence": {
-    "index_quote:000001.SH:2026-09-30": {
-      "evidence_type": "index_quote",
-      "index": "000001.SH",
-      "date": "2026-09-30",
-      "close": 3842.195,
-      "previous_close": 3830.451,
-      "change_pct": 0.31,
-      "turnover_cny": 680023000000.0
-    },
-    "index_quote:399001.SZ:2026-09-30": {
-      "evidence_type": "index_quote",
-      "index": "399001.SZ",
-      "date": "2026-09-30",
-      "close": 12887.62,
-      "previous_close": 12901.947,
-      "change_pct": -0.11,
-      "turnover_cny": 759333832918.04
-    },
-    "index_quote:399006.SZ:2026-09-30": {
-      "evidence_type": "index_quote",
-      "index": "399006.SZ",
-      "date": "2026-09-30",
-      "close": 3135.277,
-      "previous_close": 3142.563,
-      "change_pct": -0.23,
-      "turnover_cny": null
-    },
-    "market_metric:market_turnover:2026-09-30": {
-      "evidence_type": "market_metric",
-      "metric": "market_turnover",
-      "date": "2026-09-30",
-      "value": 1439356832918.04,
-      "unit": "cny",
-      "source": "sse+szse"
-    },
-    "market_metric:limit_up_count:2026-09-30": {
-      "evidence_type": "market_metric",
-      "metric": "limit_up_count",
-      "date": "2026-09-30",
-      "value": 52,
-      "unit": "count",
-      "source": "eastmoney"
-    },
-    "market_metric:limit_down_count:2026-09-30": {
-      "evidence_type": "market_metric",
-      "metric": "limit_down_count",
-      "date": "2026-09-30",
-      "value": 9,
-      "unit": "count",
-      "source": "eastmoney"
-    },
-    "market_metric:broken_limit_count:2026-09-30": {
-      "evidence_type": "market_metric",
-      "metric": "broken_limit_count",
-      "date": "2026-09-30",
-      "value": 12,
-      "unit": "count",
-      "source": "eastmoney"
-    },
-    "market_metric:broken_limit_rate:2026-09-30": {
-      "evidence_type": "market_metric",
-      "metric": "broken_limit_rate",
-      "date": "2026-09-30",
-      "value": 18.75,
-      "unit": "percent",
-      "source": "eastmoney"
-    },
-    "market_metric:first_limit_up_count:2026-09-30": {
-      "evidence_type": "market_metric",
-      "metric": "first_limit_up_count",
-      "date": "2026-09-30",
-      "value": 40,
-      "unit": "count",
-      "source": "eastmoney"
-    },
-    "market_metric:multi_limit_up_count:2026-09-30": {
-      "evidence_type": "market_metric",
-      "metric": "multi_limit_up_count",
-      "date": "2026-09-30",
-      "value": 12,
-      "unit": "count",
-      "source": "eastmoney"
-    },
-    "market_metric:max_limit_height:2026-09-30": {
-      "evidence_type": "market_metric",
-      "metric": "max_limit_height",
-      "date": "2026-09-30",
-      "value": 7,
-      "unit": "count",
-      "source": "eastmoney"
-    },
-    "market_metric:promotion_rate:2026-09-30": {
-      "evidence_type": "market_metric",
-      "metric": "promotion_rate",
-      "date": "2026-09-30",
-      "value": 21.05,
-      "unit": "percent",
-      "source": "eastmoney"
-    },
-    "market_metric_baseline:broken_limit_rate:2026-09-30:5": {
-      "evidence_type": "market_metric_baseline",
-      "metric": "broken_limit_rate",
-      "date": "2026-09-30",
-      "window": 5,
-      "current": 18.75,
-      "avg": 21.886,
-      "median": 22.22,
-      "percentile": 40.0,
-      "sample_count": 5,
-      "complete": true,
-      "unit": "percent",
-      "source": "eastmoney",
-      "endpoint": "stock_zt_pool_zbgc_em+stock_zt_pool_em"
-    },
-    "market_metric_baseline:broken_limit_rate:2026-09-30:20": {
-      "evidence_type": "market_metric_baseline",
-      "metric": "broken_limit_rate",
-      "date": "2026-09-30",
-      "window": 20,
-      "current": 18.75,
-      "avg": null,
-      "median": null,
-      "percentile": null,
-      "sample_count": 14,
-      "complete": false,
-      "unit": "percent",
-      "source": "eastmoney",
-      "endpoint": "stock_zt_pool_zbgc_em+stock_zt_pool_em"
-    },
-    "market_metric_baseline:promotion_rate:2026-09-30:5": {
-      "evidence_type": "market_metric_baseline",
-      "metric": "promotion_rate",
-      "date": "2026-09-30",
-      "window": 5,
-      "current": 21.05,
-      "avg": 22.366,
-      "median": 23.53,
-      "percentile": 40.0,
-      "sample_count": 5,
-      "complete": true,
-      "unit": "percent",
-      "source": "eastmoney",
-      "endpoint": "stock_zt_pool_previous_em+stock_zt_pool_em"
-    },
-    "market_metric_baseline:promotion_rate:2026-09-30:20": {
-      "evidence_type": "market_metric_baseline",
-      "metric": "promotion_rate",
-      "date": "2026-09-30",
-      "window": 20,
-      "current": 21.05,
-      "avg": null,
-      "median": null,
-      "percentile": null,
-      "sample_count": 14,
-      "complete": false,
-      "unit": "percent",
-      "source": "eastmoney",
-      "endpoint": "stock_zt_pool_previous_em+stock_zt_pool_em"
-    },
-    "stock_detail:600519.SH:2026-09-30": {
-      "evidence_type": "stock_detail",
-      "code": "600519.SH",
-      "date": "2026-09-30",
-      "name": "贵州茅台",
-      "close": 1258.62,
-      "change_pct": 1.86
-    }
-  },
-  "sector_ranking": {
+  "tool": "get_sector_ranking",
+  "arguments": {
     "date": "2026-09-30",
-    "taxonomy": "industry",
-    "source_family": "ths",
-    "date_semantics": "CURRENT_ONLY",
+    "direction": "top",
+    "limit": 1000
+  },
+  "requested_at": "2026-10-06T21:44:21",
+  "success": true,
+  "category": "required",
+  "kind": "current",
+  "provider": "akshare",
+  "error_code": null,
+  "runtime_identity": {
+    "build": "day5-r2b-akshare-real",
+    "name": "A-Share Market MCP",
+    "provider": "akshare",
+    "data_mode": "real"
+  },
+  "lineage": [],
+  "result": {
+    "success": true,
+    "date": "2026-09-30",
+    "direction": "top",
+    "count": 90,
     "sectors": [
       {
         "sector_id": "881142",
         "sector_name": "生物制品",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 4.63,
+        "turnover": 23662000000.0,
         "turnover_cny": 23662000000.0,
         "up_count": 53,
         "down_count": 2,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881175",
         "sector_name": "医疗服务",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 3.11,
+        "turnover": 37682000000.0,
         "turnover_cny": 37682000000.0,
         "up_count": 50,
         "down_count": 6,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881273",
         "sector_name": "白酒",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 2.82,
+        "turnover": 10747000000.0,
         "turnover_cny": 10747000000.0,
         "up_count": 19,
         "down_count": 0,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881101",
         "sector_name": "种植业与林业",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 2.43,
+        "turnover": 9372000000.0,
         "turnover_cny": 9372000000.0,
         "up_count": 23,
         "down_count": 6,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881140",
         "sector_name": "化学制药",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 2.11,
+        "turnover": 47601000000.0,
         "turnover_cny": 47601000000.0,
         "up_count": 140,
         "down_count": 16,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881133",
         "sector_name": "饮料制造",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 1.91,
+        "turnover": 9260000000.0,
         "turnover_cny": 9260000000.0,
         "up_count": 37,
         "down_count": 8,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881151",
         "sector_name": "机场航运",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 1.76,
+        "turnover": 2721000000.0,
         "turnover_cny": 2721000000.0,
         "up_count": 13,
         "down_count": 0,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881125",
         "sector_name": "汽车整车",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 1.57,
+        "turnover": 18568000000.0,
         "turnover_cny": 18568000000.0,
         "up_count": 20,
         "down_count": 2,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881146",
         "sector_name": "燃气",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 1.49,
+        "turnover": 2409000000.0,
         "turnover_cny": 2409000000.0,
         "up_count": 26,
         "down_count": 1,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881155",
         "sector_name": "银行",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 1.46,
+        "turnover": 26514000000.0,
         "turnover_cny": 26514000000.0,
         "up_count": 42,
         "down_count": 0,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881182",
         "sector_name": "美容护理",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 1.4,
+        "turnover": 5080000000.0,
         "turnover_cny": 5080000000.0,
         "up_count": 24,
         "down_count": 10,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881112",
         "sector_name": "钢铁",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 1.21,
+        "turnover": 5334000000.0,
         "turnover_cny": 5334000000.0,
         "up_count": 38,
         "down_count": 6,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881141",
         "sector_name": "中药",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 1.21,
+        "turnover": 9390000000.0,
         "turnover_cny": 9390000000.0,
         "up_count": 55,
         "down_count": 11,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881144",
         "sector_name": "医疗器械",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 1.15,
+        "turnover": 17758000000.0,
         "turnover_cny": 17758000000.0,
         "up_count": 109,
         "down_count": 30,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881169",
         "sector_name": "贵金属",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 1.08,
+        "turnover": 12527000000.0,
         "turnover_cny": 12527000000.0,
         "up_count": 12,
         "down_count": 2,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881143",
         "sector_name": "医药商业",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 1.07,
+        "turnover": 3984000000.0000005,
         "turnover_cny": 3984000000.0000005,
         "up_count": 25,
         "down_count": 5,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881103",
         "sector_name": "农产品加工",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 1.0,
+        "turnover": 7038000000.0,
         "turnover_cny": 7038000000.0,
         "up_count": 29,
         "down_count": 12,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881263",
         "sector_name": "农化制品",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.96,
+        "turnover": 7839000000.0,
         "turnover_cny": 7839000000.0,
         "up_count": 46,
         "down_count": 11,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881165",
         "sector_name": "综合",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.96,
+        "turnover": 2892000000.0,
         "turnover_cny": 2892000000.0,
         "up_count": 9,
         "down_count": 7,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881108",
         "sector_name": "化学原料",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.93,
+        "turnover": 8699000000.0,
         "turnover_cny": 8699000000.0,
         "up_count": 40,
         "down_count": 16,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881137",
         "sector_name": "造纸",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.92,
+        "turnover": 1905999999.9999998,
         "turnover_cny": 1905999999.9999998,
         "up_count": 15,
         "down_count": 8,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881134",
         "sector_name": "食品加工制造",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.84,
+        "turnover": 6191000000.0,
         "turnover_cny": 6191000000.0,
         "up_count": 53,
         "down_count": 9,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881281",
         "sector_name": "电池",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.82,
+        "turnover": 52211000000.0,
         "turnover_cny": 52211000000.0,
         "up_count": 68,
         "down_count": 38,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881148",
         "sector_name": "港口航运",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.81,
+        "turnover": 7609999999.999999,
         "turnover_cny": 7609999999.999999,
         "up_count": 29,
         "down_count": 5,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881153",
         "sector_name": "房地产",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.79,
+        "turnover": 36962000000.0,
         "turnover_cny": 36962000000.0,
         "up_count": 50,
         "down_count": 32,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881156",
         "sector_name": "保险",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.73,
+        "turnover": 5277000000.0,
         "turnover_cny": 5277000000.0,
         "up_count": 4,
         "down_count": 1,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881158",
         "sector_name": "零售",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.72,
+        "turnover": 8706000000.0,
         "turnover_cny": 8706000000.0,
         "up_count": 50,
         "down_count": 17,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881149",
         "sector_name": "公路铁路运输",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.7,
+        "turnover": 2864000000.0,
         "turnover_cny": 2864000000.0,
         "up_count": 25,
         "down_count": 5,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881145",
         "sector_name": "电力",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.66,
+        "turnover": 23262000000.0,
         "turnover_cny": 23262000000.0,
         "up_count": 82,
         "down_count": 24,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881280",
         "sector_name": "风电设备",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.66,
+        "turnover": 15504000000.0,
         "turnover_cny": 15504000000.0,
         "up_count": 16,
         "down_count": 16,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881105",
         "sector_name": "煤炭开采加工",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.57,
+        "turnover": 9290000000.0,
         "turnover_cny": 9290000000.0,
         "up_count": 23,
         "down_count": 9,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881115",
         "sector_name": "建筑材料",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.46,
+        "turnover": 16851000000.0,
         "turnover_cny": 16851000000.0,
         "up_count": 37,
         "down_count": 28,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881102",
         "sector_name": "养殖业",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.4,
+        "turnover": 4040999999.9999995,
         "turnover_cny": 4040999999.9999995,
         "up_count": 23,
         "down_count": 12,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881109",
         "sector_name": "化学制品",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.35,
+        "turnover": 28600000000.0,
         "turnover_cny": 28600000000.0,
         "up_count": 92,
         "down_count": 85,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881180",
         "sector_name": "石油加工贸易",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.35,
+        "turnover": 4888000000.0,
         "turnover_cny": 4888000000.0,
         "up_count": 16,
         "down_count": 8,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881174",
         "sector_name": "厨卫电器",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.34,
+        "turnover": 821000000.0000001,
         "turnover_cny": 821000000.0000001,
         "up_count": 6,
         "down_count": 3,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881268",
         "sector_name": "工程机械",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.34,
+        "turnover": 5404000000.0,
         "turnover_cny": 5404000000.0,
         "up_count": 24,
         "down_count": 12,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881116",
         "sector_name": "建筑装饰",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.33,
+        "turnover": 16678000000.0,
         "turnover_cny": 16678000000.0,
         "up_count": 76,
         "down_count": 63,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881267",
         "sector_name": "能源金属",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.31,
+        "turnover": 14438999999.999998,
         "turnover_cny": 14438999999.999998,
         "up_count": 8,
         "down_count": 5,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881173",
         "sector_name": "小家电",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.29,
+        "turnover": 3267000000.0,
         "turnover_cny": 3267000000.0,
         "up_count": 11,
         "down_count": 15,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881283",
         "sector_name": "多元金融",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.28,
+        "turnover": 2966000000.0,
         "turnover_cny": 2966000000.0,
         "up_count": 15,
         "down_count": 9,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881157",
         "sector_name": "证券",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.25,
+        "turnover": 11947000000.0,
         "turnover_cny": 11947000000.0,
         "up_count": 29,
         "down_count": 10,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881264",
         "sector_name": "化学纤维",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.24,
+        "turnover": 4107000000.0,
         "turnover_cny": 4107000000.0,
         "up_count": 15,
         "down_count": 13,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881159",
         "sector_name": "贸易",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.2,
+        "turnover": 821000000.0000001,
         "turnover_cny": 821000000.0000001,
         "up_count": 7,
         "down_count": 5,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881279",
         "sector_name": "光伏设备",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.1,
+        "turnover": 17580000000.0,
         "turnover_cny": 17580000000.0,
         "up_count": 36,
         "down_count": 36,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881160",
         "sector_name": "旅游及酒店",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.04,
+        "turnover": 3660000000.0,
         "turnover_cny": 3660000000.0,
         "up_count": 17,
         "down_count": 13,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881278",
         "sector_name": "电网设备",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.03,
+        "turnover": 20529000000.0,
         "turnover_cny": 20529000000.0,
         "up_count": 63,
         "down_count": 67,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881107",
         "sector_name": "油气开采及服务",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": 0.03,
+        "turnover": 3207000000.0,
         "turnover_cny": 3207000000.0,
         "up_count": 10,
         "down_count": 8,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881126",
         "sector_name": "汽车零部件",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.03,
+        "turnover": 37170000000.0,
         "turnover_cny": 37170000000.0,
         "up_count": 125,
         "down_count": 143,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881152",
         "sector_name": "物流",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.08,
+        "turnover": 4120000000.0000005,
         "turnover_cny": 4120000000.0000005,
         "up_count": 22,
         "down_count": 27,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881168",
         "sector_name": "工业金属",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.1,
+        "turnover": 14616999999.999998,
         "turnover_cny": 14616999999.999998,
         "up_count": 27,
         "down_count": 27,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881166",
         "sector_name": "军工装备",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.17,
+        "turnover": 20542000000.0,
         "turnover_cny": 20542000000.0,
         "up_count": 34,
         "down_count": 47,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881128",
         "sector_name": "汽车服务及其他",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.19,
+        "turnover": 2164000000.0,
         "turnover_cny": 2164000000.0,
         "up_count": 9,
         "down_count": 14,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881138",
         "sector_name": "包装印刷",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.23,
+        "turnover": 6340000000.0,
         "turnover_cny": 6340000000.0,
         "up_count": 18,
         "down_count": 25,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881181",
         "sector_name": "环境治理",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.34,
+        "turnover": 9343000000.0,
         "turnover_cny": 9343000000.0,
         "up_count": 47,
         "down_count": 59,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881139",
         "sector_name": "家居用品",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.35,
+        "turnover": 8720000000.0,
         "turnover_cny": 8720000000.0,
         "up_count": 37,
         "down_count": 58,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881178",
         "sector_name": "教育",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.4,
+        "turnover": 2593000000.0,
         "turnover_cny": 2593000000.0,
         "up_count": 5,
         "down_count": 10,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881131",
         "sector_name": "白色家电",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.42,
+        "turnover": 9821000000.0,
         "turnover_cny": 9821000000.0,
         "up_count": 16,
         "down_count": 26,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881275",
         "sector_name": "游戏",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.42,
+        "turnover": 4489000000.0,
         "turnover_cny": 4489000000.0,
         "up_count": 8,
         "down_count": 15,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881277",
         "sector_name": "电机",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.46,
+        "turnover": 2960000000.0,
         "turnover_cny": 2960000000.0,
         "up_count": 10,
         "down_count": 16,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881269",
         "sector_name": "轨交设备",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.47,
+        "turnover": 1853000000.0,
         "turnover_cny": 1853000000.0,
         "up_count": 11,
         "down_count": 17,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881266",
         "sector_name": "橡胶制品",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.48,
+        "turnover": 2214000000.0,
         "turnover_cny": 2214000000.0,
         "up_count": 10,
         "down_count": 11,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881136",
         "sector_name": "服装家纺",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.49,
+        "turnover": 5374000000.0,
         "turnover_cny": 5374000000.0,
         "up_count": 30,
         "down_count": 41,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881132",
         "sector_name": "黑色家电",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.62,
+        "turnover": 1133000000.0,
         "turnover_cny": 1133000000.0,
         "up_count": 3,
         "down_count": 5,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881179",
         "sector_name": "其他社会服务",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.64,
+        "turnover": 3309000000.0000005,
         "turnover_cny": 3309000000.0000005,
         "up_count": 10,
         "down_count": 28,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881135",
         "sector_name": "纺织制造",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.66,
+        "turnover": 3084000000.0,
         "turnover_cny": 3084000000.0,
         "up_count": 13,
         "down_count": 19,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881171",
         "sector_name": "自动化设备",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.71,
+        "turnover": 25317000000.0,
         "turnover_cny": 25317000000.0,
         "up_count": 25,
         "down_count": 73,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881170",
         "sector_name": "小金属",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.72,
+        "turnover": 12035000000.0,
         "turnover_cny": 12035000000.0,
         "up_count": 7,
         "down_count": 22,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881118",
         "sector_name": "专用设备",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.76,
+        "turnover": 25584000000.0,
         "turnover_cny": 25584000000.0,
         "up_count": 67,
         "down_count": 133,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881167",
         "sector_name": "非金属材料",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.77,
+        "turnover": 3879999999.9999995,
         "turnover_cny": 3879999999.9999995,
         "up_count": 5,
         "down_count": 12,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881274",
         "sector_name": "影视院线",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.78,
+        "turnover": 6201000000.0,
         "turnover_cny": 6201000000.0,
         "up_count": 4,
         "down_count": 15,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881164",
         "sector_name": "文化传媒",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.89,
+        "turnover": 23899000000.0,
         "turnover_cny": 23899000000.0,
         "up_count": 23,
         "down_count": 60,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881130",
         "sector_name": "计算机设备",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.97,
+        "turnover": 16976000000.0,
         "turnover_cny": 16976000000.0,
         "up_count": 21,
         "down_count": 61,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881122",
         "sector_name": "光学光电子",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.97,
+        "turnover": 37121000000.0,
         "turnover_cny": 37121000000.0,
         "up_count": 27,
         "down_count": 77,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881271",
         "sector_name": "IT服务",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.99,
+        "turnover": 25490000000.0,
         "turnover_cny": 25490000000.0,
         "up_count": 26,
         "down_count": 100,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881129",
         "sector_name": "通信设备",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -0.99,
+        "turnover": 91961000000.0,
         "turnover_cny": 91961000000.0,
         "up_count": 26,
         "down_count": 65,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881117",
         "sector_name": "通用设备",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -1.05,
+        "turnover": 43989000000.0,
         "turnover_cny": 43989000000.0,
         "up_count": 64,
         "down_count": 182,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881276",
         "sector_name": "军工电子",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -1.14,
+        "turnover": 11023000000.0,
         "turnover_cny": 11023000000.0,
         "up_count": 15,
         "down_count": 45,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881265",
         "sector_name": "塑料制品",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -1.18,
+        "turnover": 13777000000.000002,
         "turnover_cny": 13777000000.000002,
         "up_count": 19,
         "down_count": 57,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881282",
         "sector_name": "其他电源设备",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -1.21,
+        "turnover": 7890000000.000001,
         "turnover_cny": 7890000000.000001,
         "up_count": 11,
         "down_count": 23,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881272",
         "sector_name": "软件开发",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -1.31,
+        "turnover": 23787000000.0,
         "turnover_cny": 23787000000.0,
         "up_count": 21,
         "down_count": 115,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881284",
         "sector_name": "环保设备",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -1.33,
+        "turnover": 3116000000.0,
         "turnover_cny": 3116000000.0,
         "up_count": 11,
         "down_count": 18,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881124",
         "sector_name": "消费电子",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -1.36,
+        "turnover": 30035000000.000004,
         "turnover_cny": 30035000000.000004,
         "up_count": 16,
         "down_count": 78,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881114",
         "sector_name": "金属新材料",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -1.47,
+        "turnover": 4408000000.0,
         "turnover_cny": 4408000000.0,
         "up_count": 5,
         "down_count": 29,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881177",
         "sector_name": "互联网电商",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -1.59,
+        "turnover": 5269000000.0,
         "turnover_cny": 5269000000.0,
         "up_count": 2,
         "down_count": 17,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881123",
         "sector_name": "其他电子",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -1.75,
+        "turnover": 12079000000.0,
         "turnover_cny": 12079000000.0,
         "up_count": 5,
         "down_count": 29,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881172",
         "sector_name": "电子化学品",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -2.48,
+        "turnover": 28014999999.999996,
         "turnover_cny": 28014999999.999996,
         "up_count": 3,
         "down_count": 41,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881121",
         "sector_name": "半导体",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -2.92,
+        "turnover": 178290000000.0,
         "turnover_cny": 178290000000.0,
         "up_count": 10,
         "down_count": 179,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881162",
         "sector_name": "通信服务",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -3.44,
+        "turnover": 8642000000.0,
         "turnover_cny": 8642000000.0,
         "up_count": 5,
         "down_count": 39,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       },
       {
         "sector_id": "881270",
         "sector_name": "元件",
         "taxonomy": "industry",
+        "source_family": "ths",
         "change_pct": -4.03,
+        "turnover": 72784000000.0,
         "turnover_cny": 72784000000.0,
         "up_count": 4,
         "down_count": 59,
         "flat_count": null,
-        "constituent_count": null
+        "constituent_count": null,
+        "date_semantics": "CURRENT_ONLY"
       }
     ]
   }
