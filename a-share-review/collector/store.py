@@ -89,6 +89,8 @@ class EvidenceStore:
             "missing_capabilities": collection.missing_capabilities,
             "missing_optional": collection.missing_optional,
             "incomplete_evidence": collection.incomplete_evidence,
+            "temporal_quarantine": collection.temporal_quarantine,
+            "temporal_integrity": "QUARANTINED" if collection.temporal_quarantine else "PASS",
             "normalized_evidence_count": len(normalized.get("evidence", {})),
             "artifact_files": artifacts + ["manifest.json"],
         }
