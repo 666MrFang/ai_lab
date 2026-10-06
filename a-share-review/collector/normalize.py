@@ -63,6 +63,7 @@ def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
     sector_memberships: Dict[str, Any] = {}
     sector_history: Dict[str, Any] = {}
     stock_news: Dict[str, Any] = {}
+    stock_disclosures: Dict[str, Any] = {}
     stock_history: Dict[str, Any] = {}
     market_context: Dict[str, Any] = {"turnover": {}, "breadth": {}}
 
@@ -101,6 +102,18 @@ def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
                     "sample_count_20d": result.get("sample_count_20d"),
                     "source_family": result.get("source_family", "sina"),
                     "lineage": result.get("lineage"),
+                }
+
+        if record.tool == "get_stock_disclosures":
+            code = result.get("stock_code") or record.arguments.get("stock_code")
+            if code:
+                stock_disclosures[str(code)] = {
+                    "date": result.get("date") or date,
+                    "stock_code": code,
+                    "date_semantics": ((result.get("evidence") or {}).get("date_semantics")),
+                    "empty_semantics": ((result.get("evidence") or {}).get("empty_semantics")),
+                    "causality": ((result.get("evidence") or {}).get("causality")),
+                    "disclosures": list(result.get("disclosures") or []),
                 }
 
         if record.tool == "get_stock_news":
@@ -252,6 +265,7 @@ def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
         "sector_memberships": sector_memberships,
         "sector_history": sector_history,
         "stock_news": stock_news,
+        "stock_disclosures": stock_disclosures,
         "stock_history": stock_history,
         "market_context": market_context,
     }
