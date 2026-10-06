@@ -1,0 +1,25 @@
+{
+  "version": "golden-constraint/v1",
+  "date": "2026-09-30",
+  "purpose": "Representative replay day for evidence-discipline regression. Constraints, not an exact prose answer.",
+  "must": [
+    {"id": "G001", "path": "market_regime.state", "op": "eq", "value": "UNCERTAIN",
+     "reason": "20d persistence evidence is incomplete in the frozen evidence artifact"},
+    {"id": "G002", "path": "metric_claims", "op": "structured_complete_contract",
+     "reason": "F002 must remain independently observable"},
+    {"id": "G003", "path": "tomorrow_watch_conditions", "op": "nonempty",
+     "reason": "forward section must be verification conditions"}
+  ],
+  "must_not": [
+    {"id": "G101", "op": "semantic_claim_without_complete_baseline"},
+    {"id": "G102", "op": "confirmed_regime_with_incomplete_persistence"},
+    {"id": "G103", "op": "news_as_cause_without_causal_evidence"},
+    {"id": "G104", "op": "strong_stock_from_single_day_rank"},
+    {"id": "G105", "op": "capacity_candidate_as_confirmed_leader"}
+  ],
+  "human_score": {
+    "dimensions": ["market_structure", "sector_analysis", "stock_selection", "evidence_discipline", "tomorrow_usefulness"],
+    "scale": "1-5",
+    "status": "UNSCORED"
+  }
+}
