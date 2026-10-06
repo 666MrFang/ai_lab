@@ -121,6 +121,7 @@ def run_product_day(
         "memory_status": current.get("status"),
         "prior_records_updated": settled_count,
         "calibrated_pattern_count": outlook.get("calibrated_pattern_count"),
+        "d1_verification": (current.get("d1_verification") or {}).get("summary"),
         "artifacts": [
             "review.json", "review.md", "eval.json", "run_manifest.json",
             "outlook.json", "dashboard.html",
