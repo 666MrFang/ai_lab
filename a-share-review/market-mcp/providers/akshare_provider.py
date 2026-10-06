@@ -1192,14 +1192,98 @@ class AkShareProvider(MarketDataProvider):
             ),
         )
 
+    @staticmethod
+    def _ths_amount_to_cny(value: Any) -> Optional[float]:
+        """Parse THS human-readable CNY amounts without inventing units."""
+        if value is None:
+            return None
+        if isinstance(value, (int, float)):
+            return float(value)
+        text = str(value).strip().replace(",", "")
+        if not text or text in ("--", "-", "None", "nan"):
+            return None
+        multipliers = {"万": 10_000.0, "亿": 100_000_000.0}
+        suffix = text[-1]
+        multiplier = multipliers.get(suffix, 1.0)
+        if suffix in multipliers:
+            text = text[:-1]
+        try:
+            return float(text) * multiplier
+        except (TypeError, ValueError):
+            return None
+
+    def _get_ths_sector_membership(
+        self, sector_name: str, sector_id: str
+    ) -> Optional[SectorMembershipSnapshot]:
+        """Use the same THS taxonomy as ranking/history when the client exposes it.
+
+        Some AkShare releases do not export stock_board_industry_cons_ths.
+        Absence of the endpoint is a compatibility condition, not permission to
+        fabricate a cross-taxonomy mapping; the caller may use the explicitly
+        VERIFIED Sina fallback below.
+        """
+        if getattr(self._client, "stock_board_industry_cons_ths", None) is None:
+            return None
+        frame = self._call("stock_board_industry_cons_ths", symbol=sector_name)
+        self._require_columns(
+            frame,
+            ("代码", "名称", "涨跌幅", "换手", "成交额"),
+            "stock_board_industry_cons_ths",
+        )
+        members: List[SectorMember] = []
+        for row in self._to_records(frame):
+            code = _pad_symbol(row.get("代码"))
+            if code is None:
+                continue
+            members.append(
+                SectorMember(
+                    stock_code=code,
+                    stock_name=_clean_text(row.get("名称")),
+                    change_pct=to_float(row.get("涨跌幅")),
+                    turnover_cny=self._ths_amount_to_cny(row.get("成交额")),
+                    turnover_rate_pct=to_float(row.get("换手")),
+                    # THS membership exposes circulating market value, not
+                    # total market cap. Capacity-core requires total market cap,
+                    # so fail closed instead of relabelling 流通市值 as 市值.
+                    market_cap_cny=None,
+                )
+            )
+        if not members:
+            raise MarketError(
+                ErrorCode.EMPTY_UPSTREAM_RESPONSE,
+                "THS membership for %s is empty" % sector_name,
+            )
+        return SectorMembershipSnapshot(
+            date=self._latest_completed_trading_day(),
+            sector_id=sector_id,
+            sector_name=sector_name,
+            taxonomy="industry",
+            source_family="ths",
+            membership_semantics="CURRENT_MEMBERSHIP_ONLY",
+            stocks=members,
+            lineage=DataLineage(
+                library="akshare", source="ths",
+                endpoint="stock_board_industry_cons_ths"
+            ),
+        )
+
     def get_sector_membership(self, sector_name: str) -> SectorMembershipSnapshot:
         sector_id = self._resolve_sector_id(sector_name)
+
+        # Preferred path: ranking, history and membership all share THS
+        # taxonomy, eliminating the old cross-provider identity problem.
+        ths_membership = self._get_ths_sector_membership(sector_name, sector_id)
+        if ths_membership is not None:
+            return ths_membership
+
+        # Compatibility fallback for AkShare builds where THS constituents are
+        # not exported. Only an explicitly VERIFIED THS->Sina mapping is legal.
         mapping = self._sector_mapping().get("ths:%s" % sector_id)
         if not mapping or mapping.get("mapping_status") != "VERIFIED":
             raise MarketError(
                 ErrorCode.SECTOR_MEMBERSHIP_UNAVAILABLE,
-                "no VERIFIED THS->Sina membership mapping for %s (ths:%s)"
-                % (sector_name, sector_id),
+                "THS constituent endpoint unavailable and no VERIFIED THS->Sina "
+                "membership mapping for %s (ths:%s)" % (sector_name, sector_id),
             )
         label = mapping["sina_sector_label"]
         frame = self._call("stock_sector_detail", sector=label)
