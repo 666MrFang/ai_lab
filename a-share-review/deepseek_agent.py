@@ -46,7 +46,12 @@ def main() -> int:
         "You are the generator inside an independently evaluated A-share daily-review "
         "pipeline. Use ONLY the supplied evidence. Follow the supplied Skill and JSON "
         "Schema. Do not use outside market knowledge. Do not infer causality from news "
-        "existence. Evidence gaps must remain explicit. Return exactly one JSON object "
+        "existence. Evidence gaps must remain explicit. The supplied allowed_evidence_registry "
+        "is CLOSED-WORLD: copy only exact entries from it into evidence_registry and reference "
+        "their evidence_id values; never invent, rename, aggregate, or reconstruct evidence. "
+        "Index quotes outside that registry may be stated as facts from normalized_evidence but "
+        "must not be converted into invented metric_claims/evidence_registry entries. "
+        "Return exactly one JSON object "
         "matching the schema; no markdown fences and no prose outside JSON."
     )
     user = json.dumps(request_obj, ensure_ascii=False, separators=(",", ":"))
