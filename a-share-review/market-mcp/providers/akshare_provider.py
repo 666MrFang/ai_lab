@@ -1205,3 +1205,46 @@ class AkShareProvider(MarketDataProvider):
                 library="akshare", source="sina", endpoint="stock_sector_detail"
             ),
         )
+
+    def get_stock_news(self, date: str, stock_code: str, limit: int = 10) -> List[Dict[str, Any]]:
+        """Eastmoney latest stock-news facts filtered to the requested calendar date.
+
+        The upstream endpoint exposes only a recent rolling window. An empty
+        filtered result means "no item observed in returned window", never
+        "no news existed".
+        """
+
+        symbol = _pad_symbol(stock_code)
+        if symbol is None:
+            raise MarketError(
+                ErrorCode.INVALID_STOCK_CODE, "invalid stock code: %s" % stock_code
+            )
+        frame = self._call("stock_news_em", symbol=symbol)
+        self._require_columns(
+            frame,
+            ("新闻标题", "新闻内容", "发布时间", "文章来源", "新闻链接"),
+            "stock_news_em",
+        )
+        items: List[Dict[str, Any]] = []
+        for row in self._to_records(frame):
+            published = _clean_text(row.get("发布时间"))
+            if not published:
+                continue
+            # AkShare currently returns an ISO-like datetime string. Keep the
+            # original timestamp and use only its date prefix for filtering.
+            if published[:10] != date:
+                continue
+            items.append({
+                "published_at": published,
+                "source": _clean_text(row.get("文章来源")),
+                "title": _clean_text(row.get("新闻标题")),
+                "summary": _clean_text(row.get("新闻内容")),
+                "url": _clean_text(row.get("新闻链接")),
+                "lineage": {
+                    "library": "akshare",
+                    "source": "eastmoney",
+                    "endpoint": "stock_news_em",
+                },
+            })
+        items.sort(key=lambda item: item.get("published_at") or "", reverse=True)
+        return items[:limit]

@@ -10,7 +10,7 @@ from config import DATA_MODE_MOCK, DATA_MODE_REAL, load_settings
 # Runtime identity: surfaced via the MCP handshake (serverInfo.version) and a
 # non-invasive stderr startup log so a live instance can be told apart from a
 # stale one. It never alters any tool contract.
-MARKET_MCP_BUILD = "day5-r2b-akshare-real"
+MARKET_MCP_BUILD = "product-v13-akshare-real"
 from domain.reference import TOTAL_TURNOVER_CODES
 from errors import ErrorCode, MarketError, error_payload
 from routing import config_mode_error, unimplemented_error
@@ -792,9 +792,25 @@ def get_stock_news(date: str, stock_code: str, limit: int = 10) -> dict[str, Any
     if mode_error is not None:
         return mode_error
 
-    real_error = unimplemented_error("get_stock_news", SETTINGS)
-    if real_error is not None:
-        return real_error
+    if SETTINGS.data_mode == DATA_MODE_REAL:
+        try:
+            items = SERVICE.get_stock_news(date, stock_code, limit)
+        except MarketError as exc:
+            return error_payload(
+                exc.error_code, exc.message, date=date, stock_code=stock_code
+            )
+        return {
+            "success": True,
+            "date": date,
+            "stock_code": stock_code,
+            "count": len(items),
+            "news": items,
+            "evidence": {
+                "date_semantics": "FILTERED_RECENT_WINDOW",
+                "empty_semantics": "NO_ITEM_OBSERVED_IN_RETURNED_WINDOW",
+                "causality": "NOT_ESTABLISHED",
+            },
+        }
 
     if not isinstance(date, str) or not date:
         return {

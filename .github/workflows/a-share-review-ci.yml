@@ -24,4 +24,5 @@ jobs:
       - run: python -m pip install --upgrade pip pytest jsonschema
       - name: Review memory / product / runner / collector / eval
         run: |
-          pytest -q             review_memory/tests             product/tests             runner/tests             collector/tests             eval/tests
+          pytest -q             review_memory/tests             product/tests             runner/tests             collector/tests             eval/tests \
+            market-mcp/tests
