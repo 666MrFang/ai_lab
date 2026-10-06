@@ -1329,6 +1329,68 @@ class AkShareProvider(MarketDataProvider):
             ),
         )
 
+    def get_stock_disclosures(
+        self, date: str, stock_code: str, limit: int = 10
+    ) -> List[Dict[str, Any]]:
+        """Official company disclosures for one calendar date.
+
+        Prefer CNINFO information disclosure. If the installed AkShare build
+        does not expose that endpoint, use Eastmoney's individual notice
+        endpoint as an explicit compatibility fallback. A disclosure is event
+        evidence only; it is never labelled as a price-move cause here.
+        """
+        symbol = _pad_symbol(stock_code)
+        if symbol is None:
+            raise MarketError(
+                ErrorCode.INVALID_STOCK_CODE, "invalid stock code: %s" % stock_code
+            )
+        compact = date.replace("-", "")
+        if getattr(self._client, "stock_zh_a_disclosure_report_cninfo", None) is not None:
+            frame = self._call(
+                "stock_zh_a_disclosure_report_cninfo",
+                symbol=symbol, market="沪深京", keyword="", category="",
+                start_date=compact, end_date=compact,
+            )
+            self._require_columns(
+                frame, ("代码", "简称", "公告标题", "公告时间", "公告链接"),
+                "stock_zh_a_disclosure_report_cninfo",
+            )
+            source, endpoint = "cninfo", "stock_zh_a_disclosure_report_cninfo"
+            items = [{
+                "published_at": _clean_text(row.get("公告时间")),
+                "source": "巨潮资讯",
+                "title": _clean_text(row.get("公告标题")),
+                "category": None,
+                "url": _clean_text(row.get("公告链接")),
+                "lineage": {"library": "akshare", "source": source, "endpoint": endpoint},
+            } for row in self._to_records(frame)]
+        elif getattr(self._client, "stock_individual_notice_report", None) is not None:
+            frame = self._call(
+                "stock_individual_notice_report", security=symbol, symbol="全部",
+                begin_date=compact, end_date=compact,
+            )
+            self._require_columns(
+                frame, ("代码", "名称", "公告标题", "公告类型", "公告日期", "网址"),
+                "stock_individual_notice_report",
+            )
+            source, endpoint = "eastmoney", "stock_individual_notice_report"
+            items = [{
+                "published_at": _clean_text(row.get("公告日期")),
+                "source": "东方财富公告",
+                "title": _clean_text(row.get("公告标题")),
+                "category": _clean_text(row.get("公告类型")),
+                "url": _clean_text(row.get("网址")),
+                "lineage": {"library": "akshare", "source": source, "endpoint": endpoint},
+            } for row in self._to_records(frame)]
+        else:
+            raise MarketError(
+                ErrorCode.DATA_NOT_AVAILABLE,
+                "installed AkShare exposes no supported stock disclosure endpoint",
+            )
+        items = [x for x in items if x.get("title")]
+        items.sort(key=lambda x: x.get("published_at") or "", reverse=True)
+        return items[:limit]
+
     def get_stock_news(self, date: str, stock_code: str, limit: int = 10) -> List[Dict[str, Any]]:
         """Eastmoney latest stock-news facts filtered to the requested calendar date.
 

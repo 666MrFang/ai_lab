@@ -361,6 +361,28 @@ class ReferenceAgent:
                     "新闻存在不等于涨跌原因；缺少分钟级价格顺序/因果证据"
                 )
 
+        # Formal company disclosures are a separate evidence family from
+        # media/news. Their existence still does not establish price causality.
+        disclosure_map = normalized.get("stock_disclosures") or {}
+        for stock in stocks:
+            disclosure = disclosure_map.get(str(stock.get("code"))) or {}
+            items = list(disclosure.get("disclosures") or [])
+            for item in items[:3]:
+                stock["facts"].append({
+                    "statement": "公司公告 %s [%s] %s"
+                                 % (item.get("published_at"), item.get("source"),
+                                    item.get("title")),
+                    "source": item.get("url") or "official_disclosure",
+                })
+            if items:
+                stock["evidence_gaps"] = [
+                    gap for gap in stock.get("evidence_gaps") or []
+                    if "新闻/公告" not in gap and "公告" not in gap
+                ]
+                stock["evidence_gaps"].append(
+                    "公告存在不等于涨跌原因；需结合披露时间与价格路径验证"
+                )
+
         broken = metric_entry("broken_limit_rate")
         promotion = metric_entry("promotion_rate")
         profit_effect = {
