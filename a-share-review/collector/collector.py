@@ -89,26 +89,41 @@ def collect(caller: Any, date: str, clock: Optional[Callable[[], str]] = None) -
     )
 
     records: List[RawRecord] = []
-    for tool, arguments, category, kind in plan:
+
+    def call_and_record(tool, arguments, category, kind):
         requested_at = now()
         result = caller.call(tool, arguments)
         success = bool(result.get("success"))
         error_code = result.get("error_code")
-        records.append(
-            RawRecord(
-                tool=tool,
-                arguments=arguments,
-                requested_at=requested_at,
-                success=success,
-                category=category,
-                kind=kind,
-                provider=provider,
-                runtime_identity=runtime_identity,
-                result=result,
-                error_code=error_code,
-                lineage=extract_lineage(result),
-            )
+        record = RawRecord(
+            tool=tool, arguments=arguments, requested_at=requested_at,
+            success=success, category=category, kind=kind, provider=provider,
+            runtime_identity=runtime_identity, result=result, error_code=error_code,
+            lineage=extract_lineage(result),
         )
+        records.append(record)
+        return record
+
+    for tool, arguments, category, kind in plan:
+        call_and_record(tool, arguments, category, kind)
+
+    # Product V1.1: enrich the strongest three industries with current
+    # membership when (and only when) a VERIFIED THS->Sina mapping exists.
+    # These calls are OPTIONAL: missing mappings are explicit evidence gaps,
+    # never a reason to fail the day's market collection.
+    ranking_record = next(
+        (r for r in records if r.tool == "get_sector_ranking" and r.success), None
+    )
+    if ranking_record is not None:
+        for sector in ((ranking_record.result or {}).get("sectors") or [])[:3]:
+            name = sector.get("sector_name")
+            if name:
+                call_and_record(
+                    "get_sector_membership",
+                    {"sector_name": name},
+                    "optional",
+                    "sector_membership",
+                )
 
     # --- classify ---------------------------------------------------------
     required = [r for r in records if r.category == "required"]
