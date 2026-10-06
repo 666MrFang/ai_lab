@@ -790,6 +790,33 @@ def get_stock_history_summary(date: str, stock_code: str) -> dict[str, Any]:
 
 
 @mcp.tool()
+def get_stock_disclosures(date: str, stock_code: str, limit: int = 10) -> dict[str, Any]:
+    """获取指定日期个股正式信息披露公告；公告存在不等于股价涨跌原因。"""
+    mode_error = config_mode_error(SETTINGS)
+    if mode_error is not None:
+        return mode_error
+    if SETTINGS.data_mode != DATA_MODE_REAL:
+        return error_payload(
+            ErrorCode.MOCK_NOT_SUPPORTED,
+            "get_stock_disclosures is only available with real market data",
+            date=date, stock_code=stock_code,
+        )
+    try:
+        items = SERVICE.get_stock_disclosures(date, stock_code, limit)
+    except MarketError as exc:
+        return error_payload(exc.error_code, exc.message, date=date, stock_code=stock_code)
+    return {
+        "success": True, "date": date, "stock_code": stock_code,
+        "count": len(items), "disclosures": items,
+        "evidence": {
+            "date_semantics": "EXACT_CALENDAR_DATE",
+            "empty_semantics": "NO_DISCLOSURE_OBSERVED_FROM_UPSTREAM",
+            "causality": "NOT_ESTABLISHED",
+        },
+    }
+
+
+@mcp.tool()
 def get_stock_news(date: str, stock_code: str, limit: int = 10) -> dict[str, Any]:
     """
     获取指定交易日期某只 A 股个股相关的重要新闻和公开事件，
