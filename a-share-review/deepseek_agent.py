@@ -7,6 +7,7 @@ DEEPSEEK_API_KEY environment variable.
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import sys
@@ -50,7 +51,14 @@ def _decode_review_content(content: str):
     return value
 
 
-def main() -> int:
+def _parse_args(argv=None):
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--model", choices=("deepseek-flash", "deepseek-v4-pro"))
+    return parser.parse_args(argv)
+
+
+def main(argv=None) -> int:
+    args = _parse_args(argv)
     api_key = os.environ.get("DEEPSEEK_API_KEY")
     if not api_key:
         return _fail("DEEPSEEK_API_KEY is not configured")
@@ -66,9 +74,11 @@ def main() -> int:
     # DeepSeek's public API currently exposes deepseek-flash and
     # deepseek-v4-pro. Keep model selection configurable but fail locally for
     # accidental unsupported aliases rather than spending an API request.
-    model = os.environ.get("DEEPSEEK_MODEL", "deepseek-flash")
+    # CLI is authoritative because review_product.py explicitly selects the
+    # model. DEEPSEEK_MODEL remains a direct-adapter fallback for compatibility.
+    model = args.model or os.environ.get("DEEPSEEK_MODEL", "deepseek-flash")
     if model not in {"deepseek-flash", "deepseek-v4-pro"}:
-        return _fail("unsupported DEEPSEEK_MODEL: %s" % model)
+        return _fail("unsupported DeepSeek model: %s" % model)
 
     system = (
         "You are the generator inside an independently evaluated A-share daily-review "

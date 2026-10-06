@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from deepseek_agent import _decode_review_content
+from deepseek_agent import _decode_review_content, _parse_args
 
 
 def test_decode_exact_json():
@@ -32,3 +32,12 @@ def test_reject_trailing_prose_after_object():
 def test_reject_non_object_root():
     with pytest.raises(ValueError):
         _decode_review_content('[]')
+
+
+def test_model_cli_is_parsed_explicitly():
+    assert _parse_args(["--model", "deepseek-v4-pro"]).model == "deepseek-v4-pro"
+    assert _parse_args(["--model", "deepseek-flash"]).model == "deepseek-flash"
+
+
+def test_model_cli_optional_for_direct_adapter_compatibility():
+    assert _parse_args([]).model is None
