@@ -61,6 +61,7 @@ def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
         "sectors": [],
     }
     sector_memberships: Dict[str, Any] = {}
+    sector_history: Dict[str, Any] = {}
 
     for record in records:
         if not record.success or not isinstance(record.result, dict):
@@ -82,6 +83,27 @@ def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
                         "constituent_count": sector.get("constituent_count"),
                     }
                 )
+
+        if record.tool == "get_sector_history_summary":
+            sector_id = result.get("sector_id")
+            sector_name = result.get("sector_name") or record.arguments.get("sector_name")
+            if sector_id or sector_name:
+                sector_history[str(sector_id or sector_name)] = {
+                    "date": result.get("date") or date,
+                    "sector_id": sector_id,
+                    "sector_name": sector_name,
+                    "taxonomy": result.get("taxonomy", "industry"),
+                    "source_family": result.get("source_family", "ths"),
+                    "change_pct_5d": result.get("change_pct_5d"),
+                    "change_pct_20d": result.get("change_pct_20d"),
+                    "turnover_cny": result.get("turnover_cny"),
+                    "turnover_avg_5d_cny": result.get("turnover_avg_5d_cny"),
+                    "turnover_avg_20d_cny": result.get("turnover_avg_20d_cny"),
+                    "history_5d_complete": result.get("history_5d_complete"),
+                    "history_20d_complete": result.get("history_20d_complete"),
+                    "sample_count_5d": result.get("sample_count_5d"),
+                    "sample_count_20d": result.get("sample_count_20d"),
+                }
 
         if record.tool == "get_sector_membership":
             membership = result.get("membership") or result.get("sector") or result
@@ -189,4 +211,5 @@ def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
         "evidence": evidence,
         "sector_ranking": sector_ranking,
         "sector_memberships": sector_memberships,
+        "sector_history": sector_history,
     }
