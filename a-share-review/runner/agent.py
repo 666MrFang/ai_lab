@@ -176,13 +176,16 @@ class ReferenceAgent:
             reverse=True,
         )
 
+        sector_history = normalized.get("sector_history") or {}
         def sector_view(row: Dict[str, Any]) -> Dict[str, Any]:
+            name = row.get("sector_name") or "UNKNOWN"
+            hist = sector_history.get(name) or {}
             return {
-                "sector_name": row.get("sector_name") or "UNKNOWN",
+                "sector_name": name,
                 "change_pct": row.get("change_pct"),
                 "turnover_cny": row.get("turnover_cny"),
-                "change_5d_pct": None,
-                "change_20d_pct": None,
+                "change_5d_pct": hist.get("change_5d_pct"),
+                "change_20d_pct": hist.get("change_20d_pct"),
             }
 
         top_gainers = [sector_view(row) for row in sector_rows[:5]]
