@@ -134,8 +134,18 @@ def run_review(
                 collection = collect(caller, date)
                 normalized = normalized_for(collection)
             if collection.status == STATUS_FAILED:
-                add_stage("resolve_evidence", FAIL, "live collection FAILED")
-                errors.append("live collection FAILED")
+                failed = "; ".join(collection.tools_failed) or "unknown required tool"
+                add_stage("resolve_evidence", FAIL, "live collection FAILED: %s" % failed)
+                errors.append("live collection FAILED: %s" % failed)
+                for record in collection.records:
+                    if record.category == "required" and not record.success:
+                        print(
+                            "COLLECTION_FAILURE|tool=%s|error_code=%s|args=%s" % (
+                                record.tool, record.error_code or "UNKNOWN_ERROR",
+                                json.dumps(record.arguments, ensure_ascii=False, sort_keys=True),
+                            ),
+                            flush=True,
+                        )
             else:
                 target = store.save(date, collection, normalized)
                 data = store.load(date)
