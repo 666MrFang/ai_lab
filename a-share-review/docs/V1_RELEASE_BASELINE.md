@@ -1,6 +1,6 @@
 # A-Share Review V1.0 Release Baseline
 
-Status: **RELEASE CANDIDATE**
+Status: **RELEASED**
 
 ## Deterministic acceptance
 
@@ -30,9 +30,24 @@ DeepSeek Flash has already completed a full controlled A/B replay on the frozen
 evaluation. This proves the real-agent adapter path, not superiority over the
 ReferenceAgent.
 
-A release remains **RC** until the current master is executed end-to-end through
-`review_product.py --agent deepseek` in an environment containing a valid
-`DEEPSEEK_API_KEY`, and returns `PUBLICATION_STATUS=PUBLISHED`.
+Current-master real-agent acceptance completed on 2026-10-06 using the frozen
+2026-09-30 Evidence Store and `deepseek-flash`. The end-to-end Product run
+returned:
+
+- run_agent: PASS
+- schema_validation: PASS
+- contract_validation: PASS
+- evidence_integrity: PASS
+- independent_eval: PASS (F001=PASS, F002=PASS)
+- execution_status: SUCCESS
+- golden_status: PASS
+- publication_status: PUBLISHED
+
+The accepted run used `--mode replay --agent deepseek --model deepseek-flash
+--overwrite-output`. Review Memory remained OPEN and calibrated pattern count
+was 0 because the repository does not yet contain enough future/matching
+historical sessions; those are valid data-availability states, not release
+failures.
 
 ## Golden corpus policy
 
