@@ -50,6 +50,16 @@ def state_signature(state: Dict[str, Any]) -> Dict[str, str]:
     }
 
 
+def _same_sector(current_state: Dict[str, Any], historical_state: Dict[str, Any]) -> bool:
+    current_id = current_state.get("sector_id")
+    if current_id:
+        return historical_state.get("sector_id") == current_id
+    current_name = current_state.get("sector_name")
+    if current_name:
+        return historical_state.get("sector_name") == current_name
+    return True
+
+
 def compound_returns(values: Iterable[float]) -> float:
     value = 1.0
     for change in values:
@@ -79,13 +89,7 @@ class PatternEngine:
             for state in record.get("pattern_states") or []:
                 # Sector-specific outlooks must never borrow outcomes from a
                 # different industry that merely shares the same numeric state.
-                current_sector_id = current_state.get("sector_id")
-                state_sector_id = state.get("sector_id")
-                if current_sector_id and state_sector_id != current_sector_id:
-                    continue
-                if (not current_sector_id
-                        and current_state.get("sector_name")
-                        and state.get("sector_name") != current_state.get("sector_name")):
+                if not _same_sector(current_state, state):
                     continue
                 if state_signature(state) != signature:
                     continue
