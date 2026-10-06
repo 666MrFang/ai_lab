@@ -67,12 +67,19 @@ class ExternalLLMAgent:
         request = self._request(agent_input)
         payload = json.dumps(request, ensure_ascii=False, separators=(",", ":"))
         prompt_hash = hashlib.sha256(payload.encode("utf-8")).hexdigest()
+        # Explicit allowlist. Provider credentials may be forwarded to the
+        # dedicated model adapter, but arbitrary parent-process secrets are not.
+        allowed_provider_env = (
+            "DEEPSEEK_API_KEY", "DEEPSEEK_MODEL",
+            "DEEPSEEK_MAX_TOKENS", "DEEPSEEK_HTTP_TIMEOUT",
+        )
         env = {
             "PATH": os.environ.get("PATH", ""),
             "SYSTEMROOT": os.environ.get("SYSTEMROOT", ""),
             "WINDIR": os.environ.get("WINDIR", ""),
             "HOME": os.environ.get("HOME", ""),
             "USERPROFILE": os.environ.get("USERPROFILE", ""),
+            **{name: os.environ.get(name, "") for name in allowed_provider_env},
             **self.extra_env,
         }
         try:
