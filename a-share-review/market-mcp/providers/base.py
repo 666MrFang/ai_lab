@@ -84,6 +84,14 @@ class MarketDataProvider(ABC):
             f"{type(self).__name__} does not implement get_sector_membership",
         )
 
+    def get_stock_history_summary(self, date: str, stock_code: str) -> dict:
+        """5d/20d price persistence for one stock, with completeness metadata."""
+
+        raise MarketError(
+            ErrorCode.REAL_PROVIDER_NOT_IMPLEMENTED,
+            f"{type(self).__name__} does not implement get_stock_history_summary",
+        )
+
     def get_stock_news(self, date: str, stock_code: str, limit: int = 10) -> list[dict]:
         """Timestamped stock-news facts; never a causal conclusion."""
 

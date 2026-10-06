@@ -68,6 +68,19 @@ def build_review_record(
             ),
             "tomorrow_watch_conditions": deepcopy(review.get("tomorrow_watch_conditions") or []),
             "metric_claims": deepcopy(review.get("metric_claims") or []),
+            "stock_candidates": [
+                {
+                    "code": stock.get("code"),
+                    "name": stock.get("name"),
+                    "sector_name": stock.get("sector_name"),
+                    "roles": deepcopy(stock.get("roles") or []),
+                    "facts": deepcopy(stock.get("facts") or []),
+                    "evidence_gaps": deepcopy(stock.get("evidence_gaps") or []),
+                }
+                for stock in (review.get("stocks") or [])
+                if "STRONG_STOCK" in (stock.get("roles") or [])
+                or "CAPACITY_CORE_CANDIDATE" in (stock.get("roles") or [])
+            ],
         },
         "pattern_states": states,
         "run_identity": {

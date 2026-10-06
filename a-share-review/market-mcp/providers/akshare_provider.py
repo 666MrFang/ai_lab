@@ -556,6 +556,42 @@ class AkShareProvider(MarketDataProvider):
             ),
         )
 
+    def get_stock_history_summary(self, date: str, stock_code: str) -> Dict[str, Any]:
+        if not self.is_trading_day(date):
+            raise MarketError(ErrorCode.NOT_TRADING_DAY, f"{date} is not a trading day")
+        code = self._resolve_stock_code(stock_code)
+        rows = [row for row in self._stock_daily_series(code, date) if row["date"] <= date]
+        target_index = next((i for i, row in enumerate(rows) if row["date"] == date), None)
+        if target_index is None:
+            raise MarketError(ErrorCode.DATA_NOT_AVAILABLE, f"stock data not available for {code} on {date}")
+
+        def window_return(window: int) -> Tuple[Optional[float], bool, int]:
+            # A W-session return requires W+1 closes: target versus close W
+            # completed sessions earlier. Never shorten the window silently.
+            start_index = target_index - window
+            if start_index < 0:
+                return None, False, target_index + 1
+            start_close = rows[start_index].get("close")
+            end_close = rows[target_index].get("close")
+            return change_pct(end_close, start_close), True, window
+
+        r5, c5, n5 = window_return(5)
+        r20, c20, n20 = window_return(20)
+        return {
+            "date": date,
+            "stock_code": code,
+            "change_pct_5d": r5,
+            "change_pct_20d": r20,
+            "history_5d_complete": c5,
+            "history_20d_complete": c20,
+            "sample_count_5d": n5,
+            "sample_count_20d": n20,
+            "source_family": "sina",
+            "lineage": {
+                "library": "akshare", "source": "sina", "endpoint": "stock_zh_a_daily"
+            },
+        }
+
     def get_market_history_summary(
         self,
         date: str,

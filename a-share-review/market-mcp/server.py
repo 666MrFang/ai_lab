@@ -10,7 +10,7 @@ from config import DATA_MODE_MOCK, DATA_MODE_REAL, load_settings
 # Runtime identity: surfaced via the MCP handshake (serverInfo.version) and a
 # non-invasive stderr startup log so a live instance can be told apart from a
 # stale one. It never alters any tool contract.
-MARKET_MCP_BUILD = "product-v13-akshare-real"
+MARKET_MCP_BUILD = "product-v14-akshare-real"
 from domain.reference import TOTAL_TURNOVER_CODES
 from errors import ErrorCode, MarketError, error_payload
 from routing import config_mode_error, unimplemented_error
@@ -767,6 +767,26 @@ def _mock_stock_detail(date: str, stock_code: str) -> dict[str, Any]:
         "stock_code": stock_code,
         "error": "stock not found"
     }
+
+
+@mcp.tool()
+def get_stock_history_summary(date: str, stock_code: str) -> dict[str, Any]:
+    """Return 5d/20d stock persistence facts with explicit completeness."""
+
+    mode_error = config_mode_error(SETTINGS)
+    if mode_error is not None:
+        return mode_error
+    if SETTINGS.data_mode != DATA_MODE_REAL:
+        return error_payload(
+            ErrorCode.MOCK_NOT_SUPPORTED,
+            "get_stock_history_summary is only available with real market data",
+            date=date, stock_code=stock_code,
+        )
+    try:
+        summary = SERVICE.get_stock_history_summary(date, stock_code)
+    except MarketError as exc:
+        return error_payload(exc.error_code, exc.message, date=date, stock_code=stock_code)
+    return {"success": True, **summary}
 
 
 @mcp.tool()

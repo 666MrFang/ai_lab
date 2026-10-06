@@ -63,6 +63,7 @@ def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
     sector_memberships: Dict[str, Any] = {}
     sector_history: Dict[str, Any] = {}
     stock_news: Dict[str, Any] = {}
+    stock_history: Dict[str, Any] = {}
 
     for record in records:
         if not record.success or not isinstance(record.result, dict):
@@ -84,6 +85,22 @@ def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
                         "constituent_count": sector.get("constituent_count"),
                     }
                 )
+
+        if record.tool == "get_stock_history_summary":
+            code = result.get("stock_code") or record.arguments.get("stock_code")
+            if code:
+                stock_history[str(code)] = {
+                    "date": result.get("date") or date,
+                    "stock_code": code,
+                    "change_pct_5d": result.get("change_pct_5d"),
+                    "change_pct_20d": result.get("change_pct_20d"),
+                    "history_5d_complete": result.get("history_5d_complete"),
+                    "history_20d_complete": result.get("history_20d_complete"),
+                    "sample_count_5d": result.get("sample_count_5d"),
+                    "sample_count_20d": result.get("sample_count_20d"),
+                    "source_family": result.get("source_family", "sina"),
+                    "lineage": result.get("lineage"),
+                }
 
         if record.tool == "get_stock_news":
             code = result.get("stock_code") or record.arguments.get("stock_code")
@@ -226,4 +243,5 @@ def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
         "sector_memberships": sector_memberships,
         "sector_history": sector_history,
         "stock_news": stock_news,
+        "stock_history": stock_history,
     }
