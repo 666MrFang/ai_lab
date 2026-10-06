@@ -32,9 +32,16 @@ def _must_not(review: Dict[str, Any], rule: Dict[str, Any]) -> Dict[str, Any]:
         incomplete = "20d" in gaps and ("incomplete" in gaps or "不足" in gaps or "缺" in gaps)
         violated = state != "UNCERTAIN" and incomplete
     elif op == "news_as_cause_without_causal_evidence":
-        # Causal assertions are not represented by a structured causal contract yet.
-        # Refuse to infer them from prose.
-        observable = False
+        # Causality is checked structurally, never by scanning prose.
+        for stock in review.get("stocks") or []:
+            for inference in stock.get("possible_drivers") or []:
+                if inference.get("causal_status") == "SUPPORTED" and not (
+                    inference.get("causal_evidence_refs") or []
+                ):
+                    violated = True
+                    break
+            if violated:
+                break
     elif op == "strong_stock_from_single_day_rank":
         # STRONG_STOCK must carry historical_behavior with a positive sample.
         for stock in review.get("stocks") or []:
