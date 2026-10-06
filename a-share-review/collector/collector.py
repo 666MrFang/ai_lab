@@ -126,12 +126,37 @@ def collect(caller: Any, date: str, clock: Optional[Callable[[], str]] = None) -
                     "optional",
                     "sector_history",
                 )
-                call_and_record(
+                membership_record = call_and_record(
                     "get_sector_membership",
                     {"sector_name": name},
                     "optional",
                     "sector_membership",
                 )
+                if membership_record.success:
+                    members = list((membership_record.result or {}).get("stocks") or [])
+                    members.sort(
+                        key=lambda item: item.get("change_pct")
+                        if item.get("change_pct") is not None else float("-inf"),
+                        reverse=True,
+                    )
+                    selected = []
+                    for rank, member in enumerate(members, start=1):
+                        market_cap = member.get("market_cap_cny")
+                        if rank <= 3 or (
+                            market_cap is not None and float(market_cap) >= 50_000_000_000
+                        ):
+                            code = member.get("stock_code")
+                            if code and code not in selected:
+                                selected.append(code)
+                        if len(selected) >= 5:
+                            break
+                    for code in selected:
+                        call_and_record(
+                            "get_stock_news",
+                            {"date": date, "stock_code": code, "limit": 10},
+                            "optional",
+                            "stock_news",
+                        )
 
     # --- classify ---------------------------------------------------------
     required = [r for r in records if r.category == "required"]
