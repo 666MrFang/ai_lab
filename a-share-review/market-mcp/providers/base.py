@@ -83,3 +83,11 @@ class MarketDataProvider(ABC):
             ErrorCode.REAL_PROVIDER_NOT_IMPLEMENTED,
             f"{type(self).__name__} does not implement get_sector_membership",
         )
+
+    def get_stock_news(self, date: str, stock_code: str, limit: int = 10) -> list[dict]:
+        """Timestamped stock-news facts; never a causal conclusion."""
+
+        raise MarketError(
+            ErrorCode.REAL_PROVIDER_NOT_IMPLEMENTED,
+            f"{type(self).__name__} does not implement get_stock_news",
+        )
