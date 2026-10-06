@@ -45,6 +45,33 @@ class ExternalLLMAgent:
     def _request(agent_input: Dict[str, Any]) -> Dict[str, Any]:
         skill = Path(agent_input["skill_path"]).read_text(encoding="utf-8")
         schema = json.loads(Path(agent_input["schema_path"]).read_text(encoding="utf-8"))
+        # Give the model the exact registry it is allowed to cite. The model
+        # may select a subset, but must never synthesize metric identities.
+        store = (agent_input.get("normalized") or {}).get("evidence") or {}
+        metric_keys = sorted(
+            key for key, value in store.items()
+            if value.get("evidence_type") in ("market_metric", "market_metric_baseline")
+        )
+        allowed_registry = []
+        for index, key in enumerate(metric_keys, start=1):
+            value = store[key]
+            entry = {
+                "evidence_id": "E%03d" % index,
+                "evidence_type": value.get("evidence_type"),
+                "metric": value.get("metric"),
+                "date": value.get("date"),
+                "window": value.get("window") if value.get("evidence_type") == "market_metric_baseline" else None,
+                "value": value.get("current") if value.get("evidence_type") == "market_metric_baseline" else value.get("value"),
+                "avg": value.get("avg") if value.get("evidence_type") == "market_metric_baseline" else None,
+                "median": value.get("median") if value.get("evidence_type") == "market_metric_baseline" else None,
+                "percentile": value.get("percentile") if value.get("evidence_type") == "market_metric_baseline" else None,
+                "sample_count": value.get("sample_count") if value.get("evidence_type") == "market_metric_baseline" else None,
+                "complete": value.get("complete") if value.get("evidence_type") == "market_metric_baseline" else None,
+                "unit": value.get("unit"),
+                "source": value.get("source"),
+            }
+            allowed_registry.append(entry)
+
         return {
             "protocol": "a-share-review-agent/v1",
             "task": "Generate one daily A-share review. Return JSON only.",
@@ -56,7 +83,13 @@ class ExternalLLMAgent:
                 "no_retry": True,
                 "news_is_not_causality": True,
                 "forward_output_is_verification_conditions_not_prediction": True,
+                "evidence_registry_is_closed_world": True,
+                "evidence_registry_rule": (
+                    "evidence_registry may contain only exact unchanged entries from "
+                    "allowed_evidence_registry; never invent, rename, aggregate, or reconstruct evidence"
+                ),
             },
+            "allowed_evidence_registry": allowed_registry,
             "skill": skill,
             "schema": schema,
             "evidence_manifest": agent_input.get("manifest") or {},
