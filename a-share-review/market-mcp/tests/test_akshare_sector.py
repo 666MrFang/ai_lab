@@ -286,6 +286,7 @@ class SectorTest(unittest.TestCase):
                 records: list = []
                 tools_requested = tools_success = tools_failed = []
                 missing_capabilities = missing_optional = incomplete_evidence = []
+                temporal_quarantine = []
 
             store.save(REVIEW, FakeCollection(), normalized)
             loaded = store.load(REVIEW)
