@@ -96,3 +96,18 @@ def test_failed_provider_execution_keeps_stderr_for_diagnostics(tmp_path, monkey
     with pytest.raises(AgentExecutionError):
         agent(_input(tmp_path))
     assert "DeepSeek HTTP 400" in agent.last_execution["stderr"]
+
+
+def test_request_exposes_closed_world_registry(tmp_path):
+    agent_input = _input(tmp_path)
+    agent_input["normalized"]["evidence"] = {
+        "market_metric:market_turnover:2026-09-30": {
+            "evidence_type": "market_metric", "metric": "market_turnover",
+            "date": "2026-09-30", "value": 123.0, "unit": "cny", "source": "test"
+        }
+    }
+    request = ExternalLLMAgent._request(agent_input)
+    assert request["rules"]["evidence_registry_is_closed_world"] is True
+    assert request["allowed_evidence_registry"][0]["evidence_id"] == "E001"
+    assert request["allowed_evidence_registry"][0]["metric"] == "market_turnover"
+    assert request["allowed_evidence_registry"][0]["value"] == 123.0
