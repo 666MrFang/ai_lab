@@ -10,6 +10,7 @@ from review_memory.service import build_outlook, build_review_record, settle_rec
 from review_memory.store import ReviewMemoryStore
 from review_memory.verification import verify_conditions
 from runner.runner import run_review
+from golden.evaluator import evaluate_golden
 from .dashboard import render_dashboard
 
 
@@ -113,11 +114,25 @@ def run_product_day(
     dashboard = render_dashboard(review, outlook, current)
     (day_dir / "dashboard.html").write_text(dashboard, encoding="utf-8")
 
+    golden_result = None
+    golden_path = repo / "golden" / "cases" / ("%s.json" % date)
+    if golden_path.exists():
+        golden_result = evaluate_golden(review, _load(golden_path))
+        (day_dir / "golden_eval.json").write_text(
+            json.dumps(golden_result, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+
+    quality_ok = manifest.get("review_quality_status") == "PASS"
+    golden_ok = golden_result is None or golden_result.get("status") != "FAIL"
+    publication_status = "PUBLISHED" if quality_ok and golden_ok else "BLOCKED"
+
     product_manifest = {
         "version": "a-share-review-product/v1",
         "date": date,
         "runner_execution_status": manifest.get("execution_status"),
         "review_quality_status": manifest.get("review_quality_status"),
+        "golden_status": golden_result.get("status") if golden_result else "NO_CASE",
+        "publication_status": publication_status,
         "memory_status": current.get("status"),
         "prior_records_updated": settled_count,
         "calibrated_pattern_count": outlook.get("calibrated_pattern_count"),
@@ -125,7 +140,7 @@ def run_product_day(
         "artifacts": [
             "review.json", "review.md", "eval.json", "run_manifest.json",
             "outlook.json", "dashboard.html",
-        ],
+        ] + (["golden_eval.json"] if golden_result else []),
     }
     (day_dir / "product_manifest.json").write_text(
         json.dumps(product_manifest, ensure_ascii=False, indent=2), encoding="utf-8"
