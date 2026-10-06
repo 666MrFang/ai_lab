@@ -115,6 +115,7 @@ def run_review(
     collection_status = None
     eval_payload: Optional[Dict[str, Any]] = None
     review_quality_status = SKIPPED
+    agent_execution: Dict[str, Any] = {}
 
     # --- Stage 1: resolve evidence ------------------------------------
     try:
@@ -170,6 +171,7 @@ def run_review(
         agent_result = agent(agent_input)
         review = agent_result.get("review")
         review_md = agent_result.get("review_md")
+        agent_execution = dict(agent_result.get("execution") or {})
         if not isinstance(review, dict):
             raise ValueError("agent did not return a review object")
         add_stage("run_agent", PASS, getattr(agent, "name", "agent"))
@@ -256,7 +258,8 @@ def run_review(
                      execution="SUCCESS", quality=review_quality_status,
                      output_root=output_root, failed_root=failed_root,
                      overwrite_output=overwrite_output, extra_partials={},
-                     ready_files=files)
+                     ready_files=files,
+                     agent_execution=agent_execution)
 
 
 def _build_manifest(run_id, date, started, finished, mode, evidence_mode_used,
@@ -292,7 +295,7 @@ def _finalize(run_id, date, started, finished, mode, evidence_mode_used,
               evidence_manifest_path, collection_status, stages, errors,
               review, review_md, normalized, eval_payload,
               *, execution, quality, output_root, failed_root, overwrite_output,
-              extra_partials, ready_files=None):
+              extra_partials, ready_files=None, agent_execution=None):
     # attach market_mcp_build from evidence manifest if available
     build = None
     try:
@@ -305,6 +308,8 @@ def _finalize(run_id, date, started, finished, mode, evidence_mode_used,
         stages = stages + [{"name": "publish", "status": PASS,
                             "timestamp": finished, "message": "atomic publish"}]
         files = dict(ready_files)
+        if agent_execution:
+            files["agent_execution.json"] = json.dumps(agent_execution, ensure_ascii=False, indent=2)
         manifest = _build_manifest(run_id, date, started, finished, mode, evidence_mode_used,
                                    evidence_manifest_path, collection_status, stages, errors,
                                    execution, quality, list(files) + ["run_manifest.json"])
