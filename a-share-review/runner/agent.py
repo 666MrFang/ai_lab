@@ -258,12 +258,11 @@ class ReferenceAgent:
                 if not code or code in seen_stock_codes:
                     continue
                 is_capacity = market_cap is not None and float(market_cap) >= 50_000_000_000
-                # Keep all capacity candidates plus the current top-3 movers
-                # for observation. Current top-3 is NOT the Skill's
-                # STRONG_STOCK rule, which requires 5d history.
-                if not is_capacity and current_rank > 3:
-                    continue
                 is_strong = code in strong_codes_by_sector.get(sector_name, set())
+                # Keep all capacity candidates, true 5d strong stocks, plus
+                # today's top-3 movers for observation.
+                if not is_capacity and not is_strong and current_rank > 3:
+                    continue
                 roles = []
                 if is_strong:
                     roles.append("STRONG_STOCK")
