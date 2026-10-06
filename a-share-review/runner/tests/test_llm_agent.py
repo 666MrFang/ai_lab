@@ -74,3 +74,16 @@ def test_environment_is_whitelisted(tmp_path, monkeypatch):
     monkeypatch.setattr(subprocess, "run", fake_run)
     ExternalLLMAgent(["fake"])(_input(tmp_path))
     assert "SECRET_THAT_MUST_NOT_LEAK" not in seen["env"]
+
+
+def test_deepseek_key_is_explicitly_forwarded_but_unrelated_secret_is_not(tmp_path, monkeypatch):
+    monkeypatch.setenv("DEEPSEEK_API_KEY", "test-key")
+    monkeypatch.setenv("UNRELATED_SECRET", "must-not-leak")
+    seen = {}
+    def fake_run(command, **kwargs):
+        seen["env"] = kwargs["env"]
+        return subprocess.CompletedProcess(command, 0, "{}", "")
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    ExternalLLMAgent(["fake"])(_input(tmp_path))
+    assert seen["env"]["DEEPSEEK_API_KEY"] == "test-key"
+    assert "UNRELATED_SECRET" not in seen["env"]
