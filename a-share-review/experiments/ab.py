@@ -85,6 +85,13 @@ def run_ab(*, date: str, data_root: str, work_root: str, candidate_agent: Any,
                 "reference": evaluate_golden(reference_review, case),
                 "candidate": evaluate_golden(candidate_review, case),
             }
+            # Golden is a publication-quality gate for experiments. A hard
+            # deterministic violation is never hidden by pipeline PASS.
+            result["golden_gate"] = {
+                "reference": result["golden"]["reference"]["status"],
+                "candidate": result["golden"]["candidate"]["status"],
+                "candidate_blocked": result["golden"]["candidate"]["status"] == "FAIL",
+            }
     root.mkdir(parents=True, exist_ok=True)
     (root / "ab_result.json").write_text(
         json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
