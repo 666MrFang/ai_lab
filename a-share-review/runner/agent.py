@@ -212,18 +212,72 @@ class ReferenceAgent:
 
         # --- stocks -------------------------------------------------------
         stocks: List[Dict[str, Any]] = []
+        seen_stock_codes = set()
+
+        # Membership is a separate Sina evidence family. It may identify
+        # capacity-core *candidates* (market cap >= 50B CNY), but it must not
+        # be presented as THS internal contribution or as a confirmed leader.
+        memberships = normalized.get("sector_memberships") or {}
+        for membership in memberships.values():
+            sector_name = membership.get("sector_name") or "UNKNOWN"
+            members = list(membership.get("stocks") or [])
+            members.sort(
+                key=lambda item: item.get("change_pct")
+                if item.get("change_pct") is not None else float("-inf"),
+                reverse=True,
+            )
+            for member in members:
+                code = member.get("stock_code")
+                market_cap = member.get("market_cap_cny")
+                if not code or code in seen_stock_codes:
+                    continue
+                is_capacity = market_cap is not None and float(market_cap) >= 50_000_000_000
+                # Keep all capacity candidates plus the current top-3 movers
+                # for observation. Current top-3 is NOT the Skill's
+                # STRONG_STOCK rule, which requires 5d history.
+                current_rank = members.index(member) + 1
+                if not is_capacity and current_rank > 3:
+                    continue
+                roles = ["CAPACITY_CORE_CANDIDATE"] if is_capacity else ["OTHER"]
+                gaps = [
+                    "Sina CURRENT_MEMBERSHIP_ONLY；不得当作 THS 板块内部贡献证据",
+                    "缺少个股 5d 同口径历史，不能确认 STRONG_STOCK/龙头",
+                    "缺少新闻/公告证据，不能判断上涨原因",
+                ]
+                stocks.append({
+                    "code": code,
+                    "name": member.get("stock_name") or "UNKNOWN",
+                    "sector_name": sector_name,
+                    "roles": roles,
+                    "facts": [{
+                        "statement": (
+                            "Sina当前成员：涨跌幅 %s%%，成交额 %s 元，换手率 %s%%，市值 %s 元。"
+                            % (member.get("change_pct"), member.get("turnover_cny"),
+                               member.get("turnover_rate_pct"), market_cap)
+                        ),
+                        "source": "evidence_store:sina_membership",
+                    }],
+                    "possible_drivers": [],
+                    "historical_behavior": None,
+                    "evidence_gaps": gaps,
+                })
+                seen_stock_codes.add(code)
+
         for key in sorted(store):
             if not key.startswith("stock_detail:"):
                 continue
             stock = store[key]
+            code = stock.get("code")
+            if code in seen_stock_codes:
+                continue
             stocks.append({
-                "code": stock.get("code"), "name": stock.get("name") or "UNKNOWN",
+                "code": code, "name": stock.get("name") or "UNKNOWN",
                 "sector_name": "UNKNOWN", "roles": ["OTHER"],
                 "facts": [{"statement": "收盘 %s，涨跌幅 %s%%."
                            % (stock.get("close"), stock.get("change_pct")),
                            "source": "evidence_store"}],
                 "possible_drivers": [], "historical_behavior": None,
-                "evidence_gaps": ["no sector / news capability"],
+                "evidence_gaps": ["no verified sector membership / news evidence"],
             })
 
         broken = metric_entry("broken_limit_rate")
