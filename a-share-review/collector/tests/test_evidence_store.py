@@ -328,6 +328,29 @@ class EvidenceStoreTest(unittest.TestCase):
         self.assertIn("market_metric:broken_limit_rate:2026-09-30", norm1["evidence"])
 
 
+    def test_historical_sector_ranking_unavailable_is_explicit_gap_not_failure(self):
+        responses = base_responses()
+        responses[key("get_sector_ranking", date=DATE, direction="top", limit=1000)] = {
+            "success": False,
+            "error_code": "HISTORICAL_RANKING_UNAVAILABLE",
+            "error": "CURRENT_ONLY upstream",
+        }
+        collection = collect_with(responses)
+        self.assertNotEqual(collection.status, STATUS_FAILED)
+        self.assertIn(
+            "get_sector_ranking:HISTORICAL_RANKING_UNAVAILABLE",
+            collection.missing_optional,
+        )
+
+    def test_sector_ranking_network_error_remains_hard_failure(self):
+        responses = base_responses()
+        responses[key("get_sector_ranking", date=DATE, direction="top", limit=1000)] = {
+            "success": False, "error_code": "NETWORK_ERROR", "error": "x"
+        }
+        collection = collect_with(responses)
+        self.assertEqual(collection.status, STATUS_FAILED)
+
+
 if __name__ == "__main__":
     unittest.main()
 
