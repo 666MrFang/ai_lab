@@ -124,9 +124,22 @@ class ReferenceAgent:
                     "source": "evidence_store",
                 })
         turnover = metric_entry("market_turnover")
+        market_context = normalized.get("market_context") or {}
+        turnover_ctx = market_context.get("turnover") or {}
+        breadth_ctx = market_context.get("breadth") or {}
         if turnover and turnover.get("value") is not None:
-            facts.append({"statement": "两市成交额 %s 元。" % turnover.get("value"),
-                          "source": "evidence_store"})
+            facts.append({"statement": (
+                "两市成交额 %s 元；前一日 %s 元；5日均值 %s 元；20日均值 %s 元；"
+                "较前日 %s%%，较5日均值 %s%%，较20日均值 %s%%。"
+                % (turnover.get("value"), turnover_ctx.get("previous_cny"),
+                   turnover_ctx.get("avg_5d_cny"), turnover_ctx.get("avg_20d_cny"),
+                   turnover_ctx.get("vs_previous_pct"), turnover_ctx.get("vs_5d_pct"),
+                   turnover_ctx.get("vs_20d_pct"))
+            ), "source": "evidence_store"})
+        if any(breadth_ctx.get(k) is not None for k in ("advance_count","decline_count","flat_count")):
+            facts.append({"statement": "全市场上涨 %s 家，下跌 %s 家，平盘 %s 家。"
+                          % (breadth_ctx.get("advance_count"), breadth_ctx.get("decline_count"),
+                             breadth_ctx.get("flat_count")), "source": "evidence_store"})
         for metric in ("limit_up_count", "limit_down_count", "broken_limit_rate", "promotion_rate"):
             entry = metric_entry(metric)
             if entry and entry.get("value") is not None:

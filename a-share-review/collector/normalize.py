@@ -64,6 +64,7 @@ def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
     sector_history: Dict[str, Any] = {}
     stock_news: Dict[str, Any] = {}
     stock_history: Dict[str, Any] = {}
+    market_context: Dict[str, Any] = {"turnover": {}, "breadth": {}}
 
     for record in records:
         if not record.success or not isinstance(record.result, dict):
@@ -156,6 +157,13 @@ def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
         if record.tool == "get_market_breadth":
             limit = result.get("limit_state") or {}
             previous = result.get("previous_limit_up") or {}
+            breadth = result.get("breadth") or {}
+            market_context["breadth"] = {
+                "advance_count": breadth.get("advance_count"),
+                "decline_count": breadth.get("decline_count"),
+                "flat_count": breadth.get("flat_count"),
+                "observed_date": breadth.get("observed_date") or result.get("observed_session_date"),
+            }
             for metric, unit in _LIMIT_METRICS:
                 evidence[metric_key(metric, date)] = {
                     "evidence_type": "market_metric",
@@ -176,6 +184,7 @@ def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
 
         elif record.tool == "get_market_history_summary":
             turnover = result.get("turnover") or {}
+            market_context["turnover"] = dict(turnover)
             evidence[metric_key("market_turnover", date)] = {
                 "evidence_type": "market_metric",
                 "metric": "market_turnover",
@@ -244,4 +253,5 @@ def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
         "sector_history": sector_history,
         "stock_news": stock_news,
         "stock_history": stock_history,
+        "market_context": market_context,
     }
