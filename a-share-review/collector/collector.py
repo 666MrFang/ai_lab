@@ -63,6 +63,7 @@ class Collection:
     missing_capabilities: List[str]
     incomplete_evidence: List[str]
     missing_optional: List[str]
+    temporal_quarantine: List[str] = field(default_factory=list)
 
 
 def _signature(tool: str, arguments: Dict[str, Any]) -> str:
@@ -186,6 +187,19 @@ def collect(caller: Any, date: str, clock: Optional[Callable[[], str]] = None) -
     missing_optional = [r.tool for r in records if r.category == "optional" and not r.success]
     missing_capabilities = sorted(set(unimplemented))
 
+    # CURRENT_ONLY evidence is only temporally valid when its observed session
+    # is the requested review date. A historical path/name must never retrofit
+    # today's constituents into the past.
+    temporal_quarantine = []
+    for r in records:
+        if not r.success:
+            continue
+        result = r.result or {}
+        temporal_semantics = result.get("temporal_semantics")
+        observed_date = result.get("observed_session_date") or result.get("date")
+        if temporal_semantics == "CURRENT_ONLY" and observed_date != date:
+            temporal_quarantine.append(_signature(r.tool, r.arguments))
+
     if required_failed:
         status, complete = STATUS_FAILED, False
     elif incomplete:
@@ -208,6 +222,7 @@ def collect(caller: Any, date: str, clock: Optional[Callable[[], str]] = None) -
         missing_capabilities=missing_capabilities,
         incomplete_evidence=sorted(set(incomplete)),
         missing_optional=sorted(set(missing_optional)),
+        temporal_quarantine=sorted(set(temporal_quarantine)),
     )
 
 
