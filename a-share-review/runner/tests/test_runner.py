@@ -198,6 +198,12 @@ class RunnerTest(unittest.TestCase):
         self.assertEqual(self.stage(manifest, "schema_validation"), "SKIPPED")
         self.assertEqual(manifest["execution_status"], "FAIL")
 
+    def test_reference_agent_output_matches_frozen_schema(self):
+        self.save_evidence()
+        manifest = self.execute()
+        self.assertEqual(self.stage(manifest, "schema_validation"), "PASS")
+        self.assertEqual(manifest["execution_status"], "SUCCESS")
+
     # 7
     def test_07_invalid_output_fails_schema_stage(self):
         self.save_evidence()
