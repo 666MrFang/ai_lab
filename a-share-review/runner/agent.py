@@ -265,9 +265,15 @@ class ReferenceAgent:
             for current_rank, member in enumerate(members, start=1):
                 code = member.get("stock_code")
                 market_cap = member.get("market_cap_cny")
+                circulating_cap = member.get("circulating_market_cap_cny")
                 if not code or code in seen_stock_codes:
                     continue
-                is_capacity = market_cap is not None and float(market_cap) >= 50_000_000_000
+                is_capacity = (
+                    market_cap is not None and float(market_cap) >= 50_000_000_000
+                ) or (
+                    circulating_cap is not None
+                    and float(circulating_cap) >= 50_000_000_000
+                )
                 is_strong = code in strong_codes_by_sector.get(sector_name, set())
                 # Keep all capacity candidates, true 5d strong stocks, plus
                 # today's top-3 movers for observation.
@@ -282,7 +288,7 @@ class ReferenceAgent:
                     roles = ["OTHER"]
                 hist = stock_history.get(str(code)) or {}
                 gaps = [
-                    "Sina CURRENT_MEMBERSHIP_ONLY；不得当作 THS 板块内部贡献证据",
+                    "CURRENT_MEMBERSHIP_ONLY；不得回填为历史成分股证据",
                     "STRONG_STOCK仅表示当前Sina成员中完整5日涨幅Top3，不等同于龙头",
                     "缺少新闻/公告证据，不能判断上涨原因",
                 ]
@@ -295,9 +301,10 @@ class ReferenceAgent:
                     "roles": roles,
                     "facts": [{
                         "statement": (
-                            "Sina当前成员：涨跌幅 %s%%，成交额 %s 元，换手率 %s%%，市值 %s 元。"
+                            "当前板块成员：涨跌幅 %s%%，成交额 %s 元，换手率 %s%%，总市值 %s 元，流通市值 %s 元。"
                             % (member.get("change_pct"), member.get("turnover_cny"),
-                               member.get("turnover_rate_pct"), market_cap)
+                               member.get("turnover_rate_pct"), market_cap,
+                               circulating_cap)
                         ),
                         "source": "evidence_store:sina_membership",
                     }, {
