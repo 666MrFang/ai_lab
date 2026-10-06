@@ -393,6 +393,13 @@
           "items": {
             "type": "string"
           }
+        },
+        "causal_status": {
+          "enum": ["SUPPORTED", "HYPOTHESIS", "UNSUPPORTED", null]
+        },
+        "causal_evidence_refs": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^E[0-9]+$" }
         }
       }
     },
