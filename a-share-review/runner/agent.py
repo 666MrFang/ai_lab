@@ -226,7 +226,7 @@ class ReferenceAgent:
                 if item.get("change_pct") is not None else float("-inf"),
                 reverse=True,
             )
-            for member in members:
+            for current_rank, member in enumerate(members, start=1):
                 code = member.get("stock_code")
                 market_cap = member.get("market_cap_cny")
                 if not code or code in seen_stock_codes:
@@ -235,7 +235,6 @@ class ReferenceAgent:
                 # Keep all capacity candidates plus the current top-3 movers
                 # for observation. Current top-3 is NOT the Skill's
                 # STRONG_STOCK rule, which requires 5d history.
-                current_rank = members.index(member) + 1
                 if not is_capacity and current_rank > 3:
                     continue
                 roles = ["CAPACITY_CORE_CANDIDATE"] if is_capacity else ["OTHER"]
