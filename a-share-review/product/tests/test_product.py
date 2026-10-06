@@ -62,3 +62,42 @@ def test_one_command_replay_creates_memory_outlook_dashboard():
         assert review["sectors"]["top_gainers"][0]["sector_name"] == "半导体"
         outlook = json.loads((day / "outlook.json").read_text(encoding="utf-8"))
         assert outlook["calibrated_pattern_count"] == 0
+
+
+def test_settlement_can_use_market_days_without_memory_records():
+    from product.pipeline import _settle_prior_records
+    from review_memory.service import build_review_record
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        market_root, memory_root = root / "market", root / "memory"
+        memory = ReviewMemoryStore(memory_root)
+
+        base = {
+            "date": "2026-09-01",
+            "evidence": {},
+            "sector_ranking": {"sectors": [
+                {"sector_id": "881121", "sector_name": "半导体", "change_pct": 4.2}
+            ]},
+        }
+        record = build_review_record(
+            "2026-09-01",
+            {"sectors": {}, "tomorrow_watch_conditions": [], "metric_claims": []},
+            base,
+        )
+        memory.save("2026-09-01", record)
+
+        for index in range(2, 7):
+            date = "2026-09-0%d" % index
+            day = market_root / date / "normalized"
+            day.mkdir(parents=True)
+            payload = {
+                "date": date, "evidence": {},
+                "sector_ranking": {"sectors": [
+                    {"sector_id": "881121", "sector_name": "半导体", "change_pct": 1.0}
+                ]},
+            }
+            (day / "market.json").write_text(json.dumps(payload), encoding="utf-8")
+
+        _settle_prior_records(memory, market_root, "2026-09-06")
+        assert memory.load("2026-09-01")["status"] == "SETTLED"
