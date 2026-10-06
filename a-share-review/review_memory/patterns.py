@@ -42,11 +42,37 @@ def _rank_bucket(rank: Optional[int]) -> str:
     return "OTHER"
 
 
+def _persistence_bucket(value: Optional[float], complete: Any) -> str:
+    if complete is not True or value is None:
+        return "UNKNOWN"
+    if value >= 5.0:
+        return "UP_5P"
+    if value >= 0.0:
+        return "UP"
+    if value <= -5.0:
+        return "DOWN_5P"
+    return "DOWN"
+
+
+def _volume_bucket(value: Optional[float]) -> str:
+    if value is None:
+        return "UNKNOWN"
+    if value >= 30.0:
+        return "EXPANDED_30P"
+    if value <= -20.0:
+        return "CONTRACTED_20P"
+    return "NORMAL"
+
+
 def state_signature(state: Dict[str, Any]) -> Dict[str, str]:
     return {
         "market_direction": _direction(state.get("market_change_pct")),
         "sector_move": _sector_move_bucket(state.get("sector_change_pct")),
         "sector_rank": _rank_bucket(state.get("sector_rank")),
+        "sector_5d": _persistence_bucket(
+            state.get("sector_change_5d_pct"), state.get("sector_history_5d_complete")
+        ),
+        "sector_volume": _volume_bucket(state.get("sector_turnover_vs_5d_pct")),
     }
 
 
