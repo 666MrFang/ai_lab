@@ -102,3 +102,10 @@ class MarketService:
     def get_sector_membership(self, sector_name: str):
         provider = self._get_provider()
         return provider.get_sector_membership(sector_name)
+
+    def get_stock_news(self, date: str, stock_code: str, limit: int = 10):
+        self._validate_date(date)
+        if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
+            raise MarketError(ErrorCode.INVALID_WINDOW, "limit must be a positive integer")
+        provider = self._get_provider()
+        return provider.get_stock_news(date, stock_code, limit)
