@@ -218,6 +218,32 @@ class ReferenceAgent:
         # capacity-core *candidates* (market cap >= 50B CNY), but it must not
         # be presented as THS internal contribution or as a confirmed leader.
         memberships = normalized.get("sector_memberships") or {}
+        stock_history = normalized.get("stock_history") or {}
+        strong_codes_by_sector: Dict[str, set] = {}
+        strong_rank_by_code: Dict[str, int] = {}
+
+        # "STRONG_STOCK" is deliberately strict: only when every stock in the
+        # current Sina membership has a complete comparable 5d history can we
+        # assert a true sector Top3. Partial coverage cannot manufacture Top3.
+        for membership in memberships.values():
+            sector_name = membership.get("sector_name") or "UNKNOWN"
+            members = list(membership.get("stocks") or [])
+            ranked = []
+            complete = bool(members)
+            for member in members:
+                code = member.get("stock_code")
+                hist = stock_history.get(str(code)) or {}
+                if not code or hist.get("history_5d_complete") is not True or hist.get("change_pct_5d") is None:
+                    complete = False
+                    break
+                ranked.append((float(hist["change_pct_5d"]), str(code)))
+            if complete:
+                ranked.sort(key=lambda item: (-item[0], item[1]))
+                top = ranked[:3]
+                strong_codes_by_sector[sector_name] = {code for _, code in top}
+                for rank, (_, code) in enumerate(top, start=1):
+                    strong_rank_by_code[code] = rank
+
         for membership in memberships.values():
             sector_name = membership.get("sector_name") or "UNKNOWN"
             members = list(membership.get("stocks") or [])
@@ -237,12 +263,22 @@ class ReferenceAgent:
                 # STRONG_STOCK rule, which requires 5d history.
                 if not is_capacity and current_rank > 3:
                     continue
-                roles = ["CAPACITY_CORE_CANDIDATE"] if is_capacity else ["OTHER"]
+                is_strong = code in strong_codes_by_sector.get(sector_name, set())
+                roles = []
+                if is_strong:
+                    roles.append("STRONG_STOCK")
+                if is_capacity:
+                    roles.append("CAPACITY_CORE_CANDIDATE")
+                if not roles:
+                    roles = ["OTHER"]
+                hist = stock_history.get(str(code)) or {}
                 gaps = [
                     "Sina CURRENT_MEMBERSHIP_ONLY；不得当作 THS 板块内部贡献证据",
-                    "缺少个股 5d 同口径历史，不能确认 STRONG_STOCK/龙头",
+                    "STRONG_STOCK仅表示当前Sina成员中完整5日涨幅Top3，不等同于龙头",
                     "缺少新闻/公告证据，不能判断上涨原因",
                 ]
+                if not is_strong:
+                    gaps.append("板块成员5d历史覆盖不完整或未进入Top3，不能标记STRONG_STOCK")
                 stocks.append({
                     "code": code,
                     "name": member.get("stock_name") or "UNKNOWN",
@@ -255,6 +291,13 @@ class ReferenceAgent:
                                member.get("turnover_rate_pct"), market_cap)
                         ),
                         "source": "evidence_store:sina_membership",
+                    }, {
+                        "statement": (
+                            "5日涨幅 %s%%，5日完整=%s，板块5日排名=%s。"
+                            % (hist.get("change_pct_5d"), hist.get("history_5d_complete"),
+                               strong_rank_by_code.get(code))
+                        ),
+                        "source": "evidence_store:sina_stock_history",
                     }],
                     "possible_drivers": [],
                     "historical_behavior": None,
