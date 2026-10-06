@@ -35,9 +35,12 @@ def main() -> int:
     if request_obj.get("protocol") != "a-share-review-agent/v1":
         return _fail("unsupported agent protocol")
 
-    model = os.environ.get("DEEPSEEK_MODEL", "deepseek-flash")
-    if model not in {"deepseek-flash", "deepseek-v4-pro"}:
-        return _fail("unsupported DEEPSEEK_MODEL")
+    # DeepSeek's public API currently exposes deepseek-chat and
+    # deepseek-reasoner. Keep model selection configurable but fail locally for
+    # accidental unsupported aliases rather than spending an API request.
+    model = os.environ.get("DEEPSEEK_MODEL", "deepseek-chat")
+    if model not in {"deepseek-chat", "deepseek-reasoner"}:
+        return _fail("unsupported DEEPSEEK_MODEL: %s" % model)
 
     system = (
         "You are the generator inside an independently evaluated A-share daily-review "

@@ -182,13 +182,22 @@ def run_review(
             agent_execution.setdefault("error_code", error_code)
         add_stage("run_agent", FAIL, str(error_code))
         errors.append("agent failed: %s" % error_code)
+        stderr = str(agent_execution.get("stderr") or "").strip()
+        if stderr:
+            # Provider adapters must never print credentials. Keep the terminal
+            # diagnostic bounded so API error details are visible without log spam.
+            diagnostic = " ".join(stderr.split())[:500]
+            print("AGENT_DIAGNOSTIC|%s" % diagnostic)
         skip_rest("run_agent")
         return _finalize(run_id, date, started, now(), mode, evidence_mode_used,
                          evidence_manifest_path, collection_status, stages, errors,
                          review, review_md, normalized, eval_payload,
                          execution="FAIL", quality=SKIPPED,
                          output_root=output_root, failed_root=failed_root,
-                         overwrite_output=overwrite_output, extra_partials={})
+                         overwrite_output=overwrite_output,
+                         extra_partials={
+                             "agent_execution.json": json.dumps(agent_execution, ensure_ascii=False, indent=2)
+                         } if agent_execution else {})
 
     # --- Stage 3: schema validation -----------------------------------
     schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
