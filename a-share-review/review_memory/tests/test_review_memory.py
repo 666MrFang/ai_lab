@@ -158,3 +158,54 @@ def test_incomplete_persistence_is_unknown_not_inferred():
         "sector_change_5d_pct": 8.0, "sector_history_5d_complete": False,
     })
     assert signature["sector_5d"] == "UNKNOWN"
+
+
+def test_settlement_sorts_unique_future_sessions_and_rejects_nonfuture():
+    record = build_review_record(
+        "2026-10-01",
+        {"sectors": {}, "tomorrow_watch_conditions": [], "metric_claims": []},
+        normalized("2026-10-01"),
+    )
+    future = [
+        normalized("2026-10-04", 2.0),
+        normalized("2026-10-02", 1.0),
+        normalized("2026-10-03", -1.0),
+        normalized("2026-10-05", 0.5),
+        normalized("2026-10-06", 1.0),
+        normalized("2026-10-03", 99.0),
+        normalized("2026-10-01", 99.0),
+    ]
+    settled = settle_record(record, future)
+    assert settled["status"] == "SETTLED"
+    assert settled["settlement"]["horizons"]["t1"]["end_date"] == "2026-10-02"
+    reasons = {x["reason"] for x in settled["settlement"]["rejected_sessions"]}
+    assert reasons == {"DUPLICATE_SESSION", "NOT_STRICTLY_FUTURE"}
+
+
+def test_missing_sector_at_t3_keeps_record_partially_settled():
+    record = build_review_record(
+        "2026-10-01",
+        {"sectors": {}, "tomorrow_watch_conditions": [], "metric_claims": []},
+        normalized("2026-10-01"),
+    )
+    missing = normalized("2026-10-03", -1.0)
+    missing["sector_ranking"]["sectors"] = [
+        row for row in missing["sector_ranking"]["sectors"]
+        if row["sector_id"] != "881001"
+    ]
+    future = [
+        normalized("2026-10-02", 1.0),
+        missing,
+        normalized("2026-10-04", 2.0),
+        normalized("2026-10-05", 0.5),
+        normalized("2026-10-06", 1.0),
+    ]
+    settled = settle_record(record, future)
+    assert settled["status"] == "PARTIALLY_SETTLED"
+    assert settled["settlement"]["horizons"]["t1"]["complete"] is True
+    assert settled["settlement"]["horizons"]["t3"]["complete"] is False
+    assert settled["settlement"]["horizons"]["t5"]["complete"] is False
+    outcomes = settled["pattern_states"][0]["outcomes"]
+    assert outcomes["t1_sector_return_pct"] == 1.0
+    assert "t3_sector_return_pct" not in outcomes
+    assert "t5_sector_return_pct" not in outcomes
