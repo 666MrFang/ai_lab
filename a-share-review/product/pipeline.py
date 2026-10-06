@@ -26,13 +26,16 @@ def _settle_prior_records(
     # review-memory records. Settlement must use market snapshots, not the
     # memory index, otherwise an older record can never reach T+5 unless every
     # intermediate day was separately ingested first.
-    available = sorted(
-        p.name for p in market_root.iterdir()
+    available = (
+        sorted(
+            p.name for p in market_root.iterdir()
+            if p.is_dir()
+            and p.name <= current_date
+            and (p / "normalized" / "market.json").is_file()
+        )
         if market_root.exists()
-        and p.is_dir()
-        and p.name <= current_date
-        and (p / "normalized" / "market.json").is_file()
-    ) if market_root.exists() else []
+        else []
+    )
     for date in memory.dates():
         if date >= current_date:
             continue
