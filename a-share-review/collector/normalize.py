@@ -60,6 +60,7 @@ def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
         "date_semantics": "CURRENT_ONLY",
         "sectors": [],
     }
+    sector_memberships: Dict[str, Any] = {}
 
     for record in records:
         if not record.success or not isinstance(record.result, dict):
@@ -81,6 +82,24 @@ def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
                         "constituent_count": sector.get("constituent_count"),
                     }
                 )
+
+        if record.tool == "get_sector_membership":
+            membership = result.get("membership") or result.get("sector") or result
+            sector_id = membership.get("sector_id")
+            sector_name = membership.get("sector_name") or record.arguments.get("sector_name")
+            if sector_id or sector_name:
+                key = str(sector_id or sector_name)
+                sector_memberships[key] = {
+                    "date": result.get("date") or membership.get("date") or date,
+                    "sector_id": sector_id,
+                    "sector_name": sector_name,
+                    "taxonomy": membership.get("taxonomy", "industry"),
+                    "source_family": membership.get("source_family", "sina"),
+                    "membership_semantics": membership.get(
+                        "membership_semantics", "CURRENT_MEMBERSHIP_ONLY"
+                    ),
+                    "stocks": list(membership.get("stocks") or []),
+                }
 
         if record.tool == "get_market_breadth":
             limit = result.get("limit_state") or {}
@@ -165,4 +184,9 @@ def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
                     "change_pct": stock.get("change_pct"),
                 }
 
-    return {"date": date, "evidence": evidence, "sector_ranking": sector_ranking}
+    return {
+        "date": date,
+        "evidence": evidence,
+        "sector_ranking": sector_ranking,
+        "sector_memberships": sector_memberships,
+    }
