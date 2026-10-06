@@ -53,6 +53,15 @@ def render_dashboard(
         )
         for x in review.get("tomorrow_watch_conditions") or []
     )
+    stock_rows = "".join(
+        "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (
+            escape(str(x.get("name", "—"))),
+            escape(str(x.get("code", "—"))),
+            escape(str(x.get("sector_name", "—"))),
+            escape(" / ".join(x.get("roles") or ["OTHER"])),
+        )
+        for x in review.get("stocks") or []
+    )
     status = escape(str(memory_record.get("status", "OPEN")))
     return """<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8">
@@ -69,10 +78,11 @@ small{color:#6b7280}.warn{background:#fff7ed}
 <div class="card"><span class="badge">Regime %s</span><span class="badge">Confidence %s</span><span class="badge">Memory %s</span></div>
 <div class="card"><h2>市场事实</h2><ul>%s</ul></div>
 <div class="card"><h2>强势板块与历史反馈</h2><table><thead><tr><th>板块</th><th>当日</th><th>历史相似场景</th></tr></thead><tbody>%s</tbody></table></div>
+<div class="card"><h2>个股观察 / 容量核心候选</h2><table><thead><tr><th>股票</th><th>代码</th><th>板块</th><th>角色</th></tr></thead><tbody>%s</tbody></table><small>CAPACITY_CORE_CANDIDATE 仅表示市值候选，不等同于龙头确认。</small></div>
 <div class="card"><h2>明日验证条件</h2><ul>%s</ul></div>
 <div class="card warn"><h2>证据缺口</h2><ul>%s</ul><small>Historical Pattern ≠ Future Fact；样本不足时不会生成概率性结论。</small></div>
 </body></html>""" % (
         date, date, escape(str(regime.get("state", "UNCERTAIN"))),
         escape(str(regime.get("confidence", "LOW"))), status, facts,
-        "".join(sector_rows), watch, gaps,
+        "".join(sector_rows), stock_rows, watch, gaps,
     )
