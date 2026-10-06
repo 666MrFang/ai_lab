@@ -80,10 +80,16 @@ class ServerRealModeTest(unittest.TestCase):
             self.assertFalse(result["success"])
             self.assertEqual(result["error_code"], ErrorCode.INVALID_DATE)
 
-    def test_unimplemented_tools_do_not_fallback_to_mock(self):
-        for result in (self.server.get_stock_news("2026-10-08", "688981.SH"),):
-            self.assertFalse(result["success"])
-            self.assertEqual(result["error_code"], ErrorCode.REAL_PROVIDER_NOT_IMPLEMENTED)
+    def test_stock_news_is_a_real_provider_capability(self):
+        class FakeProvider:
+            def get_stock_news(self, date, stock_code, limit):
+                return [{"published_at": date + " 10:00:00", "title": "fact"}]
+
+        self.server.SERVICE = MarketService(Settings("real"), provider=FakeProvider())
+        result = self.server.get_stock_news("2026-10-08", "688981.SH", 10)
+        self.assertTrue(result["success"])
+        self.assertEqual(result["count"], 1)
+        self.assertEqual(result["evidence"]["causality"], "NOT_ESTABLISHED")
 
 
 class ServerMockModeTest(unittest.TestCase):
