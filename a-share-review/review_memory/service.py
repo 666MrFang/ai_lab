@@ -106,34 +106,78 @@ def settle_record(
     record: Dict[str, Any],
     future_daily_evidence: Iterable[Dict[str, Any]],
 ) -> Dict[str, Any]:
-    # Input must be chronological completed trading-session snapshots.
+    """Settle only from unique, strictly-future, chronologically ordered sessions.
+
+    A horizon is complete only when every tracked sector is observable in every
+    required session. Missing sector evidence is never converted to zero and
+    never allows the record to become SETTLED.
+    """
     result = deepcopy(record)
-    future = list(future_daily_evidence)
+    record_date = str(record.get("date") or "")
+
+    by_date: Dict[str, Dict[str, Any]] = {}
+    rejected: List[Dict[str, str]] = []
+    for item in future_daily_evidence:
+        date = str((item or {}).get("date") or "")
+        if not date:
+            rejected.append({"date": "", "reason": "MISSING_DATE"})
+            continue
+        if date <= record_date:
+            rejected.append({"date": date, "reason": "NOT_STRICTLY_FUTURE"})
+            continue
+        if date in by_date:
+            rejected.append({"date": date, "reason": "DUPLICATE_SESSION"})
+            continue
+        by_date[date] = item
+
+    future = [by_date[date] for date in sorted(by_date)]
     horizons = {"t1": 1, "t3": 3, "t5": 5}
-    settlement = {"horizons": {}, "complete": False}
+    settlement: Dict[str, Any] = {
+        "horizons": {}, "complete": False, "rejected_sessions": rejected,
+    }
 
     for label, count in horizons.items():
+        available = min(len(future), count)
         if len(future) < count:
-            settlement["horizons"][label] = {"complete": False, "sessions": len(future)}
+            settlement["horizons"][label] = {
+                "complete": False, "sessions": available,
+                "reason": "INSUFFICIENT_FUTURE_SESSIONS",
+            }
             continue
+
         days = future[:count]
-        settlement["horizons"][label] = {
-            "complete": True,
-            "sessions": count,
-            "end_date": days[-1].get("date"),
-        }
-        for state in result.get("pattern_states") or []:
+        missing_states = []
+        pending_outcomes: Dict[int, float] = {}
+        for index, state in enumerate(result.get("pattern_states") or []):
             changes = [
                 _find_sector_change(day, state.get("sector_id"), state.get("sector_name"))
                 for day in days
             ]
-            if all(value is not None for value in changes):
-                state.setdefault("outcomes", {})[
+            if any(value is None for value in changes):
+                missing_states.append({
+                    "sector_id": state.get("sector_id"),
+                    "sector_name": state.get("sector_name"),
+                })
+                continue
+            pending_outcomes[index] = compound_returns(changes)
+
+        horizon_complete = not missing_states
+        settlement["horizons"][label] = {
+            "complete": horizon_complete,
+            "sessions": count,
+            "end_date": days[-1].get("date"),
+            "missing_states": missing_states,
+            "reason": None if horizon_complete else "SECTOR_OUTCOME_NOT_OBSERVABLE",
+        }
+        if horizon_complete:
+            for index, value in pending_outcomes.items():
+                result["pattern_states"][index].setdefault("outcomes", {})[
                     "%s_sector_return_pct" % label
-                ] = compound_returns(changes)
+                ] = value
 
     settlement["complete"] = all(
-        item.get("complete") for item in settlement["horizons"].values()
+        settlement["horizons"].get(label, {}).get("complete") is True
+        for label in horizons
     )
     result["settlement"] = settlement
     result["status"] = "SETTLED" if settlement["complete"] else "PARTIALLY_SETTLED"
