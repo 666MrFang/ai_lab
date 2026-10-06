@@ -167,6 +167,49 @@ class ReferenceAgent:
             "evidence_gaps": regime_gaps or ["insufficient persistence evidence"],
         }
 
+        # --- sectors ------------------------------------------------------
+        sector_rows = list((normalized.get("sector_ranking") or {}).get("sectors") or [])
+        sector_rows = sorted(
+            sector_rows,
+            key=lambda row: row.get("change_pct")
+            if row.get("change_pct") is not None else float("-inf"),
+            reverse=True,
+        )
+
+        def sector_view(row: Dict[str, Any]) -> Dict[str, Any]:
+            return {
+                "sector_name": row.get("sector_name") or "UNKNOWN",
+                "change_pct": row.get("change_pct"),
+                "turnover": row.get("turnover_cny"),
+                "leading_stocks": [],
+                "evidence": [_ev(
+                    "THS industry snapshot; up=%s down=%s"
+                    % (row.get("up_count"), row.get("down_count")),
+                    "evidence_store",
+                )],
+            }
+
+        top_gainers = [sector_view(row) for row in sector_rows[:5]]
+        top_losers = [sector_view(row) for row in list(reversed(sector_rows[-5:]))]
+        main_theme_candidates = [
+            {
+                "sector_name": row.get("sector_name") or "UNKNOWN",
+                "status": "CANDIDATE",
+                "reason": "当日行业涨幅排名 Top%d；仅为候选，不等同于主线确认。" % (rank + 1),
+                "evidence": [_ev(
+                    "THS industry rank=%d change_pct=%s turnover_cny=%s"
+                    % (rank + 1, row.get("change_pct"), row.get("turnover_cny")),
+                    "evidence_store",
+                    "MEDIUM",
+                )],
+                "counter_evidence": [],
+                "evidence_gaps": [
+                    "缺少同口径历史横截面排名/板块内部核心股与事件证据"
+                ],
+            }
+            for rank, row in enumerate(sector_rows[:3])
+        ]
+
         # --- stocks -------------------------------------------------------
         stocks: List[Dict[str, Any]] = []
         for key in sorted(store):
@@ -202,7 +245,11 @@ class ReferenceAgent:
             "date": date,
             "market": {"facts": facts, "inferences": inferences},
             "market_regime": market_regime,
-            "sectors": {"top_gainers": [], "top_losers": [], "main_theme_candidates": []},
+            "sectors": {
+                "top_gainers": top_gainers,
+                "top_losers": top_losers,
+                "main_theme_candidates": main_theme_candidates,
+            },
             "stocks": stocks,
             "profit_effect": profit_effect,
             "loss_effect": loss_effect,
@@ -231,6 +278,15 @@ class ReferenceAgent:
         lines.append("- state = %s, confidence = %s" % (regime.get("state"), regime.get("confidence")))
         for gap in regime.get("evidence_gaps", []):
             lines.append("- evidence_gap: %s" % gap)
+        lines.append("")
+        lines.append("## 行业板块")
+        for sector in (review.get("sectors") or {}).get("top_gainers") or []:
+            lines.append("- 强势候选：%s %s%%，成交额 %s 元"
+                         % (sector.get("sector_name"), sector.get("change_pct"),
+                            sector.get("turnover")))
+        for sector in (review.get("sectors") or {}).get("top_losers") or []:
+            lines.append("- 弱势：%s %s%%"
+                         % (sector.get("sector_name"), sector.get("change_pct")))
         lines.append("")
         lines.append("## MetricClaims")
         for claim in review.get("metric_claims", []):
