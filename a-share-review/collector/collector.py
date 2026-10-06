@@ -150,6 +150,17 @@ def collect(caller: Any, date: str, clock: Optional[Callable[[], str]] = None) -
                                 selected.append(code)
                         if len(selected) >= 5:
                             break
+                    # Strong-stock ranking needs a comparable 5d return
+                    # for every current member, not only today's top movers.
+                    for member in members:
+                        code = member.get("stock_code")
+                        if code:
+                            call_and_record(
+                                "get_stock_history_summary",
+                                {"date": date, "stock_code": code},
+                                "optional",
+                                "stock_history",
+                            )
                     for code in selected:
                         call_and_record(
                             "get_stock_news",
