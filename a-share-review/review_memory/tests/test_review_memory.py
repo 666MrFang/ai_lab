@@ -118,3 +118,16 @@ def test_outlook_declares_non_prediction():
     assert result["nature"] == "HISTORICAL_CALIBRATION_NOT_PREDICTION"
     assert result["calibrated_pattern_count"] == 0
     assert result["evidence_gaps"]
+
+
+def test_sector_identity_prevents_cross_sector_outcome_leakage():
+    current = {"market_change_pct": 1.0, "sector_change_pct": 4.2, "sector_rank": 1,
+               "sector_id": "A", "sector_name": "半导体"}
+    other = {"market_change_pct": 1.0, "sector_change_pct": 4.2, "sector_rank": 1,
+             "sector_id": "B", "sector_name": "银行"}
+    record = {
+        "date": "2026-09-01", "status": "SETTLED",
+        "pattern_states": [{**other, "outcomes": {"t1_sector_return_pct": -9.0}}],
+    }
+    result = PatternEngine(min_sample=1).match([record], "2026-10-06", current)
+    assert result["sample_size"] == 0
