@@ -176,8 +176,12 @@ def run_review(
             raise ValueError("agent did not return a review object")
         add_stage("run_agent", PASS, getattr(agent, "name", "agent"))
     except Exception as exc:  # noqa: BLE001
-        add_stage("run_agent", FAIL, type(exc).__name__)
-        errors.append("agent failed: %s" % type(exc).__name__)
+        error_code = getattr(exc, "code", type(exc).__name__)
+        agent_execution = dict(getattr(agent, "last_execution", {}) or {})
+        if agent_execution:
+            agent_execution.setdefault("error_code", error_code)
+        add_stage("run_agent", FAIL, str(error_code))
+        errors.append("agent failed: %s" % error_code)
         skip_rest("run_agent")
         return _finalize(run_id, date, started, now(), mode, evidence_mode_used,
                          evidence_manifest_path, collection_status, stages, errors,
