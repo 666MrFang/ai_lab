@@ -1,0 +1,522 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "a-share-daily-review.schema.json",
+  "title": "A-Share Daily Review",
+  "type": "object",
+  "additionalProperties": false,
+
+  "required": [
+    "date",
+    "market",
+    "market_regime",
+    "sectors",
+    "stocks",
+    "profit_effect",
+    "loss_effect",
+    "evidence_gaps",
+    "tomorrow_watch_conditions"
+  ],
+
+  "properties": {
+    "date": {
+      "type": "string"
+    },
+
+    "market": {
+      "type": "object",
+      "additionalProperties": false,
+
+      "required": [
+        "facts",
+        "inferences"
+      ],
+
+      "properties": {
+        "facts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/fact"
+          }
+        },
+
+        "inferences": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/inference"
+          }
+        }
+      }
+    },
+
+    "market_regime": {
+      "type": "object",
+      "additionalProperties": false,
+
+      "required": [
+        "state",
+        "confidence",
+        "evidence",
+        "counter_evidence",
+        "evidence_gaps"
+      ],
+
+      "properties": {
+        "state": {
+          "type": "string",
+          "enum": [
+            "MAIN_UPTREND",
+            "ROTATION",
+            "LOSS_EFFECT",
+            "ICE_POINT",
+            "UNCERTAIN"
+          ]
+        },
+
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidence"
+          }
+        },
+
+        "counter_evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidence"
+          }
+        },
+
+        "evidence_gaps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "sectors": {
+      "type": "object",
+      "additionalProperties": false,
+
+      "required": [
+        "top_gainers",
+        "top_losers",
+        "main_theme_candidates"
+      ],
+
+      "properties": {
+        "top_gainers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sector"
+          }
+        },
+
+        "top_losers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sector"
+          }
+        },
+
+        "main_theme_candidates": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/themeCandidate"
+          }
+        }
+      }
+    },
+
+    "stocks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/stockAnalysis"
+      }
+    },
+
+    "profit_effect": {
+      "$ref": "#/$defs/effectAnalysis"
+    },
+
+    "loss_effect": {
+      "$ref": "#/$defs/effectAnalysis"
+    },
+
+    "evidence_gaps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+
+    "tomorrow_watch_conditions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/watchCondition"
+      }
+    }
+  },
+
+  "$defs": {
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "HIGH",
+        "MEDIUM",
+        "LOW"
+      ]
+    },
+
+    "fact": {
+      "type": "object",
+      "additionalProperties": false,
+
+      "required": [
+        "statement",
+        "source"
+      ],
+
+      "properties": {
+        "statement": {
+          "type": "string"
+        },
+
+        "source": {
+          "type": "string"
+        }
+      }
+    },
+
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+
+      "required": [
+        "statement",
+        "source",
+        "strength"
+      ],
+
+      "properties": {
+        "statement": {
+          "type": "string"
+        },
+
+        "source": {
+          "type": "string"
+        },
+
+        "published_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+
+        "strength": {
+          "type": "string",
+          "enum": [
+            "HIGH",
+            "MEDIUM",
+            "LOW"
+          ]
+        }
+      }
+    },
+
+    "inference": {
+      "type": "object",
+      "additionalProperties": false,
+
+      "required": [
+        "claim",
+        "confidence",
+        "evidence",
+        "counter_evidence",
+        "evidence_gaps"
+      ],
+
+      "properties": {
+        "claim": {
+          "type": "string"
+        },
+
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidence"
+          }
+        },
+
+        "counter_evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidence"
+          }
+        },
+
+        "evidence_gaps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "sector": {
+      "type": "object",
+      "additionalProperties": false,
+
+      "required": [
+        "sector_name",
+        "change_pct"
+      ],
+
+      "properties": {
+        "sector_name": {
+          "type": "string"
+        },
+
+        "change_pct": {
+          "type": "number"
+        },
+
+        "turnover_cny": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+
+        "change_5d_pct": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+
+        "change_20d_pct": {
+          "type": [
+            "number",
+            "null"
+          ]
+        }
+      }
+    },
+
+    "themeCandidate": {
+      "type": "object",
+      "additionalProperties": false,
+
+      "required": [
+        "sector_name",
+        "confidence",
+        "evidence",
+        "evidence_gaps"
+      ],
+
+      "properties": {
+        "sector_name": {
+          "type": "string"
+        },
+
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidence"
+          }
+        },
+
+        "evidence_gaps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "stockAnalysis": {
+      "type": "object",
+      "additionalProperties": false,
+
+      "required": [
+        "code",
+        "name",
+        "sector_name",
+        "roles",
+        "facts",
+        "possible_drivers",
+        "historical_behavior",
+        "evidence_gaps"
+      ],
+
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+
+        "name": {
+          "type": "string"
+        },
+
+        "sector_name": {
+          "type": "string"
+        },
+
+        "roles": {
+          "type": "array",
+
+          "items": {
+            "type": "string",
+            "enum": [
+              "STRONG_STOCK",
+              "CAPACITY_CORE_CANDIDATE",
+              "POPULARITY_STOCK",
+              "OTHER"
+            ]
+          }
+        },
+
+        "facts": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/fact"
+          }
+        },
+
+        "possible_drivers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/inference"
+          }
+        },
+
+        "historical_behavior": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/historicalBehavior"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+
+        "evidence_gaps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "historicalBehavior": {
+      "type": "object",
+      "additionalProperties": false,
+
+      "required": [
+        "event_definition",
+        "sample_size",
+        "statistics",
+        "confidence"
+      ],
+
+      "properties": {
+        "event_definition": {
+          "type": "string"
+        },
+
+        "sample_size": {
+          "type": "integer",
+          "minimum": 0
+        },
+
+        "statistics": {
+          "type": "object"
+        },
+
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        }
+      }
+    },
+
+    "effectAnalysis": {
+      "type": "object",
+      "additionalProperties": false,
+
+      "required": [
+        "summary",
+        "confidence",
+        "evidence",
+        "evidence_gaps"
+      ],
+
+      "properties": {
+        "summary": {
+          "type": "string"
+        },
+
+        "confidence": {
+          "$ref": "#/$defs/confidence"
+        },
+
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/evidence"
+          }
+        },
+
+        "evidence_gaps": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+
+    "watchCondition": {
+      "type": "object",
+      "additionalProperties": false,
+
+      "required": [
+        "target",
+        "condition",
+        "meaning"
+      ],
+
+      "properties": {
+        "target": {
+          "type": "string"
+        },
+
+        "condition": {
+          "type": "string"
+        },
+
+        "meaning": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

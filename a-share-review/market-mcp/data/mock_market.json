@@ -1,0 +1,589 @@
+{
+  "2026-10-08": {
+    "indices": [
+      {
+        "code": "000001.SH",
+        "name": "上证指数",
+        "open": 3900.00,
+        "previous_close": 3880.00,
+        "close": 3915.00,
+        "change_pct": 0.90,
+        "turnover": 620000000000
+      },
+      {
+        "code": "399001.SZ",
+        "name": "深证成指",
+        "open": 13200.00,
+        "previous_close": 13150.00,
+        "close": 13320.00,
+        "change_pct": 1.29,
+        "turnover": 810000000000
+      },
+      {
+        "code": "399006.SZ",
+        "name": "创业板指",
+        "open": 2840.00,
+        "previous_close": 2820.00,
+        "close": 2875.00,
+        "change_pct": 1.95,
+        "turnover": 350000000000
+      }
+    ],
+    "market_breadth": {
+      "breadth": {
+        "rising_count": 3200,
+        "falling_count": 1650,
+        "flat_count": 250
+      },
+      "limit_state": {
+        "limit_up_count": 68,
+        "limit_down_count": 7,
+        "first_limit_up_count": 52,
+        "multi_limit_up_count": 16,
+        "max_limit_height": 5,
+        "broken_limit_count": 23
+      },
+      "previous_limit_up": {
+        "sample_size": 55,
+        "positive_count": 32,
+        "promoted_count": 16,
+        "average_change_pct": 2.35,
+        "median_change_pct": 1.8
+      },
+      "extreme_move": {
+        "large_rise_count": 95,
+        "large_fall_count": 18
+      }
+    },
+    "market_history": {
+      "turnover": {
+        "previous_cny": 1380000000000,
+        "avg_5d_cny": 1350000000000,
+        "avg_20d_cny": 1300000000000
+      },
+      "indices": [
+        { "code": "000001.SH", "name": "上证指数", "change_5d_pct": 2.1, "change_20d_pct": 4.5 },
+        { "code": "399001.SZ", "name": "深证成指", "change_5d_pct": 3.05, "change_20d_pct": 6.2 },
+        { "code": "399006.SZ", "name": "创业板指", "change_5d_pct": 4.4, "change_20d_pct": 8.75 }
+      ]
+    },
+    "sectors": [
+      {
+        "sector_name": "半导体",
+        "change_pct": 4.35,
+        "turnover": 128000000000,
+        "leading_stocks": [
+          { "code": "688981.SH", "name": "中芯国际", "change_pct": 7.82 },
+          { "code": "603986.SH", "name": "兆易创新", "change_pct": 6.45 },
+          { "code": "002371.SZ", "name": "北方华创", "change_pct": 5.91 }
+        ]
+      },
+      {
+        "sector_name": "人工智能",
+        "change_pct": 3.82,
+        "turnover": 96000000000,
+        "leading_stocks": [
+          { "code": "002230.SZ", "name": "科大讯飞", "change_pct": 6.20 },
+          { "code": "688111.SH", "name": "金山办公", "change_pct": 5.37 },
+          { "code": "300308.SZ", "name": "中际旭创", "change_pct": 4.88 }
+        ]
+      },
+      {
+        "sector_name": "消费电子",
+        "change_pct": 3.10,
+        "turnover": 74000000000,
+        "leading_stocks": [
+          { "code": "002475.SZ", "name": "立讯精密", "change_pct": 5.12 },
+          { "code": "002241.SZ", "name": "歌尔股份", "change_pct": 4.33 }
+        ]
+      },
+      {
+        "sector_name": "券商",
+        "change_pct": 2.45,
+        "turnover": 88000000000,
+        "leading_stocks": [
+          { "code": "600030.SH", "name": "中信证券", "change_pct": 3.65 },
+          { "code": "300059.SZ", "name": "东方财富", "change_pct": 3.21 }
+        ]
+      },
+      {
+        "sector_name": "国防军工",
+        "change_pct": 1.76,
+        "turnover": 52000000000,
+        "leading_stocks": [
+          { "code": "600760.SH", "name": "中航沈飞", "change_pct": 2.98 },
+          { "code": "002179.SZ", "name": "中航光电", "change_pct": 2.44 }
+        ]
+      },
+      {
+        "sector_name": "光伏设备",
+        "change_pct": 1.20,
+        "turnover": 61000000000,
+        "leading_stocks": [
+          { "code": "601012.SH", "name": "隆基绿能", "change_pct": 2.15 },
+          { "code": "300274.SZ", "name": "阳光电源", "change_pct": 1.88 }
+        ]
+      },
+      {
+        "sector_name": "医药生物",
+        "change_pct": 0.65,
+        "turnover": 57000000000,
+        "leading_stocks": [
+          { "code": "600276.SH", "name": "恒瑞医药", "change_pct": 1.32 },
+          { "code": "300760.SZ", "name": "迈瑞医疗", "change_pct": 0.94 }
+        ]
+      },
+      {
+        "sector_name": "食品饮料",
+        "change_pct": 0.12,
+        "turnover": 43000000000,
+        "leading_stocks": [
+          { "code": "600887.SH", "name": "伊利股份", "change_pct": 0.58 },
+          { "code": "603288.SH", "name": "海天味业", "change_pct": 0.33 }
+        ]
+      },
+      {
+        "sector_name": "银行",
+        "change_pct": -0.35,
+        "turnover": 39000000000,
+        "leading_stocks": [
+          { "code": "600036.SH", "name": "招商银行", "change_pct": -0.12 },
+          { "code": "601398.SH", "name": "工商银行", "change_pct": -0.28 }
+        ]
+      },
+      {
+        "sector_name": "房地产",
+        "change_pct": -0.88,
+        "turnover": 47000000000,
+        "leading_stocks": [
+          { "code": "000002.SZ", "name": "万科A", "change_pct": -1.05 },
+          { "code": "600048.SH", "name": "保利发展", "change_pct": -0.76 }
+        ]
+      },
+      {
+        "sector_name": "煤炭",
+        "change_pct": -1.42,
+        "turnover": 36000000000,
+        "leading_stocks": [
+          { "code": "601088.SH", "name": "中国神华", "change_pct": -1.18 },
+          { "code": "601225.SH", "name": "陕西煤业", "change_pct": -1.63 }
+        ]
+      },
+      {
+        "sector_name": "白酒",
+        "change_pct": -1.95,
+        "turnover": 68000000000,
+        "leading_stocks": [
+          { "code": "600519.SH", "name": "贵州茅台", "change_pct": -1.45 },
+          { "code": "000858.SZ", "name": "五粮液", "change_pct": -2.08 }
+        ]
+      }
+    ],
+    "stocks": [
+      {
+        "code": "688981.SH",
+        "name": "中芯国际",
+        "sector_name": "半导体",
+        "previous_close": 100.00,
+        "open": 102.50,
+        "high": 108.60,
+        "low": 101.80,
+        "close": 107.82,
+        "change_pct": 7.82,
+        "volume": 18500000,
+        "turnover": 1950000000,
+        "turnover_rate": 2.35
+      },
+      {
+        "code": "603986.SH",
+        "name": "兆易创新",
+        "sector_name": "半导体",
+        "previous_close": 100.00,
+        "open": 100.80,
+        "high": 107.20,
+        "low": 100.20,
+        "close": 106.45,
+        "change_pct": 6.45,
+        "volume": 9200000,
+        "turnover": 960000000,
+        "turnover_rate": 1.85
+      },
+      {
+        "code": "002371.SZ",
+        "name": "北方华创",
+        "sector_name": "半导体",
+        "previous_close": 300.00,
+        "open": 303.00,
+        "high": 319.50,
+        "low": 301.50,
+        "close": 317.73,
+        "change_pct": 5.91,
+        "volume": 4100000,
+        "turnover": 1280000000,
+        "turnover_rate": 1.10
+      },
+      {
+        "code": "002230.SZ",
+        "name": "科大讯飞",
+        "sector_name": "人工智能",
+        "previous_close": 100.00,
+        "open": 101.50,
+        "high": 107.00,
+        "low": 100.90,
+        "close": 106.20,
+        "change_pct": 6.20,
+        "volume": 55000000,
+        "turnover": 5700000000,
+        "turnover_rate": 2.60
+      },
+      {
+        "code": "688111.SH",
+        "name": "金山办公",
+        "sector_name": "人工智能",
+        "previous_close": 300.00,
+        "open": 305.00,
+        "high": 318.00,
+        "low": 303.00,
+        "close": 316.11,
+        "change_pct": 5.37,
+        "volume": 3200000,
+        "turnover": 990000000,
+        "turnover_rate": 0.95
+      },
+      {
+        "code": "300308.SZ",
+        "name": "中际旭创",
+        "sector_name": "人工智能",
+        "previous_close": 100.00,
+        "open": 101.00,
+        "high": 105.60,
+        "low": 100.50,
+        "close": 104.88,
+        "change_pct": 4.88,
+        "volume": 12000000,
+        "turnover": 1240000000,
+        "turnover_rate": 2.05
+      },
+      {
+        "code": "002475.SZ",
+        "name": "立讯精密",
+        "sector_name": "消费电子",
+        "previous_close": 100.00,
+        "open": 101.20,
+        "high": 105.80,
+        "low": 100.80,
+        "close": 105.12,
+        "change_pct": 5.12,
+        "volume": 41000000,
+        "turnover": 4250000000,
+        "turnover_rate": 1.40
+      },
+      {
+        "code": "002241.SZ",
+        "name": "歌尔股份",
+        "sector_name": "消费电子",
+        "previous_close": 100.00,
+        "open": 100.90,
+        "high": 104.90,
+        "low": 100.30,
+        "close": 104.33,
+        "change_pct": 4.33,
+        "volume": 26000000,
+        "turnover": 2670000000,
+        "turnover_rate": 1.95
+      },
+      {
+        "code": "600030.SH",
+        "name": "中信证券",
+        "sector_name": "券商",
+        "previous_close": 100.00,
+        "open": 101.00,
+        "high": 104.20,
+        "low": 100.50,
+        "close": 103.65,
+        "change_pct": 3.65,
+        "volume": 88000000,
+        "turnover": 9000000000,
+        "turnover_rate": 1.15
+      },
+      {
+        "code": "300059.SZ",
+        "name": "东方财富",
+        "sector_name": "券商",
+        "previous_close": 100.00,
+        "open": 100.80,
+        "high": 103.80,
+        "low": 100.20,
+        "close": 103.21,
+        "change_pct": 3.21,
+        "volume": 150000000,
+        "turnover": 15300000000,
+        "turnover_rate": 2.20
+      },
+      {
+        "code": "600760.SH",
+        "name": "中航沈飞",
+        "sector_name": "国防军工",
+        "previous_close": 100.00,
+        "open": 100.60,
+        "high": 103.40,
+        "low": 100.10,
+        "close": 102.98,
+        "change_pct": 2.98,
+        "volume": 15000000,
+        "turnover": 1530000000,
+        "turnover_rate": 1.30
+      },
+      {
+        "code": "002179.SZ",
+        "name": "中航光电",
+        "sector_name": "国防军工",
+        "previous_close": 100.00,
+        "open": 100.50,
+        "high": 102.80,
+        "low": 100.00,
+        "close": 102.44,
+        "change_pct": 2.44,
+        "volume": 9000000,
+        "turnover": 915000000,
+        "turnover_rate": 1.05
+      },
+      {
+        "code": "601012.SH",
+        "name": "隆基绿能",
+        "sector_name": "光伏设备",
+        "previous_close": 100.00,
+        "open": 100.30,
+        "high": 102.50,
+        "low": 99.90,
+        "close": 102.15,
+        "change_pct": 2.15,
+        "volume": 62000000,
+        "turnover": 6280000000,
+        "turnover_rate": 1.60
+      },
+      {
+        "code": "300274.SZ",
+        "name": "阳光电源",
+        "sector_name": "光伏设备",
+        "previous_close": 100.00,
+        "open": 100.40,
+        "high": 102.30,
+        "low": 99.80,
+        "close": 101.88,
+        "change_pct": 1.88,
+        "volume": 18000000,
+        "turnover": 1820000000,
+        "turnover_rate": 1.45
+      },
+      {
+        "code": "600276.SH",
+        "name": "恒瑞医药",
+        "sector_name": "医药生物",
+        "previous_close": 100.00,
+        "open": 100.20,
+        "high": 101.60,
+        "low": 99.90,
+        "close": 101.32,
+        "change_pct": 1.32,
+        "volume": 21000000,
+        "turnover": 2120000000,
+        "turnover_rate": 0.85
+      },
+      {
+        "code": "300760.SZ",
+        "name": "迈瑞医疗",
+        "sector_name": "医药生物",
+        "previous_close": 300.00,
+        "open": 300.50,
+        "high": 303.20,
+        "low": 299.80,
+        "close": 302.82,
+        "change_pct": 0.94,
+        "volume": 3500000,
+        "turnover": 1060000000,
+        "turnover_rate": 0.70
+      },
+      {
+        "code": "600887.SH",
+        "name": "伊利股份",
+        "sector_name": "食品饮料",
+        "previous_close": 100.00,
+        "open": 100.10,
+        "high": 100.90,
+        "low": 99.70,
+        "close": 100.58,
+        "change_pct": 0.58,
+        "volume": 33000000,
+        "turnover": 3310000000,
+        "turnover_rate": 1.20
+      },
+      {
+        "code": "603288.SH",
+        "name": "海天味业",
+        "sector_name": "食品饮料",
+        "previous_close": 100.00,
+        "open": 100.05,
+        "high": 100.60,
+        "low": 99.60,
+        "close": 100.33,
+        "change_pct": 0.33,
+        "volume": 8000000,
+        "turnover": 800000000,
+        "turnover_rate": 0.55
+      },
+      {
+        "code": "600036.SH",
+        "name": "招商银行",
+        "sector_name": "银行",
+        "previous_close": 100.00,
+        "open": 100.10,
+        "high": 100.30,
+        "low": 99.60,
+        "close": 99.88,
+        "change_pct": -0.12,
+        "volume": 45000000,
+        "turnover": 4490000000,
+        "turnover_rate": 0.60
+      },
+      {
+        "code": "601398.SH",
+        "name": "工商银行",
+        "sector_name": "银行",
+        "previous_close": 100.00,
+        "open": 100.05,
+        "high": 100.20,
+        "low": 99.50,
+        "close": 99.72,
+        "change_pct": -0.28,
+        "volume": 120000000,
+        "turnover": 11960000000,
+        "turnover_rate": 0.45
+      },
+      {
+        "code": "000002.SZ",
+        "name": "万科A",
+        "sector_name": "房地产",
+        "previous_close": 100.00,
+        "open": 100.80,
+        "high": 101.00,
+        "low": 98.50,
+        "close": 98.95,
+        "change_pct": -1.05,
+        "volume": 58000000,
+        "turnover": 5760000000,
+        "turnover_rate": 1.75
+      },
+      {
+        "code": "600048.SH",
+        "name": "保利发展",
+        "sector_name": "房地产",
+        "previous_close": 100.00,
+        "open": 100.20,
+        "high": 100.50,
+        "low": 98.90,
+        "close": 99.24,
+        "change_pct": -0.76,
+        "volume": 36000000,
+        "turnover": 3580000000,
+        "turnover_rate": 1.10
+      },
+      {
+        "code": "601088.SH",
+        "name": "中国神华",
+        "sector_name": "煤炭",
+        "previous_close": 100.00,
+        "open": 100.50,
+        "high": 100.70,
+        "low": 98.40,
+        "close": 98.82,
+        "change_pct": -1.18,
+        "volume": 24000000,
+        "turnover": 2390000000,
+        "turnover_rate": 0.65
+      },
+      {
+        "code": "601225.SH",
+        "name": "陕西煤业",
+        "sector_name": "煤炭",
+        "previous_close": 100.00,
+        "open": 100.30,
+        "high": 100.50,
+        "low": 98.00,
+        "close": 98.37,
+        "change_pct": -1.63,
+        "volume": 19000000,
+        "turnover": 1880000000,
+        "turnover_rate": 0.90
+      },
+      {
+        "code": "600519.SH",
+        "name": "贵州茅台",
+        "sector_name": "白酒",
+        "previous_close": 1400.00,
+        "open": 1405.00,
+        "high": 1410.00,
+        "low": 1375.00,
+        "close": 1379.70,
+        "change_pct": -1.45,
+        "volume": 2200000,
+        "turnover": 3050000000,
+        "turnover_rate": 0.35
+      },
+      {
+        "code": "000858.SZ",
+        "name": "五粮液",
+        "sector_name": "白酒",
+        "previous_close": 100.00,
+        "open": 101.00,
+        "high": 101.50,
+        "low": 97.50,
+        "close": 97.92,
+        "change_pct": -2.08,
+        "volume": 17000000,
+        "turnover": 1690000000,
+        "turnover_rate": 0.95
+      }
+    ],
+    "news": {
+      "688981.SH": [
+        {
+          "news_id": "news-20261008-001",
+          "published_at": "2026-10-08T08:30:00+08:00",
+          "source": "证券时报",
+          "title": "中芯国际披露2026年第三季度业绩预告",
+          "summary": "公司预计第三季度营业收入环比增长，并披露产能利用率与毛利率区间等经营数据。",
+          "event_type": "业绩预告",
+          "url": "https://example.com/news/news-20261008-001"
+        },
+        {
+          "news_id": "news-20261008-002",
+          "published_at": "2026-10-08T10:15:00+08:00",
+          "source": "上海证券报",
+          "title": "中芯国际新增12英寸晶圆产线进入投产阶段",
+          "summary": "公司公告称其位于上海的新建12英寸晶圆产线已开始量产爬坡，设计产能将分阶段释放。",
+          "event_type": "产能扩张",
+          "url": "https://example.com/news/news-20261008-002"
+        },
+        {
+          "news_id": "news-20261008-003",
+          "published_at": "2026-10-08T14:05:00+08:00",
+          "source": "财联社",
+          "title": "半导体设备国产化率提升，晶圆代工环节受市场关注",
+          "summary": "行业机构发布报告称国内半导体设备国产化率同比提升，报告同时提及晶圆代工企业的资本开支情况。",
+          "event_type": "行业动态",
+          "url": "https://example.com/news/news-20261008-003"
+        },
+        {
+          "news_id": "news-20261008-004",
+          "published_at": "2026-10-08T09:00:00+08:00",
+          "source": "公司公告",
+          "title": "中芯国际关于回购注销部分限制性股票的公告",
+          "summary": "公司披露回购注销部分已授予但尚未解锁的限制性股票，涉及数量及注销完成后的股本结构。",
+          "event_type": "公司公告",
+          "url": "https://example.com/news/news-20261008-004"
+        }
+      ]
+    }
+  }
+}
