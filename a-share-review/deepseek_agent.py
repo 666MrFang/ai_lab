@@ -22,6 +22,34 @@ def _fail(message: str, code: int = 2) -> int:
     return code
 
 
+def _decode_review_content(content: str):
+    """Decode one JSON object without repairing model semantics.
+
+    Accept exact JSON, a single markdown JSON fence, or whitespace/prose around
+    one JSON object. Reject multiple JSON values and trailing non-whitespace
+    after a decoded object unless it is only a closing markdown fence.
+    """
+    text = (content or "").strip()
+    if text.startswith("```"):
+        first_nl = text.find("\n")
+        if first_nl >= 0 and text.endswith("```"):
+            text = text[first_nl + 1:-3].strip()
+    try:
+        value = json.loads(text)
+    except json.JSONDecodeError:
+        start = text.find("{")
+        if start < 0:
+            raise
+        decoder = json.JSONDecoder()
+        value, end = decoder.raw_decode(text[start:])
+        suffix = text[start + end:].strip()
+        if suffix not in ("", "```"):
+            raise json.JSONDecodeError("non-JSON trailing content", text, start + end)
+    if not isinstance(value, dict):
+        raise ValueError("review root must be object")
+    return value
+
+
 def main() -> int:
     api_key = os.environ.get("DEEPSEEK_API_KEY")
     if not api_key:
@@ -87,9 +115,17 @@ def main() -> int:
 
     try:
         content = payload["choices"][0]["message"]["content"]
-        review = json.loads(content)
+        review = _decode_review_content(content)
     except Exception as exc:
-        return _fail("DeepSeek response is not valid review JSON: %s" % type(exc).__name__, 5)
+        # Include only shape/length diagnostics; never echo provider content,
+        # because generated text may contain evidence or unexpected material.
+        content_len = len(content) if isinstance(locals().get("content"), str) else -1
+        finish = ((payload.get("choices") or [{}])[0].get("finish_reason")
+                  if isinstance(payload, dict) else None)
+        return _fail(
+            "DeepSeek response is not valid review JSON: %s; content_len=%s; finish_reason=%s"
+            % (type(exc).__name__, content_len, finish), 5
+        )
 
     # stdout is deliberately review JSON only: the parent adapter persists raw
     # execution metadata separately and the existing Runner validates this object.
