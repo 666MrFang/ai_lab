@@ -15,8 +15,8 @@ ROOT = Path(__file__).resolve().parent
 def main(argv=None):
     p = argparse.ArgumentParser()
     p.add_argument("--date", required=True)
-    p.add_argument("--model", choices=("deepseek-flash", "deepseek-v4-pro"),
-                   default="deepseek-flash")
+    p.add_argument("--model", choices=("deepseek-chat", "deepseek-reasoner"),
+                   default="deepseek-chat")
     p.add_argument("--data-root", default=str(ROOT / "data" / "market"))
     p.add_argument("--work-root", default=None)
     p.add_argument("--timeout", type=int, default=180)
