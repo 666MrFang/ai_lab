@@ -54,13 +54,24 @@ def render_dashboard(
         for x in review.get("tomorrow_watch_conditions") or []
     )
     stock_rows = "".join(
-        "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (
+        "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (
             escape(str(x.get("name", "—"))),
             escape(str(x.get("code", "—"))),
             escape(str(x.get("sector_name", "—"))),
             escape(" / ".join(x.get("roles") or ["OTHER"])),
+            "<br>".join(escape(str(f.get("statement", "")))
+                         for f in (x.get("facts") or [])[:4]),
         )
         for x in review.get("stocks") or []
+    )
+    gainers = (review.get("sectors") or {}).get("top_gainers") or []
+    losers = (review.get("sectors") or {}).get("top_losers") or []
+    sector_detail_rows = "".join(
+        "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (
+            escape(str(x.get("sector_name") or "—")), _pct(x.get("change_pct")),
+            _pct(x.get("change_5d_pct")), _pct(x.get("change_20d_pct")),
+            escape(str(x.get("turnover_cny") if x.get("turnover_cny") is not None else "—")),
+        ) for x in gainers + losers
     )
     status = escape(str(memory_record.get("status", "OPEN")))
     verification = memory_record.get("d1_verification") or {}
@@ -89,13 +100,14 @@ small{color:#6b7280}.warn{background:#fff7ed}
 <h1>A股盘后复盘 · %s</h1>
 <div class="card"><span class="badge">Regime %s</span><span class="badge">Confidence %s</span><span class="badge">Memory %s</span></div>
 <div class="card"><h2>市场事实</h2><ul>%s</ul></div>
+<div class="card"><h2>板块强弱 / 5D / 20D</h2><table><thead><tr><th>板块</th><th>当日</th><th>5D</th><th>20D</th><th>成交额(元)</th></tr></thead><tbody>%s</tbody></table></div>
 <div class="card"><h2>强势板块与历史反馈</h2><table><thead><tr><th>板块</th><th>当日</th><th>历史相似场景</th></tr></thead><tbody>%s</tbody></table></div>
-<div class="card"><h2>个股观察 / 容量核心候选</h2><table><thead><tr><th>股票</th><th>代码</th><th>板块</th><th>角色</th></tr></thead><tbody>%s</tbody></table><small>CAPACITY_CORE_CANDIDATE 仅表示市值候选，不等同于龙头确认。</small></div>
+<div class="card"><h2>个股观察 / 强势股 / 容量核心候选</h2><table><thead><tr><th>股票</th><th>代码</th><th>板块</th><th>角色</th><th>事实/历史</th></tr></thead><tbody>%s</tbody></table><small>CAPACITY_CORE_CANDIDATE 仅表示市值候选，不等同于龙头确认。</small></div>
 <div class="card"><h2>明日验证条件</h2><ul>%s</ul></div>
 <div class="card"><h2>D+1 自动回验</h2><table><thead><tr><th>指标</th><th>条件值</th><th>实际值</th><th>结果</th></tr></thead><tbody>%s</tbody></table><small>NOT_OBSERVABLE 既不计为通过，也不计为失败。</small></div>
 <div class="card warn"><h2>证据缺口</h2><ul>%s</ul><small>Historical Pattern ≠ Future Fact；样本不足时不会生成概率性结论。</small></div>
 </body></html>""" % (
         date, date, escape(str(regime.get("state", "UNCERTAIN"))),
         escape(str(regime.get("confidence", "LOW"))), status, facts,
-        "".join(sector_rows), stock_rows, watch, verification_rows, gaps,
+        sector_detail_rows, "".join(sector_rows), stock_rows, watch, verification_rows, gaps,
     )
