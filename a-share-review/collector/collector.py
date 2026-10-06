@@ -173,6 +173,12 @@ def collect(caller: Any, date: str, clock: Optional[Callable[[], str]] = None) -
                             "optional",
                             "stock_news",
                         )
+                        call_and_record(
+                            "get_stock_disclosures",
+                            {"date": date, "stock_code": code, "limit": 10},
+                            "optional",
+                            "stock_disclosures",
+                        )
 
     # --- classify ---------------------------------------------------------
     required = [r for r in records if r.category == "required"]
