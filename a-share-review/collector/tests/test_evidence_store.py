@@ -309,3 +309,16 @@ class EvidenceStoreTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def test_current_only_wrong_observed_date_is_quarantined():
+    responses = base_responses()
+    responses[key("get_sector_membership", sector_name="半导体")] = {
+        "success": True,
+        "date": DATE,
+        "observed_session_date": "2026-10-06",
+        "temporal_semantics": "CURRENT_ONLY",
+        "stocks": [],
+    }
+    collection = collect_with(responses)
+    assert collection.temporal_quarantine
