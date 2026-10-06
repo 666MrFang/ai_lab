@@ -328,8 +328,10 @@ class SectorTest(unittest.TestCase):
         self.assertEqual(membership.lineage.endpoint, "stock_board_industry_cons_ths")
         self.assertEqual([x.stock_code for x in membership.stocks], ["688981", "603986"])
         self.assertEqual(membership.stocks[0].turnover_cny, 128.5e8)
-        # 流通市值 must not be silently promoted to total market cap.
+        # 流通市值 stays distinct from total market cap, but is retained
+        # as a mathematically valid lower bound for capacity screening.
         self.assertIsNone(membership.stocks[0].market_cap_cny)
+        self.assertEqual(membership.stocks[0].circulating_market_cap_cny, 5000e8)
 
     def test_33b_native_ths_missing_keeps_verified_sina_fallback(self):
         membership = provider().get_sector_membership("房地产")
