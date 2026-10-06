@@ -101,6 +101,8 @@ def test_signature_is_explicit_and_reproducible():
         "market_direction": "UP",
         "sector_move": "SURGE_4P",
         "sector_rank": "TOP1",
+        "sector_5d": "UNKNOWN",
+        "sector_volume": "UNKNOWN",
     }
 
 
@@ -131,3 +133,28 @@ def test_sector_identity_prevents_cross_sector_outcome_leakage():
     }
     result = PatternEngine(min_sample=1).match([record], "2026-10-06", current)
     assert result["sample_size"] == 0
+
+
+def test_signature_uses_persistence_and_volume_when_complete():
+    assert state_signature({
+        "market_change_pct": 1.0,
+        "sector_change_pct": 4.5,
+        "sector_rank": 1,
+        "sector_change_5d_pct": 8.0,
+        "sector_history_5d_complete": True,
+        "sector_turnover_vs_5d_pct": 35.0,
+    }) == {
+        "market_direction": "UP",
+        "sector_move": "SURGE_4P",
+        "sector_rank": "TOP1",
+        "sector_5d": "UP_5P",
+        "sector_volume": "EXPANDED_30P",
+    }
+
+
+def test_incomplete_persistence_is_unknown_not_inferred():
+    signature = state_signature({
+        "market_change_pct": 1.0, "sector_change_pct": 4.5, "sector_rank": 1,
+        "sector_change_5d_pct": 8.0, "sector_history_5d_complete": False,
+    })
+    assert signature["sector_5d"] == "UNKNOWN"
