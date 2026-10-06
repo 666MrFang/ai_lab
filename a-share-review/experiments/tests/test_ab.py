@@ -38,8 +38,8 @@ def test_golden_is_constraint_based_not_exact_answer():
         "arbitrary_prose": "models may word this differently",
     }
     result = evaluate_golden(review, case)
-    assert result["status"] == "PASS"
-    assert result["delegated_must_not"] == ["G9"]
+    assert result["status"] == "PARTIAL_PASS"
+    assert result["must_not_checks"][0]["status"] == "NOT_EVALUATED"
 
 
 def test_golden_delegated_rules_are_not_silently_passed():
