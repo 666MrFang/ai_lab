@@ -40,3 +40,17 @@ def test_golden_is_constraint_based_not_exact_answer():
     result = evaluate_golden(review, case)
     assert result["status"] == "PASS"
     assert result["delegated_must_not"] == ["G9"]
+
+
+def test_golden_delegated_rules_are_not_silently_passed():
+    case = {
+        "date": "2026-09-30",
+        "must": [{"id": "G1", "path": "market_regime.state", "op": "eq",
+                  "value": "UNCERTAIN", "reason": "gate"}],
+        "must_not": [{"id": "G2", "op": "news_as_cause_without_causal_evidence"}],
+        "human_score": {"status": "UNSCORED"},
+    }
+    review = {"market_regime": {"state": "UNCERTAIN"}}
+    result = evaluate_golden(review, case)
+    assert result["status"] == "PARTIAL_PASS"
+    assert result["delegated_must_not"][0]["status"] == "NOT_EVALUATED"

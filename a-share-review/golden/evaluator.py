@@ -30,12 +30,19 @@ def evaluate_golden(review: Dict[str, Any], case: Dict[str, Any]) -> Dict[str, A
             passed = None
         checks.append({"id": rule["id"], "passed": passed, "reason": rule["reason"]})
 
-    # Existing independent Eval/Schema/Contract own the complex must-not rules.
-    # Golden records them as review criteria instead of duplicating semantics.
+    # Do not silently count delegated rules as PASS. They are explicitly
+    # NOT_EVALUATED until a deterministic owner is wired for that rule.
+    delegated = [
+        {"id": x["id"], "status": "NOT_EVALUATED", "op": x.get("op")}
+        for x in case.get("must_not") or []
+    ]
+    deterministic_pass = bool(checks) and all(x["passed"] is True for x in checks)
     return {
         "date": case["date"],
-        "status": "PASS" if checks and all(x["passed"] is True for x in checks) else "FAIL",
+        "status": "PARTIAL_PASS" if deterministic_pass and delegated else (
+            "PASS" if deterministic_pass else "FAIL"
+        ),
         "checks": checks,
-        "delegated_must_not": [x["id"] for x in case.get("must_not") or []],
+        "delegated_must_not": delegated,
         "human_score": case.get("human_score"),
     }

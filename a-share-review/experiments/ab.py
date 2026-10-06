@@ -8,6 +8,9 @@ from typing import Any, Dict
 
 from runner.agent import ReferenceAgent
 from runner.runner import run_review
+from golden.evaluator import evaluate_golden
+
+REPO = Path(__file__).resolve().parents[1]
 
 
 def _load(path: Path) -> Dict[str, Any]:
@@ -67,13 +70,21 @@ def run_ab(*, date: str, data_root: str, work_root: str, candidate_agent: Any,
             "eval_rule_status": cand_manifest.get("eval_rule_status"),
         },
         "comparison": None,
+        "golden": None,
     }
     if (ref_manifest.get("execution_status") == "SUCCESS"
             and cand_manifest.get("execution_status") == "SUCCESS"):
-        result["comparison"] = compare_reviews(
-            _load(ref_out / date / "review.json"),
-            _load(cand_out / date / "review.json"),
-        )
+        reference_review = _load(ref_out / date / "review.json")
+        candidate_review = _load(cand_out / date / "review.json")
+        result["comparison"] = compare_reviews(reference_review, candidate_review)
+        case_path = REPO / "golden" / "cases" / ("%s.json" % date)
+        if case_path.exists():
+            case = _load(case_path)
+            result["golden"] = {
+                "case_version": case.get("version"),
+                "reference": evaluate_golden(reference_review, case),
+                "candidate": evaluate_golden(candidate_review, case),
+            }
     root.mkdir(parents=True, exist_ok=True)
     (root / "ab_result.json").write_text(
         json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8"
