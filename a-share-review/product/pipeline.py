@@ -8,6 +8,7 @@ from typing import Any, Dict, Optional
 
 from review_memory.service import build_outlook, build_review_record, settle_record
 from review_memory.store import ReviewMemoryStore
+from review_memory.verification import verify_conditions
 from runner.runner import run_review
 from .dashboard import render_dashboard
 
@@ -46,6 +47,18 @@ def _settle_prior_records(
             for d in future_dates
         ]
         settled = settle_record(record, evidence)
+        if evidence:
+            conditions = (
+                (settled.get("review_snapshot") or {}).get("tomorrow_watch_conditions") or []
+            )
+            machine_conditions = [
+                item for item in conditions
+                if item.get("horizon_sessions") == 1 and item.get("condition_id")
+            ]
+            if machine_conditions:
+                settled["d1_verification"] = verify_conditions(
+                    machine_conditions, evidence[0]
+                )
         if settled != record:
             memory.save(date, settled, overwrite=True)
             changed += 1
