@@ -209,3 +209,29 @@ def test_missing_sector_at_t3_keeps_record_partially_settled():
     assert outcomes["t1_sector_return_pct"] == 1.0
     assert "t3_sector_return_pct" not in outcomes
     assert "t5_sector_return_pct" not in outcomes
+
+
+def test_d1_verification_distinguishes_pass_fail_and_not_observable():
+    from review_memory.verification import verify_conditions
+    conditions = [
+        {"condition_id": "W1", "metric": "market_turnover", "operator": "gt",
+         "expected_value": 100, "horizon_sessions": 1},
+        {"condition_id": "W2", "metric": "market_turnover", "operator": "lt",
+         "expected_value": 100, "horizon_sessions": 1},
+        {"condition_id": "W3", "metric": "missing_metric", "operator": "gt",
+         "expected_value": 0, "horizon_sessions": 1},
+    ]
+    day = {
+        "date": "2026-10-02",
+        "evidence": {
+            "market_metric:market_turnover:2026-10-02": {
+                "evidence_type": "market_metric", "metric": "market_turnover",
+                "date": "2026-10-02", "value": 200, "unit": "cny"
+            }
+        },
+    }
+    result = verify_conditions(conditions, day)
+    assert [x["status"] for x in result["results"]] == [
+        "OBSERVED_PASS", "OBSERVED_FAIL", "NOT_OBSERVABLE"
+    ]
+    assert result["summary"] == {"pass": 1, "fail": 1, "not_observable": 1}
