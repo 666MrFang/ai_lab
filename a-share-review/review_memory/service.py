@@ -33,13 +33,27 @@ def build_review_record(
         reverse=True,
     )
     market_change = _index_change(normalized)
+    history_map = normalized.get("sector_history") or {}
     states = []
     for rank, sector in enumerate(rows[:top_n], start=1):
+        sector_id = sector.get("sector_id")
+        history = history_map.get(str(sector_id)) or {}
+        turnover = sector.get("turnover_cny")
+        avg5 = history.get("turnover_avg_5d_cny")
+        turnover_vs_5d = (
+            round((float(turnover) / float(avg5) - 1.0) * 100.0, 2)
+            if turnover is not None and avg5 not in (None, 0) else None
+        )
         states.append({
-            "sector_id": sector.get("sector_id"),
+            "sector_id": sector_id,
             "sector_name": sector.get("sector_name"),
             "sector_rank": rank,
             "sector_change_pct": sector.get("change_pct"),
+            "sector_change_5d_pct": history.get("change_pct_5d"),
+            "sector_change_20d_pct": history.get("change_pct_20d"),
+            "sector_history_5d_complete": history.get("history_5d_complete"),
+            "sector_history_20d_complete": history.get("history_20d_complete"),
+            "sector_turnover_vs_5d_pct": turnover_vs_5d,
             "market_change_pct": market_change,
             "outcomes": {},
         })
