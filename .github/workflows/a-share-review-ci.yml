@@ -2,6 +2,7 @@ name: a-share-review-ci
 
 on:
   push:
+    branches: ["master"]
     paths:
       - "a-share-review/**"
       - ".github/workflows/a-share-review-ci.yml"
@@ -9,6 +10,7 @@ on:
     paths:
       - "a-share-review/**"
       - ".github/workflows/a-share-review-ci.yml"
+  workflow_dispatch:
 
 jobs:
   deterministic-product-tests:
@@ -21,9 +23,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python -m pip install --upgrade pip pytest jsonschema
-      - name: Review memory / product / runner / collector / eval
-        run: |
-          pytest -q             review_memory/tests             product/tests             runner/tests             collector/tests             eval/tests \
-            market-mcp/tests \
-            experiments/tests
+      - name: Install deterministic test dependencies
+        run: python -m pip install --upgrade pip pytest jsonschema
+      - name: Run deterministic product suite
+        run: >-
+          pytest -q
+          review_memory/tests
+          product/tests
+          runner/tests
+          collector/tests
+          eval/tests
+          market-mcp/tests
+          experiments/tests
