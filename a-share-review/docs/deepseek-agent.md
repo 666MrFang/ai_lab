@@ -5,11 +5,11 @@ The API key is never stored in this repository.
 PowerShell:
 
     $env:DEEPSEEK_API_KEY="<set locally>"
-    python run_deepseek_ab.py --date 2026-09-30 --model deepseek-flash
+    python run_deepseek_ab.py --date 2026-09-30 --model deepseek-chat
 
 For the higher-quality comparison:
 
-    python run_deepseek_ab.py --date 2026-09-30 --model deepseek-v4-pro
+    python run_deepseek_ab.py --date 2026-09-30 --model deepseek-reasoner
 
 The adapter consumes only frozen Evidence Store data, Skill and Schema.
 Its output must still pass Schema, Contract, Evidence Integrity and Independent
