@@ -54,6 +54,8 @@ def main(argv=None) -> int:
     print("EXECUTION_STATUS=%s" % result.get("execution_status"))
     product = result.get("product") or {}
     if product:
+        print("PUBLICATION_STATUS=%s" % product.get("publication_status"))
+        print("GOLDEN_STATUS=%s" % product.get("golden_status"))
         print("MEMORY_STATUS=%s" % product.get("memory_status"))
         print("CALIBRATED_PATTERNS=%s" % product.get("calibrated_pattern_count"))
         verification = product.get("d1_verification") or {}
@@ -61,7 +63,10 @@ def main(argv=None) -> int:
             verification.get("pass", 0), verification.get("fail", 0),
             verification.get("not_observable", 0)))
         print("DASHBOARD=%s" % (ROOT / "output" / args.date / "dashboard.html"))
-    return 0 if result.get("execution_status") == "SUCCESS" else 1
+    return 0 if (
+        result.get("execution_status") == "SUCCESS"
+        and (result.get("product") or {}).get("publication_status") == "PUBLISHED"
+    ) else 1
 
 
 if __name__ == "__main__":
