@@ -1,0 +1,55 @@
+name: a-share-review-daily
+
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "Trading date YYYY-MM-DD"
+        required: true
+        type: string
+      model:
+        description: "DeepSeek model"
+        required: true
+        default: "deepseek-flash"
+        type: choice
+        options:
+          - deepseek-flash
+          - deepseek-v4-pro
+
+jobs:
+  daily-review:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: a-share-review
+    env:
+      DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Require DeepSeek secret
+        run: |
+          test -n "$DEEPSEEK_API_KEY" || { echo "DEEPSEEK_API_KEY secret is missing"; exit 2; }
+      - name: Install runtime dependencies
+        run: python -m pip install --upgrade pip jsonschema pandas
+      - name: Run fail-closed daily product
+        run: >-
+          python review_product.py
+          --date "${{ inputs.date }}"
+          --mode auto
+          --agent deepseek
+          --model "${{ inputs.model }}"
+          --overwrite-output
+      - name: Upload product artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a-share-review-${{ inputs.date }}-${{ inputs.model }}
+          path: |
+            a-share-review/output/${{ inputs.date }}/
+            a-share-review/failed_runs/
+          if-no-files-found: warn
+          retention-days: 30
