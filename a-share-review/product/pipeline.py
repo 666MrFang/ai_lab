@@ -22,11 +22,17 @@ def _settle_prior_records(
     current_date: str,
 ) -> int:
     changed = 0
-    available = [
-        d for d in memory.dates()
-        if d <= current_date
-        and (market_root / d / "normalized" / "market.json").is_file()
-    ]
+    # Evidence Store may contain dates that have never been ingested as
+    # review-memory records. Settlement must use market snapshots, not the
+    # memory index, otherwise an older record can never reach T+5 unless every
+    # intermediate day was separately ingested first.
+    available = sorted(
+        p.name for p in market_root.iterdir()
+        if market_root.exists()
+        and p.is_dir()
+        and p.name <= current_date
+        and (p / "normalized" / "market.json").is_file()
+    ) if market_root.exists() else []
     for date in memory.dates():
         if date >= current_date:
             continue
