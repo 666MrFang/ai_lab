@@ -36,7 +36,7 @@ REQUIRED_BASELINE_METRICS: Tuple[Tuple[str, int], ...] = (
 OPTIONAL_REQUESTS: Tuple[Tuple[str, Dict[str, Any]], ...] = (
     ("get_stock_detail", {"stock_code": "600519.SH"}),
 )
-UNIMPLEMENTED_TOOLS = ("get_stock_news",)
+UNIMPLEMENTED_TOOLS: Tuple[str, ...] = ()
 
 ERROR_NOT_IMPLEMENTED = "REAL_PROVIDER_NOT_IMPLEMENTED"
 
