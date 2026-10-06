@@ -53,4 +53,30 @@ def test_golden_delegated_rules_are_not_silently_passed():
     review = {"market_regime": {"state": "UNCERTAIN"}}
     result = evaluate_golden(review, case)
     assert result["status"] == "PARTIAL_PASS"
-    assert result["delegated_must_not"][0]["status"] == "NOT_EVALUATED"
+    assert result["must_not_checks"][0]["status"] == "NOT_EVALUATED"
+
+
+def test_golden_rejects_semantic_claim_with_incomplete_baseline():
+    case = {"date": "2026-09-30", "must": [
+        {"id": "G1", "path": "market_regime.state", "op": "eq",
+         "value": "UNCERTAIN", "reason": "gate"}],
+        "must_not": [{"id": "G101", "op": "semantic_claim_without_complete_baseline"}]}
+    review = {
+        "market_regime": {"state": "UNCERTAIN"},
+        "metric_claims": [{"claim_type": "SEMANTIC", "baseline_refs": ["E1"]}],
+        "evidence_registry": [{"evidence_id": "E1", "complete": False}],
+    }
+    result = evaluate_golden(review, case)
+    assert result["status"] == "FAIL"
+    assert result["must_not_checks"][0]["status"] == "FAIL"
+
+
+def test_golden_rejects_strong_stock_without_historical_sample():
+    case = {"date": "2026-09-30", "must": [
+        {"id": "G1", "path": "market_regime.state", "op": "eq",
+         "value": "UNCERTAIN", "reason": "gate"}],
+        "must_not": [{"id": "G104", "op": "strong_stock_from_single_day_rank"}]}
+    review = {"market_regime": {"state": "UNCERTAIN"}, "metric_claims": [],
+              "evidence_registry": [], "stocks": [
+                  {"roles": ["STRONG_STOCK"], "historical_behavior": None}]}
+    assert evaluate_golden(review, case)["status"] == "FAIL"
