@@ -97,6 +97,24 @@ def base_responses(broken20=True, promotion20=True):
             ],
         },
         key("get_sector_detail", date=DATE, sector_name="半导体"): dict(NOT_IMPL),
+        key("get_sector_history_summary", date=DATE, sector_name="半导体"): {
+            "success": True, "date": DATE, "sector_name": "半导体",
+            "change_5d_pct": 3.2, "change_20d_pct": None,
+            "turnover_5d_avg_cny": 1.5e11, "complete_5d": True, "complete_20d": False,
+        },
+        key("get_sector_history_summary", date=DATE, sector_name="房地产"): {
+            "success": True, "date": DATE, "sector_name": "房地产",
+            "change_5d_pct": 1.1, "change_20d_pct": None,
+            "turnover_5d_avg_cny": 2.8e10, "complete_5d": True, "complete_20d": False,
+        },
+        key("get_sector_membership", sector_name="半导体"): {
+            "success": True, "date": DATE, "observed_session_date": DATE,
+            "temporal_semantics": "CURRENT_ONLY", "stocks": [],
+        },
+        key("get_sector_membership", sector_name="房地产"): {
+            "success": True, "date": DATE, "observed_session_date": DATE,
+            "temporal_semantics": "CURRENT_ONLY", "stocks": [],
+        },
         key("get_stock_news", date=DATE, stock_code="600519.SH"): dict(NOT_IMPL),
     }
     return resp
@@ -198,7 +216,9 @@ class EvidenceStoreTest(unittest.TestCase):
     # 8
     def test_08_unimplemented_capability_recorded(self):
         collection = collect_with(base_responses())
-        self.assertIn("get_stock_news", collection.missing_capabilities)
+        # News is now a real optional capability; an unimplemented response is
+        # recorded as an optional gap rather than a globally missing capability.
+        self.assertIn("get_stock_news", collection.missing_optional)
         self.assertNotIn("get_sector_ranking", collection.missing_capabilities)
         self.assertNotEqual(collection.status, STATUS_FAILED)
 
