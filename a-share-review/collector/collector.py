@@ -193,7 +193,21 @@ def collect(caller: Any, date: str, clock: Optional[Callable[[], str]] = None) -
 
     # --- classify ---------------------------------------------------------
     required = [r for r in records if r.category == "required"]
-    required_failed = [r for r in required if not r.success]
+    # Sector ranking is CURRENT_ONLY upstream. For an explicitly historical
+    # live backfill, HISTORICAL_RANKING_UNAVAILABLE is an expected evidence gap,
+    # not a failure of the independently historical market/index evidence.
+    # Any other sector-ranking failure (including network/schema errors) remains
+    # a hard required failure.
+    historical_ranking_gaps = [
+        r for r in required
+        if r.tool == "get_sector_ranking"
+        and not r.success
+        and r.error_code == "HISTORICAL_RANKING_UNAVAILABLE"
+    ]
+    required_failed = [
+        r for r in required
+        if not r.success and r not in historical_ranking_gaps
+    ]
     incomplete = [
         caps.baseline_key(
             (r.result.get("baseline") or {}).get("metric"),
@@ -206,6 +220,8 @@ def collect(caller: Any, date: str, clock: Optional[Callable[[], str]] = None) -
 
     unimplemented = [r.tool for r in records if r.category == "unimplemented"]
     missing_optional = [r.tool for r in records if r.category == "optional" and not r.success]
+    missing_optional.extend("get_sector_ranking:HISTORICAL_RANKING_UNAVAILABLE"
+                            for _ in historical_ranking_gaps)
     missing_capabilities = sorted(set(unimplemented))
 
     # CURRENT_ONLY evidence is only temporally valid when its observed session
