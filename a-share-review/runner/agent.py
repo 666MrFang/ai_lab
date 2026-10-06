@@ -279,6 +279,29 @@ class ReferenceAgent:
                 "evidence_gaps": ["no verified sector membership / news evidence"],
             })
 
+        # News is timestamped event evidence only. Existence of an item is
+        # never promoted to a price-move cause without minute-level ordering
+        # and an explicit causal policy.
+        news_map = normalized.get("stock_news") or {}
+        for stock in stocks:
+            news = news_map.get(str(stock.get("code"))) or {}
+            items = list(news.get("news") or [])
+            for item in items[:3]:
+                stock["facts"].append({
+                    "statement": "新闻 %s [%s] %s"
+                                 % (item.get("published_at"), item.get("source"),
+                                    item.get("title")),
+                    "source": item.get("url") or "eastmoney:stock_news_em",
+                })
+            if items:
+                stock["evidence_gaps"] = [
+                    gap for gap in stock.get("evidence_gaps") or []
+                    if "新闻/公告" not in gap and "news" not in gap
+                ]
+                stock["evidence_gaps"].append(
+                    "新闻存在不等于涨跌原因；缺少分钟级价格顺序/因果证据"
+                )
+
         broken = metric_entry("broken_limit_rate")
         promotion = metric_entry("promotion_rate")
         profit_effect = {
