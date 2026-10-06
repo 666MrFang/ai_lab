@@ -1,0 +1,25 @@
+{
+  "tool": "get_stock_news",
+  "arguments": {
+    "date": "2026-09-30",
+    "stock_code": "600519.SH"
+  },
+  "requested_at": "2026-10-06T20:46:08",
+  "success": false,
+  "category": "unimplemented",
+  "kind": "unimplemented",
+  "provider": "akshare",
+  "error_code": "REAL_PROVIDER_NOT_IMPLEMENTED",
+  "runtime_identity": {
+    "build": "day5-r2b-akshare-real",
+    "name": "A-Share Market MCP",
+    "provider": "akshare",
+    "data_mode": "real"
+  },
+  "lineage": [],
+  "result": {
+    "success": false,
+    "error_code": "REAL_PROVIDER_NOT_IMPLEMENTED",
+    "error": "get_stock_news is not implemented for real market data yet; set MARKET_DATA_MODE=mock to use mock data"
+  }
+}

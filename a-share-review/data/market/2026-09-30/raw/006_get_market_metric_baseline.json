@@ -1,0 +1,55 @@
+{
+  "tool": "get_market_metric_baseline",
+  "arguments": {
+    "date": "2026-09-30",
+    "metric": "promotion_rate",
+    "window": 5
+  },
+  "requested_at": "2026-10-06T20:45:15",
+  "success": true,
+  "category": "required",
+  "kind": "baseline",
+  "provider": "akshare",
+  "error_code": null,
+  "runtime_identity": {
+    "build": "day5-r2b-akshare-real",
+    "name": "A-Share Market MCP",
+    "provider": "akshare",
+    "data_mode": "real"
+  },
+  "lineage": [
+    {
+      "source": "eastmoney",
+      "endpoint": "stock_zt_pool_previous_em+stock_zt_pool_em"
+    }
+  ],
+  "result": {
+    "success": true,
+    "date": "2026-09-30",
+    "baseline": {
+      "metric": "promotion_rate",
+      "date": "2026-09-30",
+      "unit": "percent",
+      "window": 5,
+      "current": 21.05,
+      "avg": 22.366,
+      "median": 23.53,
+      "percentile": 40.0,
+      "sample_count": 5,
+      "complete": true,
+      "sample_start": "2026-09-22",
+      "sample_end": "2026-09-29",
+      "missing_dates": [],
+      "evidence_status": "COMPLETE",
+      "definition": {
+        "metric": "promotion_rate",
+        "source": "eastmoney",
+        "endpoint": "stock_zt_pool_previous_em+stock_zt_pool_em",
+        "unit": "percent",
+        "universe_definition": "衍生指标：prev(D) ∩ limit_up(D) 的数量 / prev(D) sample_size * 100；sample_size 为 0 时返回 None。",
+        "date_semantics": "交易日 D",
+        "historical": true
+      }
+    }
+  }
+}

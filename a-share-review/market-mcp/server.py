@@ -1,12 +1,18 @@
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
 from mcp.server import MCPServer
 
-from config import DATA_MODE_MOCK, load_settings
+from config import DATA_MODE_MOCK, DATA_MODE_REAL, load_settings
+
+# Runtime identity: surfaced via the MCP handshake (serverInfo.version) and a
+# non-invasive stderr startup log so a live instance can be told apart from a
+# stale one. It never alters any tool contract.
+MARKET_MCP_BUILD = "day5-r2b-akshare-real"
 from domain.reference import TOTAL_TURNOVER_CODES
-from errors import MarketError, error_payload
+from errors import ErrorCode, MarketError, error_payload
 from routing import config_mode_error, unimplemented_error
 from service import MarketService
 
@@ -15,7 +21,7 @@ from service import MarketService
 # MCP Server
 # ============================================================
 
-mcp = MCPServer("A-Share Market MCP")
+mcp = MCPServer("A-Share Market MCP", version=MARKET_MCP_BUILD)
 
 
 # ============================================================
@@ -26,6 +32,13 @@ DATA_FILE = Path(__file__).parent / "data" / "mock_market.json"
 
 SETTINGS = load_settings()
 SERVICE = MarketService(SETTINGS)
+
+RUNTIME_PROVIDER = "akshare" if SETTINGS.data_mode == DATA_MODE_REAL else "mock"
+sys.stderr.write(
+    "[market-mcp][startup] build=%s provider=%s data_mode=%s python=%s\n"
+    % (MARKET_MCP_BUILD, RUNTIME_PROVIDER, SETTINGS.data_mode, sys.version.split()[0])
+)
+sys.stderr.flush()
 
 TOTAL_TURNOVER_INDEX_CODES = TOTAL_TURNOVER_CODES
 
@@ -203,9 +216,16 @@ def get_market_breadth(date: str) -> dict[str, Any]:
     if mode_error is not None:
         return mode_error
 
-    real_error = unimplemented_error("get_market_breadth", SETTINGS)
-    if real_error is not None:
-        return real_error
+    if SETTINGS.data_mode == DATA_MODE_REAL:
+        try:
+            breadth = SERVICE.get_market_breadth(date)
+        except MarketError as exc:
+            return error_payload(exc.error_code, exc.message, date=date)
+        return {
+            "success": True,
+            "date": date,
+            **breadth.to_tool_dict()
+        }
 
     if not isinstance(date, str) or not date:
         return {
@@ -285,6 +305,60 @@ def get_market_breadth(date: str) -> dict[str, Any]:
             "large_rise_count": extreme_move["large_rise_count"],
             "large_fall_count": extreme_move["large_fall_count"]
         }
+    }
+
+
+@mcp.tool()
+def get_market_metric_baseline(
+    date: str,
+    metric: str,
+    window: int = 20
+) -> dict[str, Any]:
+    """
+    获取指定交易日期某个市场广度指标的历史基线（atomic fact）。
+
+    仅返回数值证据：current、avg、median、percentile，以及样本完整性
+    （sample_count / window / complete / missing_dates）。不判断高低强弱，
+    不做 regime 分类，不输出任何语义结论。
+
+    baseline sample = requested date 之前最近 N 个已完成交易日
+    （sample_date < requested date）；current 单独保存，不进入 baseline。
+    percentile = 100 * count(sample_value <= current) / sample_count。
+
+    Args:
+        date: 交易日期，格式 YYYY-MM-DD。
+        metric: 指标名，例如 limit_up_count / broken_limit_rate / promotion_rate。
+        window: 基线窗口（交易日数量），正整数，默认 20。
+
+    返回字段：
+        baseline.current / avg / median / percentile 为数值（可为 null）。
+        baseline.complete=false 时 avg/median/percentile 均为 null，
+        表示历史样本不足（INSUFFICIENT_HISTORY），而不是缩短窗口的结果。
+    """
+
+    mode_error = config_mode_error(SETTINGS)
+    if mode_error is not None:
+        return mode_error
+
+    if SETTINGS.data_mode != DATA_MODE_REAL:
+        return error_payload(
+            ErrorCode.MOCK_NOT_SUPPORTED,
+            "get_market_metric_baseline is only available with real market data",
+            date=date,
+            metric=metric,
+        )
+
+    try:
+        baseline = SERVICE.get_market_metric_baseline(date, metric, window)
+    except MarketError as exc:
+        return error_payload(
+            exc.error_code, exc.message, date=date, metric=metric
+        )
+
+    return {
+        "success": True,
+        "date": date,
+        "baseline": baseline.to_tool_dict()
     }
 
 

@@ -1,0 +1,89 @@
+{
+  "status": "PASS",
+  "failure_codes": [],
+  "out_of_scope": [],
+  "not_observable": [],
+  "rule_status": {
+    "F001": "PASS",
+    "F002": "PASS"
+  },
+  "checks": [
+    {
+      "rule": "F001",
+      "passed": true,
+      "failure_code": null,
+      "not_observable_code": null,
+      "evidence_refs": [],
+      "claim_refs": [
+        "market_regime.state"
+      ],
+      "reason": "state='UNCERTAIN' is not a confirmed regime claim; insufficient-persistence classification is allowed"
+    },
+    {
+      "rule": "F002",
+      "passed": true,
+      "failure_code": null,
+      "not_observable_code": null,
+      "evidence_refs": [],
+      "claim_refs": [
+        "C001"
+      ],
+      "reason": "numeric fact only; no semantic label to calibrate"
+    },
+    {
+      "rule": "F002",
+      "passed": true,
+      "failure_code": null,
+      "not_observable_code": null,
+      "evidence_refs": [],
+      "claim_refs": [
+        "C002"
+      ],
+      "reason": "numeric fact only; no semantic label to calibrate"
+    },
+    {
+      "rule": "F002",
+      "passed": true,
+      "failure_code": null,
+      "not_observable_code": null,
+      "evidence_refs": [],
+      "claim_refs": [
+        "C003"
+      ],
+      "reason": "numeric fact only; no semantic label to calibrate"
+    },
+    {
+      "rule": "F002",
+      "passed": true,
+      "failure_code": null,
+      "not_observable_code": null,
+      "evidence_refs": [],
+      "claim_refs": [
+        "C004"
+      ],
+      "reason": "numeric fact only; no semantic label to calibrate"
+    },
+    {
+      "rule": "F002",
+      "passed": true,
+      "failure_code": null,
+      "not_observable_code": null,
+      "evidence_refs": [],
+      "claim_refs": [
+        "C005"
+      ],
+      "reason": "numeric fact only; no semantic label to calibrate"
+    },
+    {
+      "rule": "F002",
+      "passed": true,
+      "failure_code": null,
+      "not_observable_code": null,
+      "evidence_refs": [],
+      "claim_refs": [
+        "C006"
+      ],
+      "reason": "numeric fact only; no semantic label to calibrate"
+    }
+  ]
+}

@@ -1,0 +1,296 @@
+{
+  "case_id": "RUN-2026-09-30-6028dcdf18fb",
+  "date": "2026-09-30",
+  "failure_domain": "F001+F002",
+  "evidence": [
+    {
+      "evidence_id": "E001",
+      "type": "market_metric",
+      "metric": "broken_limit_count",
+      "date": "2026-09-30",
+      "window": null,
+      "current": 12,
+      "percentile": null,
+      "complete": null,
+      "sample_count": null,
+      "evidence_status": null
+    },
+    {
+      "evidence_id": "E002",
+      "type": "market_metric",
+      "metric": "broken_limit_rate",
+      "date": "2026-09-30",
+      "window": null,
+      "current": 18.75,
+      "percentile": null,
+      "complete": null,
+      "sample_count": null,
+      "evidence_status": null
+    },
+    {
+      "evidence_id": "E003",
+      "type": "market_metric",
+      "metric": "first_limit_up_count",
+      "date": "2026-09-30",
+      "window": null,
+      "current": 40,
+      "percentile": null,
+      "complete": null,
+      "sample_count": null,
+      "evidence_status": null
+    },
+    {
+      "evidence_id": "E004",
+      "type": "market_metric",
+      "metric": "limit_down_count",
+      "date": "2026-09-30",
+      "window": null,
+      "current": 9,
+      "percentile": null,
+      "complete": null,
+      "sample_count": null,
+      "evidence_status": null
+    },
+    {
+      "evidence_id": "E005",
+      "type": "market_metric",
+      "metric": "limit_up_count",
+      "date": "2026-09-30",
+      "window": null,
+      "current": 52,
+      "percentile": null,
+      "complete": null,
+      "sample_count": null,
+      "evidence_status": null
+    },
+    {
+      "evidence_id": "E006",
+      "type": "market_metric",
+      "metric": "market_turnover",
+      "date": "2026-09-30",
+      "window": null,
+      "current": 1439356832918.04,
+      "percentile": null,
+      "complete": null,
+      "sample_count": null,
+      "evidence_status": null
+    },
+    {
+      "evidence_id": "E007",
+      "type": "market_metric",
+      "metric": "max_limit_height",
+      "date": "2026-09-30",
+      "window": null,
+      "current": 7,
+      "percentile": null,
+      "complete": null,
+      "sample_count": null,
+      "evidence_status": null
+    },
+    {
+      "evidence_id": "E008",
+      "type": "market_metric",
+      "metric": "multi_limit_up_count",
+      "date": "2026-09-30",
+      "window": null,
+      "current": 12,
+      "percentile": null,
+      "complete": null,
+      "sample_count": null,
+      "evidence_status": null
+    },
+    {
+      "evidence_id": "E009",
+      "type": "market_metric",
+      "metric": "promotion_rate",
+      "date": "2026-09-30",
+      "window": null,
+      "current": 21.05,
+      "percentile": null,
+      "complete": null,
+      "sample_count": null,
+      "evidence_status": null
+    },
+    {
+      "evidence_id": "E010",
+      "type": "market_metric_baseline",
+      "metric": "broken_limit_rate",
+      "date": "2026-09-30",
+      "window": 20,
+      "current": 18.75,
+      "percentile": null,
+      "complete": false,
+      "sample_count": 14,
+      "evidence_status": "INSUFFICIENT_HISTORY"
+    },
+    {
+      "evidence_id": "E011",
+      "type": "market_metric_baseline",
+      "metric": "broken_limit_rate",
+      "date": "2026-09-30",
+      "window": 5,
+      "current": 18.75,
+      "percentile": 40.0,
+      "complete": true,
+      "sample_count": 5,
+      "evidence_status": "COMPLETE"
+    },
+    {
+      "evidence_id": "E012",
+      "type": "market_metric_baseline",
+      "metric": "promotion_rate",
+      "date": "2026-09-30",
+      "window": 20,
+      "current": 21.05,
+      "percentile": null,
+      "complete": false,
+      "sample_count": 14,
+      "evidence_status": "INSUFFICIENT_HISTORY"
+    },
+    {
+      "evidence_id": "E013",
+      "type": "market_metric_baseline",
+      "metric": "promotion_rate",
+      "date": "2026-09-30",
+      "window": 5,
+      "current": 21.05,
+      "percentile": 40.0,
+      "complete": true,
+      "sample_count": 5,
+      "evidence_status": "COMPLETE"
+    }
+  ],
+  "generator_output": {
+    "market_regime": {
+      "state": "UNCERTAIN",
+      "confidence": "LOW",
+      "evidence": [],
+      "counter_evidence": [
+        {
+          "statement": "incomplete persistence baseline: market_metric_baseline:broken_limit_rate:2026-09-30:20",
+          "source": "evidence_store",
+          "strength": "HIGH"
+        },
+        {
+          "statement": "incomplete persistence baseline: market_metric_baseline:promotion_rate:2026-09-30:20",
+          "source": "evidence_store",
+          "strength": "HIGH"
+        }
+      ],
+      "evidence_gaps": [
+        "insufficient persistence evidence: market_metric_baseline:broken_limit_rate:2026-09-30:20",
+        "insufficient persistence evidence: market_metric_baseline:promotion_rate:2026-09-30:20",
+        "missing capability: get_sector_detail",
+        "missing capability: get_sector_ranking",
+        "missing capability: get_stock_news"
+      ]
+    },
+    "metric_claims": [
+      {
+        "claim_id": "C001",
+        "metric": "broken_limit_rate",
+        "claim_type": "FACT",
+        "current_value": 18.75,
+        "value": 18.75,
+        "unit": "percent",
+        "semantic_label": null,
+        "baseline_refs": [],
+        "threshold_policy_ref": null,
+        "evidence_refs": [
+          "E002"
+        ],
+        "forward_claim": false,
+        "text_ref": null
+      },
+      {
+        "claim_id": "C002",
+        "metric": "broken_limit_rate",
+        "claim_type": "RELATIVE_NUMERIC",
+        "current_value": 18.75,
+        "value": 18.75,
+        "unit": "percent",
+        "semantic_label": null,
+        "baseline_refs": [
+          "E011"
+        ],
+        "threshold_policy_ref": null,
+        "evidence_refs": [
+          "E002",
+          "E011"
+        ],
+        "forward_claim": false,
+        "text_ref": null
+      },
+      {
+        "claim_id": "C003",
+        "metric": "promotion_rate",
+        "claim_type": "FACT",
+        "current_value": 21.05,
+        "value": 21.05,
+        "unit": "percent",
+        "semantic_label": null,
+        "baseline_refs": [],
+        "threshold_policy_ref": null,
+        "evidence_refs": [
+          "E009"
+        ],
+        "forward_claim": false,
+        "text_ref": null
+      },
+      {
+        "claim_id": "C004",
+        "metric": "promotion_rate",
+        "claim_type": "RELATIVE_NUMERIC",
+        "current_value": 21.05,
+        "value": 21.05,
+        "unit": "percent",
+        "semantic_label": null,
+        "baseline_refs": [
+          "E013"
+        ],
+        "threshold_policy_ref": null,
+        "evidence_refs": [
+          "E009",
+          "E013"
+        ],
+        "forward_claim": false,
+        "text_ref": null
+      },
+      {
+        "claim_id": "C005",
+        "metric": "limit_up_count",
+        "claim_type": "FACT",
+        "current_value": 52,
+        "value": 52,
+        "unit": "count",
+        "semantic_label": null,
+        "baseline_refs": [],
+        "threshold_policy_ref": null,
+        "evidence_refs": [
+          "E005"
+        ],
+        "forward_claim": false,
+        "text_ref": null
+      },
+      {
+        "claim_id": "C006",
+        "metric": "market_turnover",
+        "claim_type": "FACT",
+        "current_value": 1439356832918.04,
+        "value": 1439356832918.04,
+        "unit": "cny",
+        "semantic_label": null,
+        "baseline_refs": [],
+        "threshold_policy_ref": null,
+        "evidence_refs": [
+          "E006"
+        ],
+        "forward_claim": false,
+        "text_ref": null
+      }
+    ],
+    "claims_contract": "metric_claims/complete/v1"
+  },
+  "semantic_policy": null,
+  "expected_result": {}
+}

@@ -1,0 +1,52 @@
+{
+  "tool": "get_index_performance",
+  "arguments": {
+    "date": "2026-09-30"
+  },
+  "requested_at": "2026-10-06T20:42:34",
+  "success": true,
+  "category": "required",
+  "kind": "current",
+  "provider": "akshare",
+  "error_code": null,
+  "runtime_identity": {
+    "build": "day5-r2b-akshare-real",
+    "name": "A-Share Market MCP",
+    "provider": "akshare",
+    "data_mode": "real"
+  },
+  "lineage": [],
+  "result": {
+    "success": true,
+    "date": "2026-09-30",
+    "indices": [
+      {
+        "code": "000001.SH",
+        "name": "上证指数",
+        "open": 3839.253,
+        "previous_close": 3830.451,
+        "close": 3842.195,
+        "change_pct": 0.31,
+        "turnover": 680023000000.0
+      },
+      {
+        "code": "399001.SZ",
+        "name": "深证成指",
+        "open": 12958.085,
+        "previous_close": 12901.947,
+        "close": 12887.62,
+        "change_pct": -0.11,
+        "turnover": 759333832918.04
+      },
+      {
+        "code": "399006.SZ",
+        "name": "创业板指",
+        "open": 3164.702,
+        "previous_close": 3142.563,
+        "close": 3135.277,
+        "change_pct": -0.23,
+        "turnover": null
+      }
+    ]
+  }
+}

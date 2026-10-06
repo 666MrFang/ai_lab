@@ -1,0 +1,76 @@
+{
+  "run_id": "6028dcdf18fb",
+  "date": "2026-09-30",
+  "started_at": "2026-10-06T21:00:43",
+  "finished_at": "2026-10-06T21:00:43",
+  "mode_requested": "replay",
+  "evidence_mode_used": "replay",
+  "evidence_manifest_path": "D:\\ai_lab\\a-share-review\\data\\market\\2026-09-30\\manifest.json",
+  "evidence_collection_status": "PARTIAL",
+  "market_mcp_build": "day5-r2b-akshare-real",
+  "skill_version": "0.1.0",
+  "schema_version": "0.1.0",
+  "eval_version": "0.1.0",
+  "skill_sha256": "30a34140a62226e7bc289bb1b93ed96e495af4bd5c6f52dc7098d02c5bda6944",
+  "schema_sha256": "6c3c753122d21e018682141510c8cd8afa61d9ca19fbb93c4910869c90485e3b",
+  "eval_sha256": "b211e6f7639d696434c07a0870f2e40325911ed94b21038b8463128327cd6d13",
+  "stages": [
+    {
+      "name": "resolve_evidence",
+      "status": "PASS",
+      "timestamp": "2026-10-06T21:00:43",
+      "message": "replay (no Market MCP)"
+    },
+    {
+      "name": "run_agent",
+      "status": "PASS",
+      "timestamp": "2026-10-06T21:00:43",
+      "message": "reference-agent-v0.1"
+    },
+    {
+      "name": "schema_validation",
+      "status": "PASS",
+      "timestamp": "2026-10-06T21:00:43",
+      "message": "schema valid"
+    },
+    {
+      "name": "contract_validation",
+      "status": "PASS",
+      "timestamp": "2026-10-06T21:00:43",
+      "message": "contract valid"
+    },
+    {
+      "name": "evidence_integrity",
+      "status": "PASS",
+      "timestamp": "2026-10-06T21:00:43",
+      "message": "review evidence matches store"
+    },
+    {
+      "name": "independent_eval",
+      "status": "PASS",
+      "timestamp": "2026-10-06T21:00:43",
+      "message": "F001=PASS F002=PASS"
+    },
+    {
+      "name": "publish",
+      "status": "PASS",
+      "timestamp": "2026-10-06T21:00:43",
+      "message": "atomic publish"
+    }
+  ],
+  "execution_status": "SUCCESS",
+  "review_quality_status": "PASS",
+  "artifacts": [
+    "review.json",
+    "review.md",
+    "eval_input.json",
+    "eval.json",
+    "run_manifest.json"
+  ],
+  "errors": [],
+  "eval_status": "PASS",
+  "eval_rule_status": {
+    "F001": "PASS",
+    "F002": "PASS"
+  }
+}

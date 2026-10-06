@@ -5,6 +5,7 @@ import unittest
 
 from normalize.codes import normalize_code, normalize_code_parts
 from normalize.dates import (
+    coerce_to_iso_date,
     from_provider_date,
     is_valid_iso_date,
     normalize_iso_date,
@@ -12,7 +13,14 @@ from normalize.dates import (
 )
 from normalize.metrics import change_pct, mean, pct_change_over_closes
 from normalize.series import as_of, latest_n, total_turnover_by_date
-from normalize.units import hands_to_shares, qian_yuan_to_cny, to_float, wan_yuan_to_cny
+from normalize.units import (
+    hands_to_shares,
+    qian_yuan_to_cny,
+    ratio_to_pct,
+    to_float,
+    wan_yuan_to_cny,
+    yi_yuan_to_cny,
+)
 
 
 class UnitConversionTest(unittest.TestCase):
@@ -28,6 +36,18 @@ class UnitConversionTest(unittest.TestCase):
 
     def test_wan_yuan_to_cny(self):
         self.assertEqual(wan_yuan_to_cny(500000), 5_000_000_000.0)
+
+    def test_yi_yuan_to_cny(self):
+        # SSE stock_sse_deal_daily values are 亿元.
+        self.assertEqual(yi_yuan_to_cny(6800.23), 680_023_000_000.0)
+        self.assertIsNone(yi_yuan_to_cny(None))
+
+    def test_ratio_to_pct(self):
+        # Sina turnover is a decimal ratio; domain uses percent.
+        self.assertEqual(ratio_to_pct(0.01), 1.0)
+        self.assertAlmostEqual(ratio_to_pct("0.003066"), 0.3066)
+        self.assertIsNone(ratio_to_pct(None))
+        self.assertIsNone(ratio_to_pct(""))
 
 
 class PercentageUnitTest(unittest.TestCase):
@@ -82,6 +102,19 @@ class DateNormalizationTest(unittest.TestCase):
         self.assertIsNone(from_provider_date("20261301"))
         with self.assertRaises(ValueError):
             normalize_iso_date("2026/10/08")
+
+    def test_coerce_to_iso_date(self):
+        import datetime
+
+        self.assertEqual(coerce_to_iso_date(datetime.date(2026, 9, 30)), "2026-09-30")
+        self.assertEqual(
+            coerce_to_iso_date(datetime.datetime(2026, 9, 30, 15, 0)), "2026-09-30"
+        )
+        self.assertEqual(coerce_to_iso_date("2026-09-30"), "2026-09-30")
+        self.assertEqual(coerce_to_iso_date("20260930"), "2026-09-30")
+        self.assertIsNone(coerce_to_iso_date("20261301"))
+        self.assertIsNone(coerce_to_iso_date("not-a-date"))
+        self.assertIsNone(coerce_to_iso_date(None))
 
 
 class StockCodeNormalizationTest(unittest.TestCase):

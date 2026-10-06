@@ -1,0 +1,122 @@
+[
+  {
+    "case_id": "AGENT-F001-001",
+    "failure_domain": "F001",
+    "date": "2026-10-08",
+    "evidence": [
+      {
+        "evidence_id": "E001",
+        "type": "market_metric_baseline",
+        "metric": "limit_up_count",
+        "date": "2026-09-30",
+        "window": 20,
+        "current": 52,
+        "percentile": null,
+        "complete": false,
+        "sample_count": 14,
+        "evidence_status": "INSUFFICIENT_HISTORY"
+      }
+    ],
+    "generator_output": {
+      "market_regime": {
+        "state": "MAIN_UPTREND",
+        "confidence": "MEDIUM",
+        "persistence_evidence_acknowledged": false
+      }
+    },
+    "expected_result": {
+      "status": "FAIL",
+      "failure_codes": ["AGENT-F001"]
+    }
+  },
+  {
+    "case_id": "AGENT-F001-002",
+    "failure_domain": "F001",
+    "date": "2026-10-08",
+    "evidence": [
+      {
+        "evidence_id": "E001",
+        "type": "market_metric_baseline",
+        "metric": "limit_up_count",
+        "date": "2026-09-30",
+        "window": 20,
+        "current": 52,
+        "percentile": null,
+        "complete": false,
+        "sample_count": 14,
+        "evidence_status": "INSUFFICIENT_HISTORY"
+      }
+    ],
+    "generator_output": {
+      "market_regime": {
+        "state": "UNCERTAIN",
+        "confidence": "LOW",
+        "persistence_evidence_acknowledged": true
+      }
+    },
+    "expected_result": {
+      "status": "PASS",
+      "failure_codes": []
+    }
+  },
+  {
+    "case_id": "AGENT-F001-003",
+    "failure_domain": "F001",
+    "date": "2026-10-08",
+    "evidence": [
+      {
+        "evidence_id": "E001",
+        "type": "market_metric_baseline",
+        "metric": "limit_up_count",
+        "date": "2026-09-30",
+        "window": 20,
+        "current": 52,
+        "percentile": 75.0,
+        "complete": true,
+        "sample_count": 20,
+        "evidence_status": "COMPLETE"
+      }
+    ],
+    "generator_output": {
+      "market_regime": {
+        "state": "MAIN_UPTREND",
+        "confidence": "MEDIUM",
+        "persistence_evidence_acknowledged": false
+      }
+    },
+    "expected_result": {
+      "status": "PASS",
+      "failure_codes": []
+    }
+  },
+  {
+    "case_id": "AGENT-F001-004",
+    "failure_domain": "F001",
+    "date": "2026-10-08",
+    "evidence": [
+      {
+        "evidence_id": "E001",
+        "type": "market_metric_baseline",
+        "metric": "limit_up_count",
+        "date": "2026-09-30",
+        "window": 20,
+        "current": 52,
+        "percentile": null,
+        "complete": false,
+        "sample_count": 14,
+        "evidence_status": "INSUFFICIENT_HISTORY"
+      }
+    ],
+    "generator_output": {
+      "market_regime": {
+        "state": "MAIN_UPTREND",
+        "confidence": "LOW",
+        "persistence_evidence_acknowledged": true
+      }
+    },
+    "expected_result": {
+      "status": "PASS",
+      "failure_codes": []
+    }
+  }
+]

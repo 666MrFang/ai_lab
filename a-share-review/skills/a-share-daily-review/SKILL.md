@@ -167,11 +167,106 @@ source_reliability = low
 禁止形成统计性 Claim。
 
 
+## RULE-007: Evidence Completeness Gate
+
+任何需要历史 / 持续性（persistence）支撑的判断，
+在形成 Claim 之前必须检查 Evidence 的完整性。
+
+必须读取并检查：
+
+- window
+- sample_count
+- complete
+- missing_dates
+- evidence_status
+
+当 Evidence 来自 baseline / 历史统计，且：
+
+`complete != true`
+或
+`evidence_status == INSUFFICIENT_HISTORY`
+
+则视为 incomplete Evidence。
+
+incomplete Evidence：
+
+- 只能支持 Fact 陈述；
+- 不能支持 confirmed 判断；
+- 不能通过“承认证据不足，但仍然给出 confirmed 结论”的方式绕过。
+
+当 persistence Evidence incomplete 时：
+
+- 禁止输出 confirmed market_regime；
+- 默认 market_regime.state = UNCERTAIN；
+- 在 evidence_gaps 中记录：insufficient persistence evidence。
+
+候选判断只能以 candidate / tentative 形式出现在 narrative / inference 中，
+不得写入结构化 confirmed state。
+
+
+## RULE-008: Numeric Semantic Calibration
+
+任何 Numeric Fact 升级为语义标签之前，必须先存在 Calibration。
+
+Numeric Fact 例如：
+
+- broken_limit_rate
+- promotion_rate
+- limit_up_count
+- limit_down_count
+- turnover
+- advance / decline 相关数值或比例
+
+语义标签例如：
+
+- 高 / 低
+- 强 / 弱
+- 放量 / 缩量
+- 分歧大
+- 修复明显
+- 情绪高涨 / 情绪冰点
+
+只有在满足其一时才允许使用语义标签：
+
+A. complete historical baseline；
+B. Skill / Eval 中明确冻结的 threshold rule（SemanticCalibrationPolicy）。
+
+否则只能：
+
+- 陈述 current value；
+- 或陈述 current 与 avg / median / percentile 的数值关系。
+
+禁止路径：
+
+Numeric Fact
+→ 模型直觉
+→ Semantic Label。
+
+
+## RULE-009: Forward Claim Boundary
+
+历史校准不等于未来因果。
+
+即使存在 complete baseline 或高 percentile，
+也只允许描述“相对历史的位置”，
+不得据此推出未来方向。
+
+禁止：
+
+- broken_limit_rate high → tomorrow market will fall
+- promotion_rate high → tomorrow will continue rising
+- 任何 deterministic forecast
+
+未来只能写成 verification condition（见 Section 15），
+不能写成 prediction。
+
+
 # 3. Review Workflow
 
 执行顺序：
 
 Market
+→ Evidence Completeness Gate
 → Market Regime
 → Sector
 → Core Stock
@@ -253,6 +348,99 @@ turnover_vs_20d
 “市场普涨”。
 
 
+## 4.3 Numeric Semantic Calibration Gate
+
+Section 4 获取的数值（涨停家数、跌停家数、首板 / 连板、
+炸板率、晋级率、成交额、涨跌家数等）
+在升级为语义描述之前，必须经过 Calibration Gate（RULE-008）。
+
+如果 baseline `complete != true`：
+
+允许：
+
+- “今日炸板率为 18.75%。”
+- “昨日涨停晋级率为 21.05%。”
+
+禁止：
+
+- “炸板率较高 / 较低”
+- “接力分歧较大”
+- “情绪较好 / 较差”
+- “放量 / 缩量”（除非成交额存在 complete turnover baseline）
+
+并记录 evidence_gap。
+
+如果 baseline `complete == true`：
+
+允许引用 avg / median / percentile 形成相对描述。
+
+例如允许：
+
+“当前 18.75%，近 5 日均值 21.89%，历史分位 40%。”
+
+禁止扩展为：
+
+“市场风险较低。”
+“明天会上涨。”
+
+优先输出数值关系（current / avg / median / percentile），
+优先于离散语义标签（高 / 低）。
+
+
+## 4.4 Market Breadth Evidence Gap
+
+advance_count / decline_count / flat_count 与 limit ecology 属于不同 Evidence。
+
+如果目标历史日期无法获得 advance / decline / flat（例如数据源仅支持 current snapshot）：
+
+- 必须进入 evidence_gaps；
+- 禁止用 limit_up_count 替代全市场 breadth；
+- 禁止由“涨停很多”推断“上涨家数很多”；
+- 禁止使用当前 snapshot 回填历史日期。
+
+
+## 4.5 Structured MetricClaim Contract
+
+review.json 是 Claim 的 Source of Truth；review.md 只是呈现。
+
+Agent 每产生一个 numeric metric claim
+（包括 FACT / RELATIVE_NUMERIC / SEMANTIC / FORWARD），
+必须同步写入 root-level `metric_claims`。
+
+禁止：
+
+review.md 中出现 metric semantic claim，
+但 review.json.metric_claims 没有对应结构化 Claim。
+
+claim_type：
+
+- FACT：仅陈述数值，例如“炸板率为 18.75%”。
+- RELATIVE_NUMERIC：数值与 baseline 的数学关系，
+  例如“18.75% 低于近 5 日均值 21.89%”。
+  注意：“低于”只是数学关系，不是 semantic_label=low。
+- SEMANTIC：语义标签（高/低/强/弱），
+  必须同时具备 complete baseline + 冻结的 SemanticCalibrationPolicy。
+- FORWARD：前瞻判断，必须 forward_claim=true。
+
+约束：
+
+- semantic_label 仅在 claim_type == SEMANTIC 时非 null；
+- 每个 MetricClaim 必须引用 evidence_refs；
+- RELATIVE_NUMERIC / SEMANTIC 必须引用 baseline_refs；
+- SEMANTIC 必须引用 threshold_policy_ref；
+- claim_id 在本 review 内唯一。
+
+在没有冻结 SemanticCalibrationPolicy 时：
+
+优先输出 FACT / RELATIVE_NUMERIC，
+不要产生 SEMANTIC。
+
+不得因为 current < avg 就自动 semantic_label=low。
+
+同时必须在 review.json 提供最小 `evidence_registry`，
+为每个 evidence_refs / baseline_refs 提供对应条目。
+
+
 # 5. Market Regime
 
 候选状态：
@@ -283,6 +471,42 @@ confidence
 evidence[]
 counter_evidence[]
 evidence_gaps[]
+
+
+## 5.0 Evidence Completeness Gate
+
+在给出任何 confirmed market_regime 之前，必须先通过本 Gate（RULE-007）。
+
+必须读取并检查所需 persistence Evidence 的：
+
+- window
+- sample_count
+- complete
+- missing_dates
+- evidence_status
+
+判定：
+
+如果所需 persistence baseline `complete != true`
+或 `evidence_status == INSUFFICIENT_HISTORY`：
+
+→ persistence Evidence insufficient：
+
+- market_regime.state = UNCERTAIN
+- confidence 不得高于证据强度
+- evidence_gaps 记录：insufficient persistence evidence
+- 禁止输出 confirmed MAIN_UPTREND / ROTATION / LOSS_EFFECT / ICE_POINT
+- 候选判断只能写 candidate / tentative（inference / narrative）
+
+如果 `complete == true`：
+
+→ 才允许进入 5.1–5.4 的 regime 规则。
+
+注意：
+
+- 5d baseline complete 不能替代 20d persistence Evidence；
+- 不得把 5d 结论伪装成 20d 结论；
+- 禁止“承认证据不足，但依然 confirmed”的路径。
 
 
 ## 5.1 MAIN_UPTREND
@@ -343,6 +567,66 @@ evidence_gaps[]
 
 如果需要讨论历史冰点后的表现，
 必须调用 Historical Evidence。
+
+
+## 5.5 Persistence Evidence Rule
+
+Confirmed market regime
+requires sufficient persistence evidence.
+
+单日强度不构成持续性 regime Evidence。
+
+例如：
+
+强势指数
++ 放量
++ 涨停较多
+
+只能证明 current-day strength，
+不能自动证明 MAIN_UPTREND。
+
+如果 MAIN_UPTREND 的持久性特征无法验证
+（主线持续、核心个股持续、赚钱效应持续、高位分歧后修复、多日结构）：
+
+- state = UNCERTAIN
+- candidate_state 写入 candidate_state / narrative
+- evidence_gaps 记录缺失的 persistence 维度
+
+如果 20d persistence baseline incomplete：
+
+- market_regime.state = UNCERTAIN
+- 即使 5d baseline complete，也不得把 5d Evidence 当作 20d persistence Evidence。
+
+
+## 5.6 Market Regime Decision Order
+
+严格按顺序执行。
+不得先选 regime，再为它寻找 Evidence。
+
+Step 1
+Collect current-day facts
+（指数、成交额、breadth、limit ecology）
+
+Step 2
+Check historical / persistence evidence
+（多日 baseline、历史统计）
+
+Step 3
+Run Evidence Completeness Gate（5.0）
+
+Step 4
+If insufficient：
+    market_regime.state = UNCERTAIN
+    在 evidence_gaps 记录 insufficient persistence evidence
+    STOP confirmed regime classification
+
+Step 5
+If sufficient：
+    才应用 regime 规则（5.1–5.4）
+
+Step 6
+Separate Fact / Evidence / Inference
+标注 confidence 与 evidence_gaps
 
 
 # 6. Sector Selection
@@ -700,6 +984,24 @@ tomorrow_watch_conditions
 明天半导体一定继续上涨。
 
 
+## 15.1 Forward Claim Boundary
+
+历史校准不等于未来因果（RULE-009）。
+
+即使存在 complete baseline 与高 percentile，
+也只能描述相对历史位置，不得推出未来方向。
+
+禁止：
+
+- broken_limit_rate high → tomorrow market will fall
+- promotion_rate high → tomorrow will continue rising
+- 任何用历史分位 / 阈值包装的确定性预测
+
+未来只能写成 verification condition，
+即“若观察到 X，则 Y 的 Evidence 增强 / 减弱”，
+不能写成 deterministic prediction。
+
+
 # 16. Forbidden Behavior
 
 禁止：
@@ -714,6 +1016,11 @@ tomorrow_watch_conditions
 - 把5日涨幅第一自动称为龙头
 - 把市场阶段直接转化为买卖建议
 - 输出确定性收益预测
+- 使用 incomplete baseline 做语义判断
+- 把单日强度当成持续性 Evidence
+- 在 persistence Evidence 不足时输出 confirmed regime
+- 用 limit_up_count 替代全市场 breadth
+- 把历史校准结论升级为未来因果或确定性预测
 
 
 # 17. Output
@@ -726,6 +1033,14 @@ tomorrow_watch_conditions
 JSON 必须符合：
 
 schemas/review_schema.json
+
+review.json 必须包含 root-level：
+
+- metric_claims（结构化 numeric metric claims）
+- evidence_registry（metric_claims 引用的最小证据集）
+
+Markdown 必须根据结构化结论表达，
+不得在 Markdown 中偷偷增加更强的 Claim。
 
 
 # 18. Final Self Check
@@ -743,4 +1058,26 @@ schemas/review_schema.json
 [ ] 是否把强势股直接称为龙头？
 [ ] Evidence Gap 是否明确输出？
 [ ] 是否存在无依据预测？
+[ ] 是否在 baseline complete != true 时输出了高/低/强/弱等语义标签？
+[ ] 是否把单日强度当作 persistence Evidence？
+[ ] 是否在 persistence Evidence 不足时仍输出 confirmed market_regime？
+[ ] 是否把历史校准结论写成未来因果 / 确定性预测？
+[ ] 在无 advance / decline 时是否用 limit_up_count 替代 breadth？
+[ ] 每个 numeric metric claim 是否已结构化写入 metric_claims？
+[ ] 是否在无 frozen policy 时避免了 SEMANTIC？
+[ ] MetricClaim 的 evidence_refs / baseline_refs 是否都在 evidence_registry 中？
 [ ] Structured Output 是否符合 Schema？
+
+
+## Self Check != Independent Eval
+
+Self Check 是 Agent 输出前的自检；
+Independent Eval 是外部、独立、deterministic 的判定。
+
+两者不互相替代：
+Self Check 通过不代表 Independent Eval 通过。
+
+Self Check 失败时：
+
+- 降低 Claim 强度；或
+- 转为 Evidence Gap。

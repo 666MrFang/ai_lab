@@ -1,0 +1,52 @@
+{
+  "tool": "get_market_history_summary",
+  "arguments": {
+    "date": "2026-09-30"
+  },
+  "requested_at": "2026-10-06T20:42:41",
+  "success": true,
+  "category": "required",
+  "kind": "current",
+  "provider": "akshare",
+  "error_code": null,
+  "runtime_identity": {
+    "build": "day5-r2b-akshare-real",
+    "name": "A-Share Market MCP",
+    "provider": "akshare",
+    "data_mode": "real"
+  },
+  "lineage": [],
+  "result": {
+    "success": true,
+    "date": "2026-09-30",
+    "turnover": {
+      "current_cny": 1439356832918.04,
+      "previous_cny": 1410929789657.5898,
+      "avg_5d_cny": 1595455332106.2622,
+      "avg_20d_cny": 1806035085267.816,
+      "vs_previous_pct": 2.01,
+      "vs_5d_pct": -9.78,
+      "vs_20d_pct": -20.3
+    },
+    "indices": [
+      {
+        "code": "000001.SH",
+        "name": "上证指数",
+        "change_5d_pct": -2.78,
+        "change_20d_pct": -3.46
+      },
+      {
+        "code": "399001.SZ",
+        "name": "深证成指",
+        "change_5d_pct": -6.09,
+        "change_20d_pct": -7.1
+      },
+      {
+        "code": "399006.SZ",
+        "name": "创业板指",
+        "change_5d_pct": -7.78,
+        "change_20d_pct": -7.61
+      }
+    ]
+  }
+}

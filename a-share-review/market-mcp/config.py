@@ -1,13 +1,15 @@
 """Runtime configuration for the A-Share Market MCP server.
 
-Only two environment variables are read:
+Only one environment variable is read:
 
 - ``MARKET_DATA_MODE``: ``real`` (default) or ``mock``.
-- ``TUSHARE_TOKEN``: token for the Tushare Pro provider (real mode only).
 
-The token is never logged, never written to disk, and never returned in tool
-output. Missing token is a hard failure (``TUSHARE_TOKEN_NOT_CONFIGURED``);
-there is no silent fallback to mock data.
+The default real provider is AkShare, which requires no token. The legacy
+Tushare provider is still importable and unit-tested, but it is not part of
+the default real routing and is never selected from configuration; it takes
+its token as a direct constructor argument if used at all.
+
+There is no silent fallback to mock data in real mode.
 """
 
 from __future__ import annotations
@@ -27,7 +29,6 @@ class Settings:
     """Immutable runtime settings."""
 
     data_mode: str
-    tushare_token: Optional[str]
 
 
 def _clean(value: Optional[str]) -> Optional[str]:
@@ -42,5 +43,4 @@ def load_settings(env: Optional[Mapping[str, str]] = None) -> Settings:
 
     source = os.environ if env is None else env
     mode = _clean(source.get("MARKET_DATA_MODE")) or DEFAULT_DATA_MODE
-    token = _clean(source.get("TUSHARE_TOKEN"))
-    return Settings(data_mode=mode.lower(), tushare_token=token)
+    return Settings(data_mode=mode.lower())

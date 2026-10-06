@@ -1,6 +1,6 @@
 """Error codes and the error payload helper for the Market MCP.
 
-Error payloads never contain the Tushare token or other sensitive provider
+Error payloads never contain tokens, secrets, or other sensitive provider
 details. Only the error type name of an underlying exception is surfaced.
 """
 
@@ -18,6 +18,12 @@ class ErrorCode:
     REAL_PROVIDER_NOT_IMPLEMENTED = "REAL_PROVIDER_NOT_IMPLEMENTED"
     INVALID_DATA_MODE = "INVALID_DATA_MODE"
     INVALID_STOCK_CODE = "INVALID_STOCK_CODE"
+    NETWORK_ERROR = "NETWORK_ERROR"
+    UPSTREAM_SCHEMA_CHANGED = "UPSTREAM_SCHEMA_CHANGED"
+    INTERNAL_ERROR = "INTERNAL_ERROR"
+    UNSUPPORTED_METRIC = "UNSUPPORTED_METRIC"
+    INVALID_WINDOW = "INVALID_WINDOW"
+    MOCK_NOT_SUPPORTED = "MOCK_NOT_SUPPORTED"
 
 
 class MarketError(Exception):

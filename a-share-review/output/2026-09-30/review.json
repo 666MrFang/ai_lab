@@ -1,0 +1,450 @@
+{
+  "date": "2026-09-30",
+  "market": {
+    "facts": [
+      {
+        "statement": "000001.SH 收盘 3842.195，涨跌幅 0.31%。",
+        "source": "evidence_store"
+      },
+      {
+        "statement": "399001.SZ 收盘 12887.62，涨跌幅 -0.11%。",
+        "source": "evidence_store"
+      },
+      {
+        "statement": "399006.SZ 收盘 3135.277，涨跌幅 -0.23%。",
+        "source": "evidence_store"
+      },
+      {
+        "statement": "两市成交额 1439356832918.04 元。",
+        "source": "evidence_store"
+      },
+      {
+        "statement": "limit_up_count = 52。",
+        "source": "evidence_store"
+      },
+      {
+        "statement": "limit_down_count = 9。",
+        "source": "evidence_store"
+      },
+      {
+        "statement": "broken_limit_rate = 18.75。",
+        "source": "evidence_store"
+      },
+      {
+        "statement": "promotion_rate = 21.05。",
+        "source": "evidence_store"
+      }
+    ],
+    "inferences": [
+      {
+        "claim": "broken_limit_rate 当前 18.75，低于近 5 日均值 21.886（历史分位 40.0）。",
+        "confidence": "MEDIUM",
+        "evidence": [
+          {
+            "statement": "stored broken_limit_rate and 5d baseline",
+            "source": "evidence_store",
+            "strength": "HIGH"
+          }
+        ],
+        "counter_evidence": [],
+        "evidence_gaps": []
+      },
+      {
+        "claim": "promotion_rate 当前 21.05，低于近 5 日均值 22.366（历史分位 40.0）。",
+        "confidence": "MEDIUM",
+        "evidence": [
+          {
+            "statement": "stored promotion_rate and 5d baseline",
+            "source": "evidence_store",
+            "strength": "HIGH"
+          }
+        ],
+        "counter_evidence": [],
+        "evidence_gaps": []
+      }
+    ]
+  },
+  "market_regime": {
+    "state": "UNCERTAIN",
+    "confidence": "LOW",
+    "evidence": [],
+    "counter_evidence": [
+      {
+        "statement": "incomplete persistence baseline: market_metric_baseline:broken_limit_rate:2026-09-30:20",
+        "source": "evidence_store",
+        "strength": "HIGH"
+      },
+      {
+        "statement": "incomplete persistence baseline: market_metric_baseline:promotion_rate:2026-09-30:20",
+        "source": "evidence_store",
+        "strength": "HIGH"
+      }
+    ],
+    "evidence_gaps": [
+      "insufficient persistence evidence: market_metric_baseline:broken_limit_rate:2026-09-30:20",
+      "insufficient persistence evidence: market_metric_baseline:promotion_rate:2026-09-30:20",
+      "missing capability: get_sector_detail",
+      "missing capability: get_sector_ranking",
+      "missing capability: get_stock_news"
+    ]
+  },
+  "sectors": {
+    "top_gainers": [],
+    "top_losers": [],
+    "main_theme_candidates": []
+  },
+  "stocks": [
+    {
+      "code": "600519.SH",
+      "name": "贵州茅台",
+      "sector_name": "UNKNOWN",
+      "roles": [
+        "OTHER"
+      ],
+      "facts": [
+        {
+          "statement": "收盘 1258.62，涨跌幅 1.86%.",
+          "source": "evidence_store"
+        }
+      ],
+      "possible_drivers": [],
+      "historical_behavior": null,
+      "evidence_gaps": [
+        "no sector / news capability"
+      ]
+    }
+  ],
+  "profit_effect": {
+    "summary": "promotion_rate = 21.05。",
+    "confidence": "LOW",
+    "evidence": [
+      {
+        "statement": "stored breadth metrics",
+        "source": "evidence_store",
+        "strength": "HIGH"
+      }
+    ],
+    "evidence_gaps": []
+  },
+  "loss_effect": {
+    "summary": "broken_limit_rate = 18.75。",
+    "confidence": "LOW",
+    "evidence": [
+      {
+        "statement": "stored breadth metrics",
+        "source": "evidence_store",
+        "strength": "HIGH"
+      }
+    ],
+    "evidence_gaps": []
+  },
+  "evidence_gaps": [
+    "insufficient persistence evidence: market_metric_baseline:broken_limit_rate:2026-09-30:20",
+    "insufficient persistence evidence: market_metric_baseline:promotion_rate:2026-09-30:20",
+    "missing capability: get_sector_detail",
+    "missing capability: get_sector_ranking",
+    "missing capability: get_stock_news"
+  ],
+  "tomorrow_watch_conditions": [
+    {
+      "target": "persistence baseline",
+      "condition": "20d metric baseline complete=true",
+      "meaning": "persistence 证据是否充分，决定能否确认 regime"
+    }
+  ],
+  "metric_claims": [
+    {
+      "claim_id": "C001",
+      "metric": "broken_limit_rate",
+      "claim_type": "FACT",
+      "current_value": 18.75,
+      "unit": "percent",
+      "semantic_label": null,
+      "baseline_refs": [],
+      "threshold_policy_ref": null,
+      "evidence_refs": [
+        "E002"
+      ],
+      "forward_claim": false,
+      "text_ref": null
+    },
+    {
+      "claim_id": "C002",
+      "metric": "broken_limit_rate",
+      "claim_type": "RELATIVE_NUMERIC",
+      "current_value": 18.75,
+      "unit": "percent",
+      "semantic_label": null,
+      "baseline_refs": [
+        "E011"
+      ],
+      "threshold_policy_ref": null,
+      "evidence_refs": [
+        "E002",
+        "E011"
+      ],
+      "forward_claim": false,
+      "text_ref": null
+    },
+    {
+      "claim_id": "C003",
+      "metric": "promotion_rate",
+      "claim_type": "FACT",
+      "current_value": 21.05,
+      "unit": "percent",
+      "semantic_label": null,
+      "baseline_refs": [],
+      "threshold_policy_ref": null,
+      "evidence_refs": [
+        "E009"
+      ],
+      "forward_claim": false,
+      "text_ref": null
+    },
+    {
+      "claim_id": "C004",
+      "metric": "promotion_rate",
+      "claim_type": "RELATIVE_NUMERIC",
+      "current_value": 21.05,
+      "unit": "percent",
+      "semantic_label": null,
+      "baseline_refs": [
+        "E013"
+      ],
+      "threshold_policy_ref": null,
+      "evidence_refs": [
+        "E009",
+        "E013"
+      ],
+      "forward_claim": false,
+      "text_ref": null
+    },
+    {
+      "claim_id": "C005",
+      "metric": "limit_up_count",
+      "claim_type": "FACT",
+      "current_value": 52,
+      "unit": "count",
+      "semantic_label": null,
+      "baseline_refs": [],
+      "threshold_policy_ref": null,
+      "evidence_refs": [
+        "E005"
+      ],
+      "forward_claim": false,
+      "text_ref": null
+    },
+    {
+      "claim_id": "C006",
+      "metric": "market_turnover",
+      "claim_type": "FACT",
+      "current_value": 1439356832918.04,
+      "unit": "cny",
+      "semantic_label": null,
+      "baseline_refs": [],
+      "threshold_policy_ref": null,
+      "evidence_refs": [
+        "E006"
+      ],
+      "forward_claim": false,
+      "text_ref": null
+    }
+  ],
+  "evidence_registry": [
+    {
+      "evidence_id": "E001",
+      "evidence_type": "market_metric",
+      "metric": "broken_limit_count",
+      "date": "2026-09-30",
+      "window": null,
+      "value": 12,
+      "avg": null,
+      "median": null,
+      "percentile": null,
+      "sample_count": null,
+      "complete": null,
+      "unit": "count",
+      "source": "eastmoney"
+    },
+    {
+      "evidence_id": "E002",
+      "evidence_type": "market_metric",
+      "metric": "broken_limit_rate",
+      "date": "2026-09-30",
+      "window": null,
+      "value": 18.75,
+      "avg": null,
+      "median": null,
+      "percentile": null,
+      "sample_count": null,
+      "complete": null,
+      "unit": "percent",
+      "source": "eastmoney"
+    },
+    {
+      "evidence_id": "E003",
+      "evidence_type": "market_metric",
+      "metric": "first_limit_up_count",
+      "date": "2026-09-30",
+      "window": null,
+      "value": 40,
+      "avg": null,
+      "median": null,
+      "percentile": null,
+      "sample_count": null,
+      "complete": null,
+      "unit": "count",
+      "source": "eastmoney"
+    },
+    {
+      "evidence_id": "E004",
+      "evidence_type": "market_metric",
+      "metric": "limit_down_count",
+      "date": "2026-09-30",
+      "window": null,
+      "value": 9,
+      "avg": null,
+      "median": null,
+      "percentile": null,
+      "sample_count": null,
+      "complete": null,
+      "unit": "count",
+      "source": "eastmoney"
+    },
+    {
+      "evidence_id": "E005",
+      "evidence_type": "market_metric",
+      "metric": "limit_up_count",
+      "date": "2026-09-30",
+      "window": null,
+      "value": 52,
+      "avg": null,
+      "median": null,
+      "percentile": null,
+      "sample_count": null,
+      "complete": null,
+      "unit": "count",
+      "source": "eastmoney"
+    },
+    {
+      "evidence_id": "E006",
+      "evidence_type": "market_metric",
+      "metric": "market_turnover",
+      "date": "2026-09-30",
+      "window": null,
+      "value": 1439356832918.04,
+      "avg": null,
+      "median": null,
+      "percentile": null,
+      "sample_count": null,
+      "complete": null,
+      "unit": "cny",
+      "source": "sse+szse"
+    },
+    {
+      "evidence_id": "E007",
+      "evidence_type": "market_metric",
+      "metric": "max_limit_height",
+      "date": "2026-09-30",
+      "window": null,
+      "value": 7,
+      "avg": null,
+      "median": null,
+      "percentile": null,
+      "sample_count": null,
+      "complete": null,
+      "unit": "count",
+      "source": "eastmoney"
+    },
+    {
+      "evidence_id": "E008",
+      "evidence_type": "market_metric",
+      "metric": "multi_limit_up_count",
+      "date": "2026-09-30",
+      "window": null,
+      "value": 12,
+      "avg": null,
+      "median": null,
+      "percentile": null,
+      "sample_count": null,
+      "complete": null,
+      "unit": "count",
+      "source": "eastmoney"
+    },
+    {
+      "evidence_id": "E009",
+      "evidence_type": "market_metric",
+      "metric": "promotion_rate",
+      "date": "2026-09-30",
+      "window": null,
+      "value": 21.05,
+      "avg": null,
+      "median": null,
+      "percentile": null,
+      "sample_count": null,
+      "complete": null,
+      "unit": "percent",
+      "source": "eastmoney"
+    },
+    {
+      "evidence_id": "E010",
+      "evidence_type": "market_metric_baseline",
+      "metric": "broken_limit_rate",
+      "date": "2026-09-30",
+      "window": 20,
+      "value": 18.75,
+      "avg": null,
+      "median": null,
+      "percentile": null,
+      "sample_count": 14,
+      "complete": false,
+      "unit": "percent",
+      "source": "eastmoney"
+    },
+    {
+      "evidence_id": "E011",
+      "evidence_type": "market_metric_baseline",
+      "metric": "broken_limit_rate",
+      "date": "2026-09-30",
+      "window": 5,
+      "value": 18.75,
+      "avg": 21.886,
+      "median": 22.22,
+      "percentile": 40.0,
+      "sample_count": 5,
+      "complete": true,
+      "unit": "percent",
+      "source": "eastmoney"
+    },
+    {
+      "evidence_id": "E012",
+      "evidence_type": "market_metric_baseline",
+      "metric": "promotion_rate",
+      "date": "2026-09-30",
+      "window": 20,
+      "value": 21.05,
+      "avg": null,
+      "median": null,
+      "percentile": null,
+      "sample_count": 14,
+      "complete": false,
+      "unit": "percent",
+      "source": "eastmoney"
+    },
+    {
+      "evidence_id": "E013",
+      "evidence_type": "market_metric_baseline",
+      "metric": "promotion_rate",
+      "date": "2026-09-30",
+      "window": 5,
+      "value": 21.05,
+      "avg": 22.366,
+      "median": 23.53,
+      "percentile": 40.0,
+      "sample_count": 5,
+      "complete": true,
+      "unit": "percent",
+      "source": "eastmoney"
+    }
+  ]
+}

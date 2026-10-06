@@ -1,0 +1,310 @@
+[
+  {
+    "case_id": "AGENT-F002-004",
+    "failure_domain": "F002",
+    "date": "2026-09-30",
+    "evidence": [],
+    "generator_output": {
+      "claims_contract": "metric_claims/complete/v1",
+      "metric_claims": [
+        {
+          "claim_id": "C001",
+          "metric": "broken_limit_rate",
+          "value": 18.75,
+          "semantic_label": null,
+          "evidence_refs": [],
+          "forward_claim": false
+        }
+      ]
+    },
+    "semantic_policy": {
+      "high": {"percentile_gte": 80},
+      "low": {"percentile_lte": 20}
+    },
+    "expected_result": {
+      "status": "PASS",
+      "failure_codes": []
+    }
+  },
+  {
+    "case_id": "AGENT-F002-005",
+    "failure_domain": "F002",
+    "date": "2026-09-30",
+    "evidence": [],
+    "generator_output": {
+      "claims_contract": "metric_claims/complete/v1",
+      "metric_claims": [
+        {
+          "claim_id": "C001",
+          "metric": "broken_limit_rate",
+          "value": 25.27,
+          "semantic_label": "high",
+          "evidence_refs": [],
+          "forward_claim": false
+        }
+      ]
+    },
+    "semantic_policy": {
+      "high": {"percentile_gte": 80},
+      "low": {"percentile_lte": 20}
+    },
+    "expected_result": {
+      "status": "FAIL",
+      "failure_codes": ["AGENT-F002"]
+    }
+  },
+  {
+    "case_id": "AGENT-F002-006",
+    "failure_domain": "F002",
+    "date": "2026-09-30",
+    "evidence": [
+      {
+        "evidence_id": "E001",
+        "type": "market_metric_baseline",
+        "metric": "broken_limit_rate",
+        "date": "2026-09-30",
+        "window": 5,
+        "current": 25.27,
+        "percentile": null,
+        "complete": false,
+        "sample_count": 3,
+        "evidence_status": "INSUFFICIENT_HISTORY"
+      }
+    ],
+    "generator_output": {
+      "claims_contract": "metric_claims/complete/v1",
+      "metric_claims": [
+        {
+          "claim_id": "C001",
+          "metric": "broken_limit_rate",
+          "value": 25.27,
+          "semantic_label": "high",
+          "evidence_refs": ["E001"],
+          "forward_claim": false
+        }
+      ]
+    },
+    "semantic_policy": {
+      "high": {"percentile_gte": 80},
+      "low": {"percentile_lte": 20}
+    },
+    "expected_result": {
+      "status": "FAIL",
+      "failure_codes": ["AGENT-F002"]
+    }
+  },
+  {
+    "case_id": "AGENT-F002-007",
+    "failure_domain": "F002",
+    "date": "2026-09-30",
+    "evidence": [
+      {
+        "evidence_id": "E001",
+        "type": "market_metric_baseline",
+        "metric": "broken_limit_rate",
+        "date": "2026-09-30",
+        "window": 20,
+        "current": 25.27,
+        "percentile": 90.0,
+        "complete": true,
+        "sample_count": 20,
+        "evidence_status": "COMPLETE"
+      }
+    ],
+    "generator_output": {
+      "claims_contract": "metric_claims/complete/v1",
+      "metric_claims": [
+        {
+          "claim_id": "C001",
+          "metric": "broken_limit_rate",
+          "value": 25.27,
+          "semantic_label": "high",
+          "evidence_refs": ["E001"],
+          "forward_claim": false
+        }
+      ]
+    },
+    "semantic_policy": {
+      "high": {"percentile_gte": 80},
+      "low": {"percentile_lte": 20}
+    },
+    "expected_result": {
+      "status": "PASS",
+      "failure_codes": []
+    }
+  },
+  {
+    "case_id": "AGENT-F002-008",
+    "failure_domain": "F002",
+    "date": "2026-09-30",
+    "evidence": [
+      {
+        "evidence_id": "E001",
+        "type": "market_metric_baseline",
+        "metric": "broken_limit_rate",
+        "date": "2026-09-30",
+        "window": 20,
+        "current": 18.75,
+        "percentile": 40.0,
+        "complete": true,
+        "sample_count": 20,
+        "evidence_status": "COMPLETE"
+      }
+    ],
+    "generator_output": {
+      "claims_contract": "metric_claims/complete/v1",
+      "metric_claims": [
+        {
+          "claim_id": "C001",
+          "metric": "broken_limit_rate",
+          "value": 18.75,
+          "semantic_label": "high",
+          "evidence_refs": ["E001"],
+          "forward_claim": false
+        }
+      ]
+    },
+    "semantic_policy": {
+      "high": {"percentile_gte": 80},
+      "low": {"percentile_lte": 20}
+    },
+    "expected_result": {
+      "status": "FAIL",
+      "failure_codes": ["AGENT-F002"]
+    }
+  },
+  {
+    "case_id": "AGENT-F002-009",
+    "failure_domain": "F002",
+    "date": "2026-09-30",
+    "evidence": [
+      {
+        "evidence_id": "E001",
+        "type": "market_metric_baseline",
+        "metric": "promotion_rate",
+        "date": "2026-09-30",
+        "window": 20,
+        "current": 12.0,
+        "percentile": 10.0,
+        "complete": true,
+        "sample_count": 20,
+        "evidence_status": "COMPLETE"
+      }
+    ],
+    "generator_output": {
+      "claims_contract": "metric_claims/complete/v1",
+      "metric_claims": [
+        {
+          "claim_id": "C001",
+          "metric": "promotion_rate",
+          "value": 12.0,
+          "semantic_label": "low",
+          "evidence_refs": ["E001"],
+          "forward_claim": false
+        }
+      ]
+    },
+    "semantic_policy": {
+      "high": {"percentile_gte": 80},
+      "low": {"percentile_lte": 20}
+    },
+    "expected_result": {
+      "status": "PASS",
+      "failure_codes": []
+    }
+  },
+  {
+    "case_id": "AGENT-F002-010",
+    "failure_domain": "F002",
+    "date": "2026-09-30",
+    "evidence": [
+      {
+        "evidence_id": "E001",
+        "type": "market_metric_baseline",
+        "metric": "broken_limit_rate",
+        "date": "2026-09-30",
+        "window": 20,
+        "current": 25.27,
+        "percentile": 90.0,
+        "complete": true,
+        "sample_count": 20,
+        "evidence_status": "COMPLETE"
+      }
+    ],
+    "generator_output": {
+      "claims_contract": "metric_claims/complete/v1",
+      "metric_claims": [
+        {
+          "claim_id": "C001",
+          "metric": "broken_limit_rate",
+          "value": 25.27,
+          "semantic_label": "high",
+          "evidence_refs": ["E001"],
+          "forward_claim": true
+        }
+      ]
+    },
+    "semantic_policy": {
+      "high": {"percentile_gte": 80},
+      "low": {"percentile_lte": 20}
+    },
+    "expected_result": {
+      "status": "OUT_OF_SCOPE",
+      "failure_codes": []
+    }
+  },
+  {
+    "case_id": "AGENT-F002-011",
+    "failure_domain": "F002",
+    "date": "2026-09-30",
+    "evidence": [
+      {
+        "evidence_id": "E001",
+        "type": "market_metric_baseline",
+        "metric": "broken_limit_rate",
+        "date": "2026-09-30",
+        "window": 5,
+        "current": 18.75,
+        "percentile": 40.0,
+        "complete": true,
+        "sample_count": 5,
+        "evidence_status": "COMPLETE"
+      }
+    ],
+    "generator_output": {},
+    "semantic_policy": {
+      "high": {"percentile_gte": 80},
+      "low": {"percentile_lte": 20}
+    },
+    "expected_result": {
+      "status": "NOT_OBSERVABLE",
+      "failure_codes": []
+    }
+  },
+  {
+    "case_id": "AGENT-F002-012",
+    "failure_domain": "F002",
+    "date": "2026-09-30",
+    "evidence": [],
+    "generator_output": {
+      "metric_claims": [
+        {
+          "claim_id": "C001",
+          "metric": "broken_limit_rate",
+          "value": 18.75,
+          "semantic_label": null,
+          "evidence_refs": [],
+          "forward_claim": false
+        }
+      ]
+    },
+    "semantic_policy": {
+      "high": {"percentile_gte": 80},
+      "low": {"percentile_lte": 20}
+    },
+    "expected_result": {
+      "status": "NOT_OBSERVABLE",
+      "failure_codes": []
+    }
+  }
+]

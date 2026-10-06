@@ -1,8 +1,11 @@
 """Market service.
 
 The MCP tool layer talks only to this service. The service owns provider
-selection, config/token validation, date validation, and translation of
-provider failures into stable ``MarketError`` codes.
+selection, date validation, and translation of provider failures into stable
+``MarketError`` codes.
+
+The default real provider is AkShare; no token is required. Real mode never
+falls back to mock data.
 """
 
 from __future__ import annotations
@@ -33,21 +36,15 @@ class MarketService:
         if self._provider is not None:
             return self._provider
 
-        if not self._settings.tushare_token:
-            raise MarketError(
-                ErrorCode.TUSHARE_TOKEN_NOT_CONFIGURED,
-                "TUSHARE_TOKEN environment variable is not configured",
-            )
-
         try:
-            from providers.tushare_provider import TushareProvider
+            from providers.akshare_provider import AkShareProvider
 
-            self._provider = TushareProvider(token=self._settings.tushare_token)
+            self._provider = AkShareProvider()
         except MarketError:
             raise
         except Exception as exc:  # noqa: BLE001 - do not leak provider internals
             raise MarketError(
-                ErrorCode.PROVIDER_ERROR,
+                ErrorCode.INTERNAL_ERROR,
                 f"failed to initialize provider ({type(exc).__name__})",
             ) from exc
         return self._provider
@@ -81,3 +78,13 @@ class MarketService:
         return provider.get_market_history_summary(
             date, index_codes, total_turnover_codes
         )
+
+    def get_market_breadth(self, date: str):
+        self._validate_date(date)
+        provider = self._get_provider()
+        return provider.get_market_breadth(date)
+
+    def get_market_metric_baseline(self, date: str, metric: str, window: int):
+        self._validate_date(date)
+        provider = self._get_provider()
+        return provider.get_market_metric_baseline(date, metric, window)

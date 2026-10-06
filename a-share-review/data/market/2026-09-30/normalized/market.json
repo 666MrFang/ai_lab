@@ -1,0 +1,172 @@
+{
+  "date": "2026-09-30",
+  "evidence": {
+    "index_quote:000001.SH:2026-09-30": {
+      "evidence_type": "index_quote",
+      "index": "000001.SH",
+      "date": "2026-09-30",
+      "close": 3842.195,
+      "previous_close": 3830.451,
+      "change_pct": 0.31,
+      "turnover_cny": 680023000000.0
+    },
+    "index_quote:399001.SZ:2026-09-30": {
+      "evidence_type": "index_quote",
+      "index": "399001.SZ",
+      "date": "2026-09-30",
+      "close": 12887.62,
+      "previous_close": 12901.947,
+      "change_pct": -0.11,
+      "turnover_cny": 759333832918.04
+    },
+    "index_quote:399006.SZ:2026-09-30": {
+      "evidence_type": "index_quote",
+      "index": "399006.SZ",
+      "date": "2026-09-30",
+      "close": 3135.277,
+      "previous_close": 3142.563,
+      "change_pct": -0.23,
+      "turnover_cny": null
+    },
+    "market_metric:market_turnover:2026-09-30": {
+      "evidence_type": "market_metric",
+      "metric": "market_turnover",
+      "date": "2026-09-30",
+      "value": 1439356832918.04,
+      "unit": "cny",
+      "source": "sse+szse"
+    },
+    "market_metric:limit_up_count:2026-09-30": {
+      "evidence_type": "market_metric",
+      "metric": "limit_up_count",
+      "date": "2026-09-30",
+      "value": 52,
+      "unit": "count",
+      "source": "eastmoney"
+    },
+    "market_metric:limit_down_count:2026-09-30": {
+      "evidence_type": "market_metric",
+      "metric": "limit_down_count",
+      "date": "2026-09-30",
+      "value": 9,
+      "unit": "count",
+      "source": "eastmoney"
+    },
+    "market_metric:broken_limit_count:2026-09-30": {
+      "evidence_type": "market_metric",
+      "metric": "broken_limit_count",
+      "date": "2026-09-30",
+      "value": 12,
+      "unit": "count",
+      "source": "eastmoney"
+    },
+    "market_metric:broken_limit_rate:2026-09-30": {
+      "evidence_type": "market_metric",
+      "metric": "broken_limit_rate",
+      "date": "2026-09-30",
+      "value": 18.75,
+      "unit": "percent",
+      "source": "eastmoney"
+    },
+    "market_metric:first_limit_up_count:2026-09-30": {
+      "evidence_type": "market_metric",
+      "metric": "first_limit_up_count",
+      "date": "2026-09-30",
+      "value": 40,
+      "unit": "count",
+      "source": "eastmoney"
+    },
+    "market_metric:multi_limit_up_count:2026-09-30": {
+      "evidence_type": "market_metric",
+      "metric": "multi_limit_up_count",
+      "date": "2026-09-30",
+      "value": 12,
+      "unit": "count",
+      "source": "eastmoney"
+    },
+    "market_metric:max_limit_height:2026-09-30": {
+      "evidence_type": "market_metric",
+      "metric": "max_limit_height",
+      "date": "2026-09-30",
+      "value": 7,
+      "unit": "count",
+      "source": "eastmoney"
+    },
+    "market_metric:promotion_rate:2026-09-30": {
+      "evidence_type": "market_metric",
+      "metric": "promotion_rate",
+      "date": "2026-09-30",
+      "value": 21.05,
+      "unit": "percent",
+      "source": "eastmoney"
+    },
+    "market_metric_baseline:broken_limit_rate:2026-09-30:5": {
+      "evidence_type": "market_metric_baseline",
+      "metric": "broken_limit_rate",
+      "date": "2026-09-30",
+      "window": 5,
+      "current": 18.75,
+      "avg": 21.886,
+      "median": 22.22,
+      "percentile": 40.0,
+      "sample_count": 5,
+      "complete": true,
+      "unit": "percent",
+      "source": "eastmoney",
+      "endpoint": "stock_zt_pool_zbgc_em+stock_zt_pool_em"
+    },
+    "market_metric_baseline:broken_limit_rate:2026-09-30:20": {
+      "evidence_type": "market_metric_baseline",
+      "metric": "broken_limit_rate",
+      "date": "2026-09-30",
+      "window": 20,
+      "current": 18.75,
+      "avg": null,
+      "median": null,
+      "percentile": null,
+      "sample_count": 14,
+      "complete": false,
+      "unit": "percent",
+      "source": "eastmoney",
+      "endpoint": "stock_zt_pool_zbgc_em+stock_zt_pool_em"
+    },
+    "market_metric_baseline:promotion_rate:2026-09-30:5": {
+      "evidence_type": "market_metric_baseline",
+      "metric": "promotion_rate",
+      "date": "2026-09-30",
+      "window": 5,
+      "current": 21.05,
+      "avg": 22.366,
+      "median": 23.53,
+      "percentile": 40.0,
+      "sample_count": 5,
+      "complete": true,
+      "unit": "percent",
+      "source": "eastmoney",
+      "endpoint": "stock_zt_pool_previous_em+stock_zt_pool_em"
+    },
+    "market_metric_baseline:promotion_rate:2026-09-30:20": {
+      "evidence_type": "market_metric_baseline",
+      "metric": "promotion_rate",
+      "date": "2026-09-30",
+      "window": 20,
+      "current": 21.05,
+      "avg": null,
+      "median": null,
+      "percentile": null,
+      "sample_count": 14,
+      "complete": false,
+      "unit": "percent",
+      "source": "eastmoney",
+      "endpoint": "stock_zt_pool_previous_em+stock_zt_pool_em"
+    },
+    "stock_detail:600519.SH:2026-09-30": {
+      "evidence_type": "stock_detail",
+      "code": "600519.SH",
+      "date": "2026-09-30",
+      "name": "贵州茅台",
+      "close": 1258.62,
+      "change_pct": 1.86
+    }
+  }
+}

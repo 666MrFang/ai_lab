@@ -8,7 +8,47 @@ Tool layer never has to know about provider fields or internal unit names.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from typing import List, Optional
+from typing import Dict, List, Optional, Tuple
+
+
+@dataclass(frozen=True)
+class DataLineage:
+    """Internal provenance metadata (never part of the tool contract).
+
+    ``library`` is the client library, ``source`` the upstream vendor, and
+    ``endpoint`` the concrete function/URL used to build a value.
+    """
+
+    library: str
+    source: str
+    endpoint: str
+
+    def to_dict(self) -> dict:
+        return {
+            "library": self.library,
+            "source": self.source,
+            "endpoint": self.endpoint,
+        }
+
+
+@dataclass(frozen=True)
+class FieldProvenance:
+    """Field-level provenance for a composite quote.
+
+    A single quote can mix upstream sources (e.g. index OHLC from Sina but
+    market turnover from SSE/SZSE), so a single object-level lineage would be
+    incorrect. Each field group carries its own lineage; ``None`` means the
+    field is unsupported or has no reliable source.
+    """
+
+    price: Optional[DataLineage] = None
+    turnover: Optional[DataLineage] = None
+
+    def to_dict(self) -> dict:
+        return {
+            "price": self.price.to_dict() if self.price is not None else None,
+            "turnover": self.turnover.to_dict() if self.turnover is not None else None,
+        }
 
 
 @dataclass(frozen=True)
@@ -23,6 +63,7 @@ class IndexQuote:
     close: Optional[float]
     change_pct: Optional[float]
     turnover_cny: Optional[float]
+    provenance: Optional[FieldProvenance] = None
 
     def to_tool_dict(self) -> dict:
         return {
@@ -51,6 +92,7 @@ class StockQuote:
     volume_shares: Optional[float]
     turnover_cny: Optional[float]
     turnover_rate_pct: Optional[float]
+    lineage: Optional[DataLineage] = None
 
     def to_tool_dict(self) -> dict:
         return {
@@ -98,9 +140,157 @@ class IndexTrend:
 class MarketHistorySummary:
     turnover: TurnoverBaseline
     indices: List[IndexTrend] = field(default_factory=list)
+    lineage: List[DataLineage] = field(default_factory=list)
 
     def to_tool_dict(self) -> dict:
         return {
             "turnover": self.turnover.to_tool_dict(),
             "indices": [trend.to_tool_dict() for trend in self.indices],
         }
+
+
+# ============================================================
+# Market breadth / limit ecology
+# ============================================================
+
+
+@dataclass(frozen=True)
+class MetricDefinition:
+    """Machine-readable definition of a breadth metric.
+
+    ``universe_definition`` records the *verified* universe (based on live
+    payloads), never a vendor docstring. ``historical`` says whether the metric
+    can be queried for a past trading day.
+    """
+
+    metric: str
+    source: str
+    endpoint: str
+    unit: str
+    universe_definition: str
+    date_semantics: str
+    historical: bool
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
+@dataclass(frozen=True)
+class LimitEcology:
+    """Historical-queryable limit-up/down ecology metrics for a trading day."""
+
+    limit_up_count: Optional[int]
+    limit_down_count: Optional[int]
+    broken_limit_count: Optional[int]
+    broken_limit_rate: Optional[float]
+    first_limit_up_count: Optional[int]
+    multi_limit_up_count: Optional[int]
+    max_consecutive_limit_up: Optional[int]
+    previous_sample_size: Optional[int]
+    previous_average_change_pct: Optional[float]
+    previous_median_change_pct: Optional[float]
+    previous_positive_rate: Optional[float]
+    previous_promotion_rate: Optional[float]
+
+
+@dataclass(frozen=True)
+class MarketBreadth:
+    """Breadth for a trading day.
+
+    Limit ecology is historical-queryable (Eastmoney limit pools).
+    ``advance_count`` / ``decline_count`` / ``flat_count`` are CURRENT_ONLY
+    (legulegu snapshot) and are ``None`` for any historical date.
+    """
+
+    date: str
+    limit: LimitEcology
+    advance_count: Optional[int]
+    decline_count: Optional[int]
+    flat_count: Optional[int]
+    breadth_as_of: Optional[str] = None
+    missing_reasons: Dict[str, str] = field(default_factory=dict)
+    definitions: Dict[str, MetricDefinition] = field(default_factory=dict)
+
+    def to_tool_dict(self) -> dict:
+        return {
+            "breadth": {
+                "rising_count": self.advance_count,
+                "falling_count": self.decline_count,
+                "flat_count": self.flat_count,
+            },
+            "limit_state": {
+                "limit_up_count": self.limit.limit_up_count,
+                "limit_down_count": self.limit.limit_down_count,
+                "first_limit_up_count": self.limit.first_limit_up_count,
+                "multi_limit_up_count": self.limit.multi_limit_up_count,
+                "max_limit_height": self.limit.max_consecutive_limit_up,
+                "broken_limit_count": self.limit.broken_limit_count,
+                "broken_limit_rate": self.limit.broken_limit_rate,
+            },
+            "previous_limit_up": {
+                "sample_size": self.limit.previous_sample_size,
+                "average_change_pct": self.limit.previous_average_change_pct,
+                "median_change_pct": self.limit.previous_median_change_pct,
+                "positive_rate": self.limit.previous_positive_rate,
+                "promotion_rate": self.limit.previous_promotion_rate,
+            },
+            "extreme_move": {
+                "large_rise_count": None,
+                "large_fall_count": None,
+            },
+            "evidence": {
+                "breadth_as_of": self.breadth_as_of,
+                "missing_reasons": dict(self.missing_reasons),
+                "definitions": {
+                    name: definition.to_dict()
+                    for name, definition in self.definitions.items()
+                },
+            },
+        }
+
+
+@dataclass(frozen=True)
+class MetricBaseline:
+    """As-of historical baseline for a single metric.
+
+    The sample is the ``window`` most recent completed trading days strictly
+    before ``date`` (``sample_date < date``); ``current`` is stored separately
+    and never enters the sample. When ``complete`` is false the aggregate
+    statistics are ``None`` and must not be read as a shortened-window result.
+    """
+
+    metric: str
+    date: str
+    unit: str
+    window: int
+    current: Optional[float]
+    avg: Optional[float]
+    median: Optional[float]
+    percentile: Optional[float]
+    sample_count: int
+    complete: bool
+    sample_start: Optional[str]
+    sample_end: Optional[str]
+    missing_dates: Tuple[str, ...] = ()
+    definition: Optional[MetricDefinition] = None
+
+    def to_tool_dict(self) -> dict:
+        payload = {
+            "metric": self.metric,
+            "date": self.date,
+            "unit": self.unit,
+            "window": self.window,
+            "current": self.current,
+            "avg": self.avg,
+            "median": self.median,
+            "percentile": self.percentile,
+            "sample_count": self.sample_count,
+            "complete": self.complete,
+            "sample_start": self.sample_start,
+            "sample_end": self.sample_end,
+            "missing_dates": list(self.missing_dates),
+            "evidence_status": "COMPLETE" if self.complete else "INSUFFICIENT_HISTORY",
+        }
+        if self.definition is not None:
+            payload["definition"] = self.definition.to_dict()
+        return payload

@@ -1,0 +1,1031 @@
+{
+  "signatures": {
+    "stock_sector_spot": "(indicator: str = '新浪行业') -> pandas.DataFrame",
+    "stock_sector_detail": "(sector: str = 'gn_gfgn') -> pandas.DataFrame",
+    "stock_board_industry_summary_ths": "() -> pandas.DataFrame",
+    "stock_board_concept_summary_ths": "() -> pandas.DataFrame",
+    "stock_board_industry_index_ths": "(symbol: str = '元件', start_date: str = '20200101', end_date: str = '20240108') -> pandas.DataFrame",
+    "stock_board_industry_name_ths": "() -> pandas.DataFrame",
+    "stock_board_concept_name_ths": "() -> pandas.DataFrame",
+    "sw_index_third_cons": "(symbol: str = '801120.SI') -> pandas.DataFrame",
+    "stock_fund_flow_industry": "(symbol: str = '即时') -> pandas.DataFrame",
+    "stock_fund_flow_concept": "(symbol: str = '即时') -> pandas.DataFrame"
+  },
+  "probes": [
+    {
+      "label": "stock_board_industry_name_em",
+      "category": "ranking",
+      "taxonomy": "unknown",
+      "status": "NETWORK_ERROR",
+      "rows": 0,
+      "columns": [],
+      "dtypes": {},
+      "sample": [],
+      "error": "SSLError: HTTPSConnectionPool(host='17.push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/clist/get?pn=1&pz=100&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6"
+    },
+    {
+      "label": "stock_board_concept_name_em",
+      "category": "ranking",
+      "taxonomy": "unknown",
+      "status": "UNKNOWN",
+      "rows": 0,
+      "columns": [],
+      "dtypes": {},
+      "sample": [],
+      "error": "HTTPError: 502 Server Error: Bad Gateway for url: https://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=100&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid="
+    },
+    {
+      "label": "stock_board_industry_cons_em(半导体)",
+      "category": "constituents",
+      "taxonomy": "industry",
+      "status": "NETWORK_ERROR",
+      "rows": 0,
+      "columns": [],
+      "dtypes": {},
+      "sample": [],
+      "error": "SSLError: HTTPSConnectionPool(host='17.push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/clist/get?pn=1&pz=100&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6"
+    },
+    {
+      "label": "stock_board_concept_cons_em(人工智能)",
+      "category": "constituents",
+      "taxonomy": "concept",
+      "status": "UNKNOWN",
+      "rows": 0,
+      "columns": [],
+      "dtypes": {},
+      "sample": [],
+      "error": "HTTPError: 502 Server Error: Bad Gateway for url: https://push2.eastmoney.com/api/qt/clist/get?pn=1&pz=100&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6f7426281&fltt=2&invt=2&fid="
+    },
+    {
+      "label": "stock_board_industry_hist_em(半导体)",
+      "category": "history",
+      "taxonomy": "industry",
+      "status": "NETWORK_ERROR",
+      "rows": 0,
+      "columns": [],
+      "dtypes": {},
+      "sample": [],
+      "error": "SSLError: HTTPSConnectionPool(host='17.push2.eastmoney.com', port=443): Max retries exceeded with url: /api/qt/clist/get?pn=1&pz=100&po=1&np=1&ut=bd1d9ddb04089700cf9c27f6"
+    },
+    {
+      "label": "stock_board_industry_name_ths",
+      "category": "taxonomy",
+      "taxonomy": "industry",
+      "status": "AVAILABLE",
+      "rows": 90,
+      "columns": [
+        "name",
+        "code"
+      ],
+      "dtypes": {
+        "name": "str",
+        "code": "str"
+      },
+      "sample": [
+        {
+          "name": "半导体",
+          "code": "881121"
+        },
+        {
+          "name": "白酒",
+          "code": "881273"
+        }
+      ]
+    },
+    {
+      "label": "stock_board_concept_name_ths",
+      "category": "taxonomy",
+      "taxonomy": "concept",
+      "status": "AVAILABLE",
+      "rows": 375,
+      "columns": [
+        "name",
+        "code"
+      ],
+      "dtypes": {
+        "name": "str",
+        "code": "str"
+      },
+      "sample": [
+        {
+          "name": "阿尔茨海默概念",
+          "code": "308614"
+        },
+        {
+          "name": "AI PC",
+          "code": "309121"
+        }
+      ]
+    },
+    {
+      "label": "stock_board_industry_summary_ths",
+      "category": "ranking",
+      "taxonomy": "industry",
+      "status": "AVAILABLE",
+      "rows": 90,
+      "columns": [
+        "序号",
+        "板块",
+        "涨跌幅",
+        "总成交量",
+        "总成交额",
+        "净流入",
+        "上涨家数",
+        "下跌家数",
+        "均价",
+        "领涨股",
+        "领涨股-最新价",
+        "领涨股-涨跌幅"
+      ],
+      "dtypes": {
+        "序号": "int64",
+        "板块": "str",
+        "涨跌幅": "float64",
+        "总成交量": "float64",
+        "总成交额": "float64",
+        "净流入": "float64",
+        "上涨家数": "int64",
+        "下跌家数": "int64",
+        "均价": "float64",
+        "领涨股": "str",
+        "领涨股-最新价": "float64",
+        "领涨股-涨跌幅": "float64"
+      },
+      "sample": [
+        {
+          "序号": 1,
+          "板块": "生物制品",
+          "涨跌幅": 4.63,
+          "总成交量": 878.68,
+          "总成交额": 236.62,
+          "净流入": 14.36,
+          "上涨家数": 53,
+          "下跌家数": 2,
+          "均价": 26.93,
+          "领涨股": "康希诺",
+          "领涨股-最新价": 102.64,
+          "领涨股-涨跌幅": 20.0
+        },
+        {
+          "序号": 2,
+          "板块": "医疗服务",
+          "涨跌幅": 3.11,
+          "总成交量": 1427.02,
+          "总成交额": 376.82,
+          "净流入": 20.08,
+          "上涨家数": 50,
+          "下跌家数": 6,
+          "均价": 26.41,
+          "领涨股": "南模生物",
+          "领涨股-最新价": 64.98,
+          "领涨股-涨跌幅": 19.87
+        }
+      ]
+    },
+    {
+      "label": "stock_board_concept_summary_ths",
+      "category": "ranking",
+      "taxonomy": "concept",
+      "status": "AVAILABLE",
+      "rows": 50,
+      "columns": [
+        "日期",
+        "概念名称",
+        "驱动事件",
+        "龙头股",
+        "成分股数量"
+      ],
+      "dtypes": {
+        "日期": "object",
+        "概念名称": "str",
+        "驱动事件": "str",
+        "龙头股": "str",
+        "成分股数量": "int64"
+      },
+      "sample": [
+        {
+          "日期": 1785456000000,
+          "概念名称": "MLCC概念",
+          "驱动事件": "MLCC概念板块高开，华瓷股份涨停",
+          "龙头股": "--",
+          "成分股数量": 39
+        },
+        {
+          "日期": 1782864000000,
+          "概念名称": "玻璃基板",
+          "驱动事件": "技术迭代周期下先进封装材料路线博弈——有机、硅、玻璃中介层的技术替代周期与材料路线演进",
+          "龙头股": "--",
+          "成分股数量": 62
+        }
+      ]
+    },
+    {
+      "label": "stock_board_industry_index_ths(半导体,2026-09-01..30)",
+      "category": "history",
+      "taxonomy": "industry",
+      "status": "AVAILABLE",
+      "rows": 21,
+      "columns": [
+        "日期",
+        "开盘价",
+        "最高价",
+        "最低价",
+        "收盘价",
+        "成交量",
+        "成交额"
+      ],
+      "dtypes": {
+        "日期": "object",
+        "开盘价": "float64",
+        "最高价": "float64",
+        "最低价": "float64",
+        "收盘价": "float64",
+        "成交量": "int64",
+        "成交额": "float64"
+      },
+      "sample": [
+        {
+          "日期": 1788220800000,
+          "开盘价": 17063.091,
+          "最高价": 17068.104,
+          "最低价": 16565.452,
+          "收盘价": 16613.152,
+          "成交量": 2703196000,
+          "成交额": 221990800000.0
+        },
+        {
+          "日期": 1788307200000,
+          "开盘价": 16364.559,
+          "最高价": 16538.522,
+          "最低价": 16262.212,
+          "收盘价": 16390.583,
+          "成交量": 2285551200,
+          "成交额": 181894040000.0
+        }
+      ]
+    },
+    {
+      "label": "stock_board_concept_index_ths(人工智能,2026-09-01..30)",
+      "category": "history",
+      "taxonomy": "concept",
+      "status": "AVAILABLE",
+      "rows": 21,
+      "columns": [
+        "日期",
+        "开盘价",
+        "最高价",
+        "最低价",
+        "收盘价",
+        "成交量",
+        "成交额"
+      ],
+      "dtypes": {
+        "日期": "object",
+        "开盘价": "float64",
+        "最高价": "float64",
+        "最低价": "float64",
+        "收盘价": "float64",
+        "成交量": "int64",
+        "成交额": "float64"
+      },
+      "sample": [
+        {
+          "日期": 1788220800000,
+          "开盘价": 1298.77,
+          "最高价": 1314.652,
+          "最低价": 1298.512,
+          "收盘价": 1311.222,
+          "成交量": 28778108000,
+          "成交额": 441954410000.0
+        },
+        {
+          "日期": 1788307200000,
+          "开盘价": 1301.527,
+          "最高价": 1307.147,
+          "最低价": 1291.692,
+          "收盘价": 1300.767,
+          "成交量": 23904436000,
+          "成交额": 370760700000.0
+        }
+      ]
+    },
+    {
+      "label": "stock_board_industry_info_ths(881121)",
+      "category": "constituents",
+      "taxonomy": "industry",
+      "status": "UNKNOWN",
+      "rows": 0,
+      "columns": [],
+      "dtypes": {},
+      "sample": [],
+      "error": "IndexError: index 0 is out of bounds for axis 0 with size 0"
+    },
+    {
+      "label": "stock_board_concept_info_ths(308614)",
+      "category": "constituents",
+      "taxonomy": "concept",
+      "status": "UNKNOWN",
+      "rows": 0,
+      "columns": [],
+      "dtypes": {},
+      "sample": [],
+      "error": "IndexError: index 0 is out of bounds for axis 0 with size 0"
+    },
+    {
+      "label": "stock_sector_spot(新浪行业)",
+      "category": "ranking",
+      "taxonomy": "industry",
+      "status": "AVAILABLE",
+      "rows": 49,
+      "columns": [
+        "label",
+        "板块",
+        "公司家数",
+        "平均价格",
+        "涨跌额",
+        "涨跌幅",
+        "总成交量",
+        "总成交额",
+        "股票代码",
+        "个股-涨跌幅",
+        "个股-当前价",
+        "个股-涨跌额",
+        "股票名称"
+      ],
+      "dtypes": {
+        "label": "str",
+        "板块": "str",
+        "公司家数": "int64",
+        "平均价格": "float64",
+        "涨跌额": "float64",
+        "涨跌幅": "float64",
+        "总成交量": "int64",
+        "总成交额": "int64",
+        "股票代码": "str",
+        "个股-涨跌幅": "float64",
+        "个股-当前价": "float64",
+        "个股-涨跌额": "float64",
+        "股票名称": "str"
+      },
+      "sample": [
+        {
+          "label": "new_blhy",
+          "板块": "玻璃行业",
+          "公司家数": 19,
+          "平均价格": 16.7331578947,
+          "涨跌额": 0.0010526316,
+          "涨跌幅": 0.0062910887,
+          "总成交量": 410050588,
+          "总成交额": 9066360698,
+          "股票代码": "sz300395",
+          "个股-涨跌幅": 2.395,
+          "个股-当前价": 94.92,
+          "个股-涨跌额": 2.22,
+          "股票名称": "菲利华"
+        },
+        {
+          "label": "new_cbzz",
+          "板块": "船舶制造",
+          "公司家数": 8,
+          "平均价格": 14.9514285714,
+          "涨跌额": 0.2257142857,
+          "涨跌幅": 1.532790066,
+          "总成交量": 243309795,
+          "总成交额": 4804133152,
+          "股票代码": "sh600072",
+          "个股-涨跌幅": 9.977,
+          "个股-当前价": 9.7,
+          "个股-涨跌额": 0.88,
+          "股票名称": "中船科技"
+        }
+      ]
+    },
+    {
+      "label": "stock_sector_spot(概念)",
+      "category": "ranking",
+      "taxonomy": "concept",
+      "status": "AVAILABLE",
+      "rows": 175,
+      "columns": [
+        "label",
+        "板块",
+        "公司家数",
+        "平均价格",
+        "涨跌额",
+        "涨跌幅",
+        "总成交量",
+        "总成交额",
+        "股票代码",
+        "个股-涨跌幅",
+        "个股-当前价",
+        "个股-涨跌额",
+        "股票名称"
+      ],
+      "dtypes": {
+        "label": "str",
+        "板块": "str",
+        "公司家数": "int64",
+        "平均价格": "float64",
+        "涨跌额": "float64",
+        "涨跌幅": "float64",
+        "总成交量": "int64",
+        "总成交额": "int64",
+        "股票代码": "str",
+        "个股-涨跌幅": "float64",
+        "个股-当前价": "float64",
+        "个股-涨跌额": "float64",
+        "股票名称": "str"
+      },
+      "sample": [
+        {
+          "label": "gn_hwqc",
+          "板块": "华为汽车",
+          "公司家数": 97,
+          "平均价格": 23.956875,
+          "涨跌额": -0.2873958333,
+          "涨跌幅": -1.185417517,
+          "总成交量": 2069201242,
+          "总成交额": 31890354954,
+          "股票代码": "sz002454",
+          "个股-涨跌幅": 10.0,
+          "个股-当前价": 5.61,
+          "个股-涨跌额": 0.51,
+          "股票名称": "松芝股份"
+        },
+        {
+          "label": "gn_BCdc",
+          "板块": "BC电池",
+          "公司家数": 26,
+          "平均价格": 61.3523076923,
+          "涨跌额": -0.3680769231,
+          "涨跌幅": -0.5963620048,
+          "总成交量": 620775305,
+          "总成交额": 15634104984,
+          "股票代码": "sh600732",
+          "个股-涨跌幅": 6.342,
+          "个股-当前价": 11.57,
+          "个股-涨跌额": 0.69,
+          "股票名称": "爱旭股份"
+        }
+      ]
+    },
+    {
+      "label": "sw_index_first_info",
+      "category": "taxonomy",
+      "taxonomy": "industry",
+      "status": "AVAILABLE",
+      "rows": 31,
+      "columns": [
+        "行业代码",
+        "行业名称",
+        "成份个数",
+        "静态市盈率",
+        "TTM(滚动)市盈率",
+        "市净率",
+        "静态股息率"
+      ],
+      "dtypes": {
+        "行业代码": "str",
+        "行业名称": "str",
+        "成份个数": "int64",
+        "静态市盈率": "float64",
+        "TTM(滚动)市盈率": "float64",
+        "市净率": "float64",
+        "静态股息率": "float64"
+      },
+      "sample": [
+        {
+          "行业代码": "801010.SI",
+          "行业名称": "农林牧渔",
+          "成份个数": 104,
+          "静态市盈率": 30.11,
+          "TTM(滚动)市盈率": 31.87,
+          "市净率": 1.91,
+          "静态股息率": 2.25
+        },
+        {
+          "行业代码": "801030.SI",
+          "行业名称": "基础化工",
+          "成份个数": 412,
+          "静态市盈率": 25.21,
+          "TTM(滚动)市盈率": 21.6,
+          "市净率": 2.26,
+          "静态股息率": 1.63
+        }
+      ]
+    },
+    {
+      "label": "sw_index_second_info",
+      "category": "taxonomy",
+      "taxonomy": "industry",
+      "status": "AVAILABLE",
+      "rows": 131,
+      "columns": [
+        "行业代码",
+        "行业名称",
+        "上级行业",
+        "成份个数",
+        "静态市盈率",
+        "TTM(滚动)市盈率",
+        "市净率",
+        "静态股息率"
+      ],
+      "dtypes": {
+        "行业代码": "str",
+        "行业名称": "str",
+        "上级行业": "str",
+        "成份个数": "int64",
+        "静态市盈率": "float64",
+        "TTM(滚动)市盈率": "float64",
+        "市净率": "float64",
+        "静态股息率": "float64"
+      },
+      "sample": [
+        {
+          "行业代码": "801016.SI",
+          "行业名称": "种植业",
+          "上级行业": "农林牧渔",
+          "成份个数": 20,
+          "静态市盈率": 39.79,
+          "TTM(滚动)市盈率": 34.37,
+          "市净率": 2.17,
+          "静态股息率": 1.63
+        },
+        {
+          "行业代码": "801015.SI",
+          "行业名称": "渔业",
+          "上级行业": "农林牧渔",
+          "成份个数": 6,
+          "静态市盈率": 62.43,
+          "TTM(滚动)市盈率": 68.49,
+          "市净率": 1.72,
+          "静态股息率": 0.56
+        }
+      ]
+    },
+    {
+      "label": "stock_sector_fund_flow_rank(行业)",
+      "category": "ranking",
+      "taxonomy": "industry",
+      "status": "UNKNOWN",
+      "rows": 0,
+      "columns": [],
+      "dtypes": {},
+      "sample": [],
+      "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "label": "stock_sector_fund_flow_rank(概念)",
+      "category": "ranking",
+      "taxonomy": "concept",
+      "status": "UNKNOWN",
+      "rows": 0,
+      "columns": [],
+      "dtypes": {},
+      "sample": [],
+      "error": "JSONDecodeError: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "label": "index_stock_cons(000300)",
+      "category": "constituents",
+      "taxonomy": "index",
+      "status": "AVAILABLE",
+      "rows": 300,
+      "columns": [
+        "品种代码",
+        "品种名称",
+        "纳入日期"
+      ],
+      "dtypes": {
+        "品种代码": "str",
+        "品种名称": "str",
+        "纳入日期": "str"
+      },
+      "sample": [
+        {
+          "品种代码": "600118",
+          "品种名称": "中国卫星",
+          "纳入日期": "2026-06-15"
+        },
+        {
+          "品种代码": "002532",
+          "品种名称": "天山铝业",
+          "纳入日期": "2026-06-15"
+        }
+      ]
+    },
+    {
+      "label": "stock_sector_detail(sina-industry)",
+      "category": "constituents",
+      "taxonomy": "industry",
+      "status": "AVAILABLE",
+      "rows": 19,
+      "columns": [
+        "symbol",
+        "code",
+        "name",
+        "trade",
+        "pricechange",
+        "changepercent",
+        "buy",
+        "sell",
+        "settlement",
+        "open",
+        "high",
+        "low",
+        "volume",
+        "amount",
+        "ticktime",
+        "per",
+        "pb",
+        "mktcap",
+        "nmc",
+        "turnoverratio"
+      ],
+      "dtypes": {
+        "symbol": "str",
+        "code": "str",
+        "name": "str",
+        "trade": "float64",
+        "pricechange": "float64",
+        "changepercent": "float64",
+        "buy": "float64",
+        "sell": "float64",
+        "settlement": "float64",
+        "open": "float64",
+        "high": "float64",
+        "low": "float64",
+        "volume": "int64",
+        "amount": "int64",
+        "ticktime": "str",
+        "per": "float64",
+        "pb": "float64",
+        "mktcap": "float64",
+        "nmc": "float64",
+        "turnoverratio": "float64"
+      },
+      "sample": [
+        {
+          "symbol": "sh600176",
+          "code": "600176",
+          "name": "中国巨石",
+          "trade": 39.41,
+          "pricechange": -0.28,
+          "changepercent": -0.705,
+          "buy": 39.41,
+          "sell": 39.42,
+          "settlement": 39.69,
+          "open": 39.91,
+          "high": 40.19,
+          "low": 39.21,
+          "volume": 94954728,
+          "amount": 3761312051,
+          "ticktime": "15:34:59",
+          "per": 47.985,
+          "pb": 4.758,
+          "mktcap": 15776361.845048,
+          "nmc": 15652024.477348,
+          "turnoverratio": 2.39085
+        },
+        {
+          "symbol": "sh600184",
+          "code": "600184",
+          "name": "光电股份",
+          "trade": 17.85,
+          "pricechange": -0.27,
+          "changepercent": -1.49,
+          "buy": 17.85,
+          "sell": 17.86,
+          "settlement": 18.12,
+          "open": 18.39,
+          "high": 18.48,
+          "low": 17.79,
+          "volume": 10269317,
+          "amount": 184793690,
+          "ticktime": "15:34:59",
+          "per": 188.49,
+          "pb": 3.045,
+          "mktcap": 1040168.53038,
+          "nmc": 1040168.53038,
+          "turnoverratio": 1.76228
+        }
+      ]
+    },
+    {
+      "label": "stock_sector_detail(sina-concept)",
+      "category": "constituents",
+      "taxonomy": "concept",
+      "status": "AVAILABLE",
+      "rows": 97,
+      "columns": [
+        "symbol",
+        "code",
+        "name",
+        "trade",
+        "pricechange",
+        "changepercent",
+        "buy",
+        "sell",
+        "settlement",
+        "open",
+        "high",
+        "low",
+        "volume",
+        "amount",
+        "ticktime",
+        "per",
+        "pb",
+        "mktcap",
+        "nmc",
+        "turnoverratio"
+      ],
+      "dtypes": {
+        "symbol": "str",
+        "code": "str",
+        "name": "str",
+        "trade": "float64",
+        "pricechange": "float64",
+        "changepercent": "float64",
+        "buy": "float64",
+        "sell": "float64",
+        "settlement": "float64",
+        "open": "float64",
+        "high": "float64",
+        "low": "float64",
+        "volume": "int64",
+        "amount": "int64",
+        "ticktime": "str",
+        "per": "float64",
+        "pb": "float64",
+        "mktcap": "float64",
+        "nmc": "float64",
+        "turnoverratio": "float64"
+      },
+      "sample": [
+        {
+          "symbol": "sh600006",
+          "code": "600006",
+          "name": "东风股份",
+          "trade": 5.73,
+          "pricechange": 0.15,
+          "changepercent": 2.688,
+          "buy": 5.73,
+          "sell": 5.74,
+          "settlement": 5.58,
+          "open": 5.57,
+          "high": 5.9,
+          "low": 5.43,
+          "volume": 62217389,
+          "amount": 354416432,
+          "ticktime": "15:34:59",
+          "per": -23.895,
+          "pb": 1.449,
+          "mktcap": 1146000.0,
+          "nmc": 1146000.0,
+          "turnoverratio": 3.11087
+        },
+        {
+          "symbol": "sh600081",
+          "code": "600081",
+          "name": "东风科技",
+          "trade": 11.89,
+          "pricechange": 1.08,
+          "changepercent": 9.991,
+          "buy": 11.89,
+          "sell": 0.0,
+          "settlement": 10.81,
+          "open": 10.77,
+          "high": 11.89,
+          "low": 10.75,
+          "volume": 16608224,
+          "amount": 195515214,
+          "ticktime": "15:34:59",
+          "per": 348.68,
+          "pb": 1.408,
+          "mktcap": 657548.11613,
+          "nmc": 657548.11613,
+          "turnoverratio": 3.00315
+        }
+      ]
+    },
+    {
+      "label": "sw_index_third_cons(801016.SI)",
+      "category": "constituents",
+      "taxonomy": "industry",
+      "status": "AVAILABLE",
+      "rows": 20,
+      "columns": [
+        "序号",
+        "股票代码",
+        "股票简称",
+        "纳入时间",
+        "申万2级",
+        "细分概念",
+        "价格",
+        "市盈率",
+        "市盈率ttm",
+        "市净率",
+        "ROE(%)",
+        "股息率",
+        "市值",
+        "近1日涨幅(2026-09-30)",
+        "近5日涨幅(2026-09-30)",
+        "今年以来涨幅(2026-09-30)",
+        "净利润增速(%)(2026-06-30)",
+        "营收增速(%)(2026-06-30)",
+        "上季度净利润增速(%)(2026-03-31)",
+        "上季度营收增速(%)(2026-03-31)"
+      ],
+      "dtypes": {
+        "序号": "int64",
+        "股票代码": "str",
+        "股票简称": "str",
+        "纳入时间": "str",
+        "申万2级": "str",
+        "细分概念": "float64",
+        "价格": "float64",
+        "市盈率": "float64",
+        "市盈率ttm": "float64",
+        "市净率": "float64",
+        "ROE(%)": "float64",
+        "股息率": "float64",
+        "市值": "float64",
+        "近1日涨幅(2026-09-30)": "float64",
+        "近5日涨幅(2026-09-30)": "float64",
+        "今年以来涨幅(2026-09-30)": "float64",
+        "净利润增速(%)(2026-06-30)": "float64",
+        "营收增速(%)(2026-06-30)": "float64",
+        "上季度净利润增速(%)(2026-03-31)": "float64",
+        "上季度营收增速(%)(2026-03-31)": "float64"
+      },
+      "sample": [
+        {
+          "序号": 1,
+          "股票代码": "600313.SH",
+          "股票简称": "农发种业",
+          "纳入时间": "2011-01-10",
+          "申万2级": "种植业",
+          "细分概念": null,
+          "价格": 6.73,
+          "市盈率": 93.51,
+          "市盈率ttm": 106.93,
+          "市净率": 3.21,
+          "ROE(%)": 2.37,
+          "股息率": 0.13,
+          "市值": 78.16,
+          "近1日涨幅(2026-09-30)": 4.34,
+          "近5日涨幅(2026-09-30)": -6.27,
+          "今年以来涨幅(2026-09-30)": 4.69,
+          "净利润增速(%)(2026-06-30)": -16.64,
+          "营收增速(%)(2026-06-30)": 32.84,
+          "上季度净利润增速(%)(2026-03-31)": -63.25,
+          "上季度营收增速(%)(2026-03-31)": 5.33
+        },
+        {
+          "序号": 2,
+          "股票代码": "601118.SH",
+          "股票简称": "海南橡胶",
+          "纳入时间": "2010-01-28",
+          "申万2级": "种植业",
+          "细分概念": null,
+          "价格": 6.37,
+          "市盈率": null,
+          "市盈率ttm": null,
+          "市净率": 2.87,
+          "ROE(%)": -1.31,
+          "股息率": null,
+          "市值": 272.6,
+          "近1日涨幅(2026-09-30)": 10.02,
+          "近5日涨幅(2026-09-30)": -2.6,
+          "今年以来涨幅(2026-09-30)": 8.89,
+          "净利润增速(%)(2026-06-30)": 25.88,
+          "营收增速(%)(2026-06-30)": -25.4,
+          "上季度净利润增速(%)(2026-03-31)": -22.31,
+          "上季度营收增速(%)(2026-03-31)": -20.75
+        }
+      ]
+    },
+    {
+      "label": "stock_fund_flow_industry(即时)",
+      "category": "ranking",
+      "taxonomy": "industry",
+      "status": "AVAILABLE",
+      "rows": 90,
+      "columns": [
+        "序号",
+        "行业",
+        "行业指数",
+        "行业-涨跌幅",
+        "流入资金",
+        "流出资金",
+        "净额",
+        "公司家数",
+        "领涨股",
+        "领涨股-涨跌幅",
+        "当前价"
+      ],
+      "dtypes": {
+        "序号": "int64",
+        "行业": "str",
+        "行业指数": "float64",
+        "行业-涨跌幅": "float64",
+        "流入资金": "float64",
+        "流出资金": "float64",
+        "净额": "float64",
+        "公司家数": "int64",
+        "领涨股": "str",
+        "领涨股-涨跌幅": "float64",
+        "当前价": "float64"
+      },
+      "sample": [
+        {
+          "序号": 1,
+          "行业": "生物制品",
+          "行业指数": 6727.88,
+          "行业-涨跌幅": 4.63,
+          "流入资金": 80.96,
+          "流出资金": 66.0,
+          "净额": 14.97,
+          "公司家数": 56,
+          "领涨股": "康希诺",
+          "领涨股-涨跌幅": 20.0,
+          "当前价": 102.64
+        },
+        {
+          "序号": 2,
+          "行业": "医疗服务",
+          "行业指数": 21661.9,
+          "行业-涨跌幅": 3.11,
+          "流入资金": 133.87,
+          "流出资金": 108.33,
+          "净额": 25.54,
+          "公司家数": 56,
+          "领涨股": "南模生物",
+          "领涨股-涨跌幅": 19.87,
+          "当前价": 64.98
+        }
+      ]
+    },
+    {
+      "label": "stock_fund_flow_concept(即时)",
+      "category": "ranking",
+      "taxonomy": "concept",
+      "status": "AVAILABLE",
+      "rows": 387,
+      "columns": [
+        "序号",
+        "行业",
+        "行业指数",
+        "行业-涨跌幅",
+        "流入资金",
+        "流出资金",
+        "净额",
+        "公司家数",
+        "领涨股",
+        "领涨股-涨跌幅",
+        "当前价"
+      ],
+      "dtypes": {
+        "序号": "int64",
+        "行业": "str",
+        "行业指数": "float64",
+        "行业-涨跌幅": "float64",
+        "流入资金": "float64",
+        "流出资金": "float64",
+        "净额": "float64",
+        "公司家数": "int64",
+        "领涨股": "str",
+        "领涨股-涨跌幅": "float64",
+        "当前价": "float64"
+      },
+      "sample": [
+        {
+          "序号": 1,
+          "行业": "重组蛋白",
+          "行业指数": 851.771,
+          "行业-涨跌幅": 3.78,
+          "流入资金": 95.52,
+          "流出资金": 75.58,
+          "净额": 19.94,
+          "公司家数": 128,
+          "领涨股": "泰诺麦博",
+          "领涨股-涨跌幅": 19.99,
+          "当前价": 30.67
+        },
+        {
+          "序号": 2,
+          "行业": "细胞免疫治疗",
+          "行业指数": 1273.78,
+          "行业-涨跌幅": 3.45,
+          "流入资金": 126.44,
+          "流出资金": 97.04,
+          "净额": 29.4,
+          "公司家数": 66,
+          "领涨股": "三元基因",
+          "领涨股-涨跌幅": 15.79,
+          "当前价": 24.35
+        }
+      ]
+    }
+  ]
+}

@@ -1,11 +1,13 @@
 """Date normalization.
 
-Internal canonical date format is ``YYYY-MM-DD``. Provider (Tushare) uses
-``YYYYMMDD``; conversion happens only at the provider boundary.
+Internal canonical date format is ``YYYY-MM-DD``. Providers use a compact
+``YYYYMMDD`` at their boundary (Tushare ``trade_date``, AkShare query params);
+conversion happens only at the provider boundary.
 """
 
 from __future__ import annotations
 
+import datetime as _datetime
 import re
 from datetime import date as _date
 from datetime import timedelta
@@ -35,7 +37,7 @@ def normalize_iso_date(value: str) -> str:
 
 
 def to_provider_date(iso_date: str) -> str:
-    """``YYYY-MM-DD`` -> ``YYYYMMDD`` (Tushare style)."""
+    """``YYYY-MM-DD`` -> ``YYYYMMDD`` (compact provider form)."""
 
     return iso_date.replace("-", "")
 
@@ -54,3 +56,23 @@ def shift_calendar_days(iso_date: str, days: int) -> str:
 
     shifted = _date.fromisoformat(iso_date) + timedelta(days=days)
     return shifted.isoformat()
+
+
+def coerce_to_iso_date(value: object) -> str | None:
+    """Coerce a provider date value to canonical ``YYYY-MM-DD``.
+
+    Handles ``datetime.date`` / ``datetime.datetime`` objects (Sina calendar)
+    and ``YYYY-MM-DD`` or ``YYYYMMDD`` strings. Anything else, or an invalid
+    calendar date, returns ``None``.
+    """
+
+    if isinstance(value, _datetime.datetime):
+        return value.date().isoformat()
+    if isinstance(value, _datetime.date):
+        return value.isoformat()
+    if isinstance(value, str):
+        text = value.strip()
+        if is_valid_iso_date(text):
+            return text
+        return from_provider_date(text)
+    return None

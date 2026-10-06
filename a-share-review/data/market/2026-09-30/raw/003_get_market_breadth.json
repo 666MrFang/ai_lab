@@ -1,0 +1,218 @@
+{
+  "tool": "get_market_breadth",
+  "arguments": {
+    "date": "2026-09-30"
+  },
+  "requested_at": "2026-10-06T20:43:48",
+  "success": true,
+  "category": "required",
+  "kind": "current",
+  "provider": "akshare",
+  "error_code": null,
+  "runtime_identity": {
+    "build": "day5-r2b-akshare-real",
+    "name": "A-Share Market MCP",
+    "provider": "akshare",
+    "data_mode": "real"
+  },
+  "lineage": [
+    {
+      "source": "eastmoney",
+      "endpoint": "stock_zt_pool_em"
+    },
+    {
+      "source": "eastmoney",
+      "endpoint": "stock_zt_pool_dtgc_em"
+    },
+    {
+      "source": "eastmoney",
+      "endpoint": "stock_zt_pool_zbgc_em"
+    },
+    {
+      "source": "eastmoney",
+      "endpoint": "stock_zt_pool_zbgc_em+stock_zt_pool_em"
+    },
+    {
+      "source": "eastmoney",
+      "endpoint": "stock_zt_pool_previous_em"
+    },
+    {
+      "source": "eastmoney",
+      "endpoint": "stock_zt_pool_previous_em+stock_zt_pool_em"
+    },
+    {
+      "source": "legulegu",
+      "endpoint": "stock_market_activity_legu"
+    }
+  ],
+  "result": {
+    "success": true,
+    "date": "2026-09-30",
+    "breadth": {
+      "rising_count": 2345,
+      "falling_count": 2713,
+      "flat_count": 155
+    },
+    "limit_state": {
+      "limit_up_count": 52,
+      "limit_down_count": 9,
+      "first_limit_up_count": 40,
+      "multi_limit_up_count": 12,
+      "max_limit_height": 7,
+      "broken_limit_count": 12,
+      "broken_limit_rate": 18.75
+    },
+    "previous_limit_up": {
+      "sample_size": 57,
+      "average_change_pct": 1.2443,
+      "median_change_pct": -0.6659,
+      "positive_rate": 49.12,
+      "promotion_rate": 21.05
+    },
+    "extreme_move": {
+      "large_rise_count": null,
+      "large_fall_count": null
+    },
+    "evidence": {
+      "breadth_as_of": "2026-09-30",
+      "missing_reasons": {},
+      "definitions": {
+        "limit_up_count": {
+          "metric": "limit_up_count",
+          "source": "eastmoney",
+          "endpoint": "stock_zt_pool_em",
+          "unit": "count",
+          "universe_definition": "Eastmoney 涨停板行情股池。已验证：payload 含 688 科创板代码、不含 ST 名称；vendor docstring 声称排除科创板，但被 payload 反证。",
+          "date_semantics": "交易日 D 收盘涨停股池",
+          "historical": true
+        },
+        "limit_down_count": {
+          "metric": "limit_down_count",
+          "source": "eastmoney",
+          "endpoint": "stock_zt_pool_dtgc_em",
+          "unit": "count",
+          "universe_definition": "Eastmoney 跌停股池：当日当前跌停的全部 A 股。",
+          "date_semantics": "交易日 D 收盘跌停股池（AkShare 侧限制最近 30 个自然日）",
+          "historical": true
+        },
+        "broken_limit_count": {
+          "metric": "broken_limit_count",
+          "source": "eastmoney",
+          "endpoint": "stock_zt_pool_zbgc_em",
+          "unit": "count",
+          "universe_definition": "Eastmoney 炸板股池：当日触及涨停但当前未封板的 A 股。",
+          "date_semantics": "交易日 D 炸板股池（AkShare 侧限制最近 30 个自然日）",
+          "historical": true
+        },
+        "broken_limit_rate": {
+          "metric": "broken_limit_rate",
+          "source": "eastmoney",
+          "endpoint": "stock_zt_pool_zbgc_em+stock_zt_pool_em",
+          "unit": "percent",
+          "universe_definition": "衍生指标：broken_limit_count / (broken_limit_count + limit_up_count) * 100；分母为 0 时返回 None，绝不填 0。",
+          "date_semantics": "交易日 D（两个股池同源、同 universe）",
+          "historical": true
+        },
+        "first_limit_up_count": {
+          "metric": "first_limit_up_count",
+          "source": "eastmoney",
+          "endpoint": "stock_zt_pool_em",
+          "unit": "count",
+          "universe_definition": "Eastmoney 涨停板行情股池。已验证：payload 含 688 科创板代码、不含 ST 名称；vendor docstring 声称排除科创板，但被 payload 反证。 首板定义：连板数 == 1。",
+          "date_semantics": "交易日 D",
+          "historical": true
+        },
+        "multi_limit_up_count": {
+          "metric": "multi_limit_up_count",
+          "source": "eastmoney",
+          "endpoint": "stock_zt_pool_em",
+          "unit": "count",
+          "universe_definition": "Eastmoney 涨停板行情股池。已验证：payload 含 688 科创板代码、不含 ST 名称；vendor docstring 声称排除科创板，但被 payload 反证。 连板定义：连板数 >= 2。",
+          "date_semantics": "交易日 D",
+          "historical": true
+        },
+        "max_consecutive_limit_up": {
+          "metric": "max_consecutive_limit_up",
+          "source": "eastmoney",
+          "endpoint": "stock_zt_pool_em",
+          "unit": "count",
+          "universe_definition": "Eastmoney 涨停板行情股池。已验证：payload 含 688 科创板代码、不含 ST 名称；vendor docstring 声称排除科创板，但被 payload 反证。 最大连板数 = max(连板数)。",
+          "date_semantics": "交易日 D",
+          "historical": true
+        },
+        "previous_limit_up_sample_size": {
+          "metric": "previous_limit_up_sample_size",
+          "source": "eastmoney",
+          "endpoint": "stock_zt_pool_previous_em",
+          "unit": "count",
+          "universe_definition": "Eastmoney 昨日涨停股池：上一交易日收盘涨停的 A 股，用交易日 D 的价格评估。已验证 prev(D) 与 zt(D-1) 代码基本一致。",
+          "date_semantics": "前一交易日涨停、交易日 D 表现",
+          "historical": true
+        },
+        "previous_limit_up_average_change_pct": {
+          "metric": "previous_limit_up_average_change_pct",
+          "source": "eastmoney",
+          "endpoint": "stock_zt_pool_previous_em",
+          "unit": "percent",
+          "universe_definition": "昨日涨停股池在交易日 D 的涨跌幅均值。",
+          "date_semantics": "交易日 D",
+          "historical": true
+        },
+        "previous_limit_up_median_change_pct": {
+          "metric": "previous_limit_up_median_change_pct",
+          "source": "eastmoney",
+          "endpoint": "stock_zt_pool_previous_em",
+          "unit": "percent",
+          "universe_definition": "昨日涨停股池在交易日 D 的涨跌幅中位数。",
+          "date_semantics": "交易日 D",
+          "historical": true
+        },
+        "previous_limit_up_positive_rate": {
+          "metric": "previous_limit_up_positive_rate",
+          "source": "eastmoney",
+          "endpoint": "stock_zt_pool_previous_em",
+          "unit": "percent",
+          "universe_definition": "昨日涨停股池在交易日 D 上涨占比：涨跌幅 > 0 严格判定；涨跌幅 == 0 不计入 positive。",
+          "date_semantics": "交易日 D",
+          "historical": true
+        },
+        "promotion_rate": {
+          "metric": "promotion_rate",
+          "source": "eastmoney",
+          "endpoint": "stock_zt_pool_previous_em+stock_zt_pool_em",
+          "unit": "percent",
+          "universe_definition": "衍生指标：prev(D) ∩ limit_up(D) 的数量 / prev(D) sample_size * 100；sample_size 为 0 时返回 None。",
+          "date_semantics": "交易日 D",
+          "historical": true
+        },
+        "advance_count": {
+          "metric": "advance_count",
+          "source": "legulegu",
+          "endpoint": "stock_market_activity_legu",
+          "unit": "count",
+          "universe_definition": "乐咕乐股网赚钱效应快照：item `上涨`。CURRENT_ONLY。",
+          "date_semantics": "页面统计日期（最近一个已完成交易日，通常仅当日可用）",
+          "historical": false
+        },
+        "decline_count": {
+          "metric": "decline_count",
+          "source": "legulegu",
+          "endpoint": "stock_market_activity_legu",
+          "unit": "count",
+          "universe_definition": "乐咕乐股网赚钱效应快照：item `下跌`。CURRENT_ONLY。",
+          "date_semantics": "页面统计日期（CURRENT_ONLY）",
+          "historical": false
+        },
+        "flat_count": {
+          "metric": "flat_count",
+          "source": "legulegu",
+          "endpoint": "stock_market_activity_legu",
+          "unit": "count",
+          "universe_definition": "乐咕乐股网赚钱效应快照：item `平盘`。CURRENT_ONLY。",
+          "date_semantics": "页面统计日期（CURRENT_ONLY）",
+          "historical": false
+        }
+      }
+    }
+  }
+}

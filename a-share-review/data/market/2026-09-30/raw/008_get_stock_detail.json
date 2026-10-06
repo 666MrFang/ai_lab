@@ -1,0 +1,38 @@
+{
+  "tool": "get_stock_detail",
+  "arguments": {
+    "date": "2026-09-30",
+    "stock_code": "600519.SH"
+  },
+  "requested_at": "2026-10-06T20:45:52",
+  "success": true,
+  "category": "optional",
+  "kind": "optional",
+  "provider": "akshare",
+  "error_code": null,
+  "runtime_identity": {
+    "build": "day5-r2b-akshare-real",
+    "name": "A-Share Market MCP",
+    "provider": "akshare",
+    "data_mode": "real"
+  },
+  "lineage": [],
+  "result": {
+    "success": true,
+    "date": "2026-09-30",
+    "stock": {
+      "code": "600519.SH",
+      "name": "贵州茅台",
+      "sector_name": null,
+      "previous_close": 1235.58,
+      "open": 1239.53,
+      "high": 1268.0,
+      "low": 1236.05,
+      "close": 1258.62,
+      "change_pct": 1.86,
+      "volume": 3833098.0,
+      "turnover": 4797246636.0,
+      "turnover_rate": 0.3066278230904064
+    }
+  }
+}

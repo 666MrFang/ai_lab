@@ -1,0 +1,156 @@
+"""Evidence collector: tool collection only (no Agent, no Eval, no review.md).
+
+Collection != Analysis. This module only gathers Tool Evidence and classifies
+collection completeness against the Production Capability Set.
+"""
+
+from __future__ import annotations
+
+import datetime as dt
+from dataclasses import dataclass, field
+from typing import Any, Callable, Dict, List, Optional
+
+from . import capabilities as caps
+from .normalize import extract_lineage, normalize_records
+
+STATUS_SUCCESS = "SUCCESS"
+STATUS_PARTIAL = "PARTIAL"
+STATUS_FAILED = "FAILED"
+
+
+@dataclass
+class RawRecord:
+    tool: str
+    arguments: Dict[str, Any]
+    requested_at: str
+    success: bool
+    category: str  # required | optional | unimplemented
+    kind: str      # current | baseline | optional | unimplemented
+    provider: str
+    runtime_identity: Dict[str, Any]
+    result: Dict[str, Any]
+    error_code: Optional[str] = None
+    lineage: List[Dict[str, str]] = field(default_factory=list)
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "tool": self.tool,
+            "arguments": self.arguments,
+            "requested_at": self.requested_at,
+            "success": self.success,
+            "category": self.category,
+            "kind": self.kind,
+            "provider": self.provider,
+            "error_code": self.error_code,
+            "runtime_identity": self.runtime_identity,
+            "lineage": self.lineage,
+            "result": self.result,
+        }
+
+
+@dataclass
+class Collection:
+    date: str
+    started_at: str
+    finished_at: str
+    runtime_identity: Dict[str, Any]
+    status: str
+    complete: bool
+    records: List[RawRecord]
+    tools_requested: List[str]
+    tools_success: List[str]
+    tools_failed: List[str]
+    missing_capabilities: List[str]
+    incomplete_evidence: List[str]
+    missing_optional: List[str]
+
+
+def _signature(tool: str, arguments: Dict[str, Any]) -> str:
+    return "%s(%s)" % (tool, ", ".join("%s=%s" % (k, arguments[k]) for k in sorted(arguments)))
+
+
+def _is_incomplete_baseline(record: RawRecord) -> bool:
+    if record.tool != "get_market_metric_baseline" or not record.success:
+        return False
+    baseline = (record.result or {}).get("baseline") or {}
+    return baseline.get("complete") is not True
+
+
+def collect(caller: Any, date: str, clock: Optional[Callable[[], str]] = None) -> Collection:
+    now = clock or (lambda: dt.datetime.now().isoformat(timespec="seconds"))
+    runtime_identity = dict(getattr(caller, "runtime_identity", {}) or {})
+    provider = runtime_identity.get("provider", "akshare")
+    started = now()
+
+    plan = (
+        [(t, a, "required", k) for t, a, k in caps.required_requests(date)]
+        + [(t, a, "optional", k) for t, a, k in caps.optional_requests(date)]
+        + [(t, a, "unimplemented", k) for t, a, k in caps.unimplemented_requests(date)]
+    )
+
+    records: List[RawRecord] = []
+    for tool, arguments, category, kind in plan:
+        requested_at = now()
+        result = caller.call(tool, arguments)
+        success = bool(result.get("success"))
+        error_code = result.get("error_code")
+        records.append(
+            RawRecord(
+                tool=tool,
+                arguments=arguments,
+                requested_at=requested_at,
+                success=success,
+                category=category,
+                kind=kind,
+                provider=provider,
+                runtime_identity=runtime_identity,
+                result=result,
+                error_code=error_code,
+                lineage=extract_lineage(result),
+            )
+        )
+
+    # --- classify ---------------------------------------------------------
+    required = [r for r in records if r.category == "required"]
+    required_failed = [r for r in required if not r.success]
+    incomplete = [
+        caps.baseline_key(
+            (r.result.get("baseline") or {}).get("metric"),
+            date,
+            (r.result.get("baseline") or {}).get("window"),
+        )
+        for r in required
+        if _is_incomplete_baseline(r)
+    ]
+
+    unimplemented = [r.tool for r in records if r.category == "unimplemented"]
+    missing_optional = [r.tool for r in records if r.category == "optional" and not r.success]
+    missing_capabilities = sorted(set(unimplemented))
+
+    if required_failed:
+        status, complete = STATUS_FAILED, False
+    elif incomplete:
+        status, complete = STATUS_PARTIAL, False
+    else:
+        status, complete = STATUS_SUCCESS, True
+
+    return Collection(
+        date=date,
+        started_at=started,
+        finished_at=now(),
+        runtime_identity=runtime_identity,
+        status=status,
+        complete=complete,
+        records=records,
+        tools_requested=[_signature(r.tool, r.arguments) for r in records],
+        tools_success=[_signature(r.tool, r.arguments) for r in records if r.success],
+        tools_failed=[_signature(r.tool, r.arguments) for r in records
+                      if not r.success and r.category != "unimplemented"],
+        missing_capabilities=missing_capabilities,
+        incomplete_evidence=sorted(set(incomplete)),
+        missing_optional=sorted(set(missing_optional)),
+    )
+
+
+def normalized_for(collection: Collection) -> Dict[str, Any]:
+    return normalize_records(collection.records, collection.date)

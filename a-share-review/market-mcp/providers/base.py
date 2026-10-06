@@ -9,7 +9,14 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import List, Sequence
 
-from domain.models import IndexQuote, MarketHistorySummary, StockQuote
+from domain.models import (
+    IndexQuote,
+    MarketBreadth,
+    MarketHistorySummary,
+    MetricBaseline,
+    StockQuote,
+)
+from errors import ErrorCode, MarketError
 
 
 class MarketDataProvider(ABC):
@@ -33,3 +40,21 @@ class MarketDataProvider(ABC):
     @abstractmethod
     def is_trading_day(self, date: str) -> bool:
         """Whether ``date`` is an open trading day."""
+
+    def get_market_breadth(self, date: str) -> MarketBreadth:
+        """Breadth for ``date`` (limit ecology historical; breadth current-only)."""
+
+        raise MarketError(
+            ErrorCode.REAL_PROVIDER_NOT_IMPLEMENTED,
+            f"{type(self).__name__} does not implement get_market_breadth",
+        )
+
+    def get_market_metric_baseline(
+        self, date: str, metric: str, window: int
+    ) -> MetricBaseline:
+        """As-of historical baseline for a single breadth metric."""
+
+        raise MarketError(
+            ErrorCode.REAL_PROVIDER_NOT_IMPLEMENTED,
+            f"{type(self).__name__} does not implement get_market_metric_baseline",
+        )
