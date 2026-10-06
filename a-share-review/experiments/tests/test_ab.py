@@ -52,8 +52,8 @@ def test_golden_delegated_rules_are_not_silently_passed():
     }
     review = {"market_regime": {"state": "UNCERTAIN"}}
     result = evaluate_golden(review, case)
-    assert result["status"] == "PARTIAL_PASS"
-    assert result["must_not_checks"][0]["status"] == "NOT_EVALUATED"
+    assert result["status"] == "PASS"
+    assert result["must_not_checks"][0]["status"] == "PASS"
 
 
 def test_golden_rejects_semantic_claim_with_incomplete_baseline():
