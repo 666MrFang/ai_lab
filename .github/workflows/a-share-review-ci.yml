@@ -24,7 +24,9 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install deterministic test dependencies
-        run: python -m pip install --upgrade pip pytest jsonschema
+        run: python -m pip install --upgrade pip pytest jsonschema pandas
+      - name: Configure import roots
+        run: echo "PYTHONPATH=$PWD:$PWD/market-mcp" >> "$GITHUB_ENV"
       - name: Run deterministic product suite
         run: >-
           pytest -q
