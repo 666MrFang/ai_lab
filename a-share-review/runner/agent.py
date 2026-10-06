@@ -180,13 +180,9 @@ class ReferenceAgent:
             return {
                 "sector_name": row.get("sector_name") or "UNKNOWN",
                 "change_pct": row.get("change_pct"),
-                "turnover": row.get("turnover_cny"),
-                "leading_stocks": [],
-                "evidence": [_ev(
-                    "THS industry snapshot; up=%s down=%s"
-                    % (row.get("up_count"), row.get("down_count")),
-                    "evidence_store",
-                )],
+                "turnover_cny": row.get("turnover_cny"),
+                "change_5d_pct": None,
+                "change_20d_pct": None,
             }
 
         top_gainers = [sector_view(row) for row in sector_rows[:5]]
@@ -194,15 +190,13 @@ class ReferenceAgent:
         main_theme_candidates = [
             {
                 "sector_name": row.get("sector_name") or "UNKNOWN",
-                "status": "CANDIDATE",
-                "reason": "当日行业涨幅排名 Top%d；仅为候选，不等同于主线确认。" % (rank + 1),
+                "confidence": "LOW",
                 "evidence": [_ev(
                     "THS industry rank=%d change_pct=%s turnover_cny=%s"
                     % (rank + 1, row.get("change_pct"), row.get("turnover_cny")),
                     "evidence_store",
                     "MEDIUM",
                 )],
-                "counter_evidence": [],
                 "evidence_gaps": [
                     "缺少同口径历史横截面排名/板块内部核心股与事件证据"
                 ],
