@@ -24,7 +24,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install deterministic test dependencies
-        run: python -m pip install --upgrade pip pytest jsonschema pandas
+        run: python -m pip install --upgrade pip pytest jsonschema pandas "mcp>=1.0"
       - name: Run deterministic product suite
         env:
           PYTHONPATH: .
