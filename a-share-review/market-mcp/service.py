@@ -103,6 +103,10 @@ class MarketService:
         provider = self._get_provider()
         return provider.get_sector_membership(sector_name)
 
+    def get_stock_history_summary(self, date: str, stock_code: str):
+        self._validate_date(date)
+        return self._get_provider().get_stock_history_summary(date, stock_code)
+
     def get_stock_news(self, date: str, stock_code: str, limit: int = 10):
         self._validate_date(date)
         if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
