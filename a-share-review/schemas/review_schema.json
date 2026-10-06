@@ -638,7 +638,15 @@
 
         "meaning": {
           "type": "string"
-        }
+        },
+        "condition_id": { "type": ["string", "null"] },
+        "metric": { "type": ["string", "null"] },
+        "operator": {
+          "enum": ["gt", "gte", "lt", "lte", "eq", null]
+        },
+        "expected_value": { "type": ["number", "null"] },
+        "horizon_sessions": { "type": ["integer", "null"], "minimum": 1 },
+        "evidence_ref": { "type": ["string", "null"] }
       }
     }
   }
