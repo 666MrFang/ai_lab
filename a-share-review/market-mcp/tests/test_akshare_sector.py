@@ -313,6 +313,29 @@ class SectorTest(unittest.TestCase):
             provider(taxonomy=empty_tax).get_sector_ranking(REVIEW, "top", 5)
         self.assertEqual(ctx.exception.error_code, ErrorCode.DATA_NOT_AVAILABLE)
 
+    def test_33a_native_ths_membership_preferred(self):
+        class NativeThsClient(FakeSectorClient):
+            def stock_board_industry_cons_ths(self, symbol=None):
+                return pd.DataFrame([
+                    {"代码": 688981, "名称": "中芯国际", "涨跌幅": 7.82,
+                     "换手": 2.5, "成交额": "128.5亿", "流通市值": "5000亿"},
+                    {"代码": "603986", "名称": "兆易创新", "涨跌幅": 4.2,
+                     "换手": 3.1, "成交额": "20.5亿", "流通市值": "800亿"},
+                ])
+        p = AkShareProvider(client=NativeThsClient(), today=TODAY)
+        membership = p.get_sector_membership("半导体")
+        self.assertEqual(membership.source_family, "ths")
+        self.assertEqual(membership.lineage.endpoint, "stock_board_industry_cons_ths")
+        self.assertEqual([x.stock_code for x in membership.stocks], ["688981", "603986"])
+        self.assertEqual(membership.stocks[0].turnover_cny, 128.5e8)
+        # 流通市值 must not be silently promoted to total market cap.
+        self.assertIsNone(membership.stocks[0].market_cap_cny)
+
+    def test_33b_native_ths_missing_keeps_verified_sina_fallback(self):
+        membership = provider().get_sector_membership("房地产")
+        self.assertEqual(membership.source_family, "sina")
+        self.assertEqual(membership.lineage.endpoint, "stock_sector_detail")
+
     # 34
     def test_34_market_regression_placeholder(self):
         # Full Market suite runs separately; here we assert market tools still import.
