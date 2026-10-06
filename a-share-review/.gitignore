@@ -1,0 +1,12 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+
+# Local runtime artifacts
+failed_runs/
+output/.tmp-*/
+data/market/.tmp-*/
+data/review_history/.tmp-*/
+data/review_history/.bak-*/
