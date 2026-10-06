@@ -107,6 +107,12 @@ class MarketService:
         self._validate_date(date)
         return self._get_provider().get_stock_history_summary(date, stock_code)
 
+    def get_stock_disclosures(self, date: str, stock_code: str, limit: int = 10):
+        self._validate_date(date)
+        if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
+            raise MarketError(ErrorCode.INVALID_WINDOW, "limit must be a positive integer")
+        return self._get_provider().get_stock_disclosures(date, stock_code, limit)
+
     def get_stock_news(self, date: str, stock_code: str, limit: int = 10):
         self._validate_date(date)
         if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
