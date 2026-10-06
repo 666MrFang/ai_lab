@@ -103,6 +103,17 @@ def collect(caller: Any, date: str, clock: Optional[Callable[[], str]] = None) -
             lineage=extract_lineage(result),
         )
         records.append(record)
+        # Production CLI progress must distinguish a slow upstream from a dead
+        # process and expose the exact failing capability without leaking data.
+        print(
+            "COLLECT|%s|%s|%s%s" % (
+                tool,
+                "PASS" if success else "FAIL",
+                category.upper(),
+                "" if success else "|%s" % (error_code or "UNKNOWN_ERROR"),
+            ),
+            flush=True,
+        )
         return record
 
     for tool, arguments, category, kind in plan:
