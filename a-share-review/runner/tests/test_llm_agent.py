@@ -87,3 +87,12 @@ def test_deepseek_key_is_explicitly_forwarded_but_unrelated_secret_is_not(tmp_pa
     ExternalLLMAgent(["fake"])(_input(tmp_path))
     assert seen["env"]["DEEPSEEK_API_KEY"] == "test-key"
     assert "UNRELATED_SECRET" not in seen["env"]
+
+
+def test_failed_provider_execution_keeps_stderr_for_diagnostics(tmp_path, monkeypatch):
+    monkeypatch.setattr(subprocess, "run", lambda *a, **k:
+        subprocess.CompletedProcess(a[0], 3, "", "DeepSeek HTTP 400: bad model"))
+    agent = ExternalLLMAgent(["fake"])
+    with pytest.raises(AgentExecutionError):
+        agent(_input(tmp_path))
+    assert "DeepSeek HTTP 400" in agent.last_execution["stderr"]
