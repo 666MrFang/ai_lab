@@ -118,6 +118,14 @@ def collect(caller: Any, date: str, clock: Optional[Callable[[], str]] = None) -
         for sector in ((ranking_record.result or {}).get("sectors") or [])[:3]:
             name = sector.get("sector_name")
             if name:
+                # THS history is the same evidence family as THS ranking and
+                # gives the pattern engine real 5d/20d persistence context.
+                call_and_record(
+                    "get_sector_history_summary",
+                    {"date": date, "sector_name": name},
+                    "optional",
+                    "sector_history",
+                )
                 call_and_record(
                     "get_sector_membership",
                     {"sector_name": name},
