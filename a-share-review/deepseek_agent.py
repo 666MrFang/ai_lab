@@ -51,6 +51,9 @@ def main() -> int:
         "their evidence_id values; never invent, rename, aggregate, or reconstruct evidence. "
         "Index quotes outside that registry may be stated as facts from normalized_evidence but "
         "must not be converted into invented metric_claims/evidence_registry entries. "
+        "For stock possible_drivers, set causal_status to HYPOTHESIS or UNSUPPORTED unless "
+        "the supplied evidence explicitly establishes causality. SUPPORTED requires non-empty "
+        "causal_evidence_refs; news existence or timing alone is not causal proof. "
         "Return exactly one JSON object "
         "matching the schema; no markdown fences and no prose outside JSON."
     )
