@@ -216,9 +216,10 @@ class EvidenceStoreTest(unittest.TestCase):
     # 8
     def test_08_unimplemented_capability_recorded(self):
         collection = collect_with(base_responses())
-        # News is now a real optional capability; an unimplemented response is
-        # recorded as an optional gap rather than a globally missing capability.
-        self.assertIn("get_stock_news", collection.missing_optional)
+        # With no candidate stocks from the fixture, stock-news is not requested;
+        # absence of a request must not be misreported as a missing capability.
+        self.assertNotIn("get_stock_news", collection.missing_capabilities)
+        self.assertNotIn("get_stock_news", collection.missing_optional)
         self.assertNotIn("get_sector_ranking", collection.missing_capabilities)
         self.assertNotEqual(collection.status, STATUS_FAILED)
 
