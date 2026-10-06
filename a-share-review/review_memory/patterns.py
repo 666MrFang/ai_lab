@@ -77,6 +77,16 @@ class PatternEngine:
             if record.get("date", "") >= as_of_date or record.get("status") != "SETTLED":
                 continue
             for state in record.get("pattern_states") or []:
+                # Sector-specific outlooks must never borrow outcomes from a
+                # different industry that merely shares the same numeric state.
+                current_sector_id = current_state.get("sector_id")
+                state_sector_id = state.get("sector_id")
+                if current_sector_id and state_sector_id != current_sector_id:
+                    continue
+                if (not current_sector_id
+                        and current_state.get("sector_name")
+                        and state.get("sector_name") != current_state.get("sector_name")):
+                    continue
                 if state_signature(state) != signature:
                     continue
                 value = (state.get("outcomes") or {}).get(metric)
