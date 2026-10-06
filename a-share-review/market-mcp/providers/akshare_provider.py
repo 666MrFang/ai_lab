@@ -1242,10 +1242,13 @@ class AkShareProvider(MarketDataProvider):
                     change_pct=to_float(row.get("涨跌幅")),
                     turnover_cny=self._ths_amount_to_cny(row.get("成交额")),
                     turnover_rate_pct=to_float(row.get("换手")),
-                    # THS membership exposes circulating market value, not
-                    # total market cap. Capacity-core requires total market cap,
-                    # so fail closed instead of relabelling 流通市值 as 市值.
+                    # Keep total and circulating market cap semantically
+                    # separate. Circulating cap can be used only as a lower
+                    # bound for total cap (circulating <= total).
                     market_cap_cny=None,
+                    circulating_market_cap_cny=self._ths_amount_to_cny(
+                        row.get("流通市值")
+                    ),
                 )
             )
         if not members:

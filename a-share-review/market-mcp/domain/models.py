@@ -233,6 +233,7 @@ class SectorMember:
     turnover_cny: Optional[float]
     turnover_rate_pct: Optional[float]
     market_cap_cny: Optional[float]
+    circulating_market_cap_cny: Optional[float] = None
 
     def to_tool_dict(self) -> dict:
         return {
@@ -242,6 +243,7 @@ class SectorMember:
             "turnover_cny": self.turnover_cny,
             "turnover_rate_pct": self.turnover_rate_pct,
             "market_cap_cny": self.market_cap_cny,
+            "circulating_market_cap_cny": self.circulating_market_cap_cny,
         }
 
 

@@ -143,8 +143,12 @@ def collect(caller: Any, date: str, clock: Optional[Callable[[], str]] = None) -
                     selected = []
                     for rank, member in enumerate(members, start=1):
                         market_cap = member.get("market_cap_cny")
+                        circulating_cap = member.get("circulating_market_cap_cny")
                         if rank <= 3 or (
                             market_cap is not None and float(market_cap) >= 50_000_000_000
+                        ) or (
+                            circulating_cap is not None
+                            and float(circulating_cap) >= 50_000_000_000
                         ):
                             code = member.get("stock_code")
                             if code and code not in selected:
