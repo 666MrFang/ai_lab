@@ -205,6 +205,46 @@ class EvidenceStoreTest(unittest.TestCase):
         self.assertFalse(self.store.exists(DATE))
 
     # 7
+    def test_06a_required_network_error_retries_and_recovers(self):
+        responses = base_responses()
+
+        class FlakyCaller(FakeCaller):
+            def __init__(self, responses):
+                super().__init__(responses)
+                self.attempts = 0
+
+            def call(self, tool, arguments):
+                if tool == "get_index_performance":
+                    self.attempts += 1
+                    if self.attempts < 3:
+                        return {"success": False, "error_code": "NETWORK_ERROR", "error": "transient"}
+                return super().call(tool, arguments)
+
+        caller = FlakyCaller(responses)
+        with mock.patch("collector.collector.time.sleep"):
+            collection = collect(caller, DATE)
+        self.assertEqual(collection.status, STATUS_SUCCESS)
+        self.assertEqual(caller.attempts, 3)
+
+    def test_06b_required_semantic_error_is_not_retried(self):
+        responses = base_responses()
+
+        class SemanticFailureCaller(FakeCaller):
+            def __init__(self, responses):
+                super().__init__(responses)
+                self.attempts = 0
+
+            def call(self, tool, arguments):
+                if tool == "get_index_performance":
+                    self.attempts += 1
+                    return {"success": False, "error_code": "DATA_NOT_AVAILABLE", "error": "x"}
+                return super().call(tool, arguments)
+
+        caller = SemanticFailureCaller(responses)
+        collection = collect(caller, DATE)
+        self.assertEqual(collection.status, STATUS_FAILED)
+        self.assertEqual(caller.attempts, 1)
+
     def test_07_optional_failure_does_not_fail_collection(self):
         responses = base_responses()
         responses[key("get_stock_detail", date=DATE, stock_code="600519.SH")] = {
