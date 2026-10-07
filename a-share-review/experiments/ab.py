@@ -9,6 +9,7 @@ from typing import Any, Dict
 from runner.agent import ReferenceAgent
 from runner.runner import run_review
 from golden.evaluator import evaluate_golden
+from experiments.quality import score_review
 
 REPO = Path(__file__).resolve().parents[1]
 
@@ -77,6 +78,13 @@ def run_ab(*, date: str, data_root: str, work_root: str, candidate_agent: Any,
         reference_review = _load(ref_out / date / "review.json")
         candidate_review = _load(cand_out / date / "review.json")
         result["comparison"] = compare_reviews(reference_review, candidate_review)
+        result["quality"] = {
+            "reference": score_review(reference_review),
+            "candidate": score_review(candidate_review),
+        }
+        result["quality"]["candidate_minus_reference"] = (
+            result["quality"]["candidate"]["score"] - result["quality"]["reference"]["score"]
+        )
         case_path = REPO / "golden" / "cases" / ("%s.json" % date)
         if case_path.exists():
             case = _load(case_path)
