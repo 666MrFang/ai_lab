@@ -21,6 +21,7 @@ def responses_with_verified_membership():
         "success": True,
         "sector_id": "881153", "sector_name": "房地产", "taxonomy": "industry",
         "source_family": "sina", "membership_semantics": "CURRENT_MEMBERSHIP_ONLY",
+        "observed_session_date": DATE,
         "count": 2,
         "stocks": [
             {"stock_code": "600663", "stock_name": "陆家嘴", "change_pct": 3.2,
