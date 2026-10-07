@@ -21,6 +21,52 @@ def _money(value: Any) -> str:
     return "%.0f" % value
 
 
+def _canonical_stock_market_facts(stock: Dict[str, Any], normalized: Dict[str, Any]) -> str:
+    code = str(stock.get("code") or "")
+    lines = []
+    hot = next(
+        (item for item in (normalized.get("hot_stocks") or [])
+         if str(item.get("stock_code") or "") == code),
+        None,
+    )
+    if hot is not None:
+        lines.append(
+            "%s涨%s%%，连续%s个涨停，成交额%s，换手率%s%%，总市值%s，首次封板时间%s，炸板次数%s。"
+            % (
+                escape(str(hot.get("date") or normalized.get("date") or "")),
+                escape(str(hot.get("change_pct"))),
+                escape(str(hot.get("consecutive_limit_up"))),
+                _money(hot.get("turnover_cny")),
+                escape(str(hot.get("turnover_rate_pct"))),
+                _money(hot.get("total_market_cap_cny")),
+                escape(str(hot.get("first_limit_time"))),
+                escape(str(hot.get("broken_count"))),
+            )
+        )
+    for membership in (normalized.get("sector_memberships") or {}).values():
+        for member in membership.get("stocks") or []:
+            if str(member.get("stock_code") or "") != code:
+                continue
+            lines.append(
+                "%s板块成分股口径涨跌幅%s，成交额%s，换手率%s%%，总市值%s。"
+                % (
+                    escape(str(membership.get("sector_name") or stock.get("sector_name") or "—")),
+                    _pct(member.get("change_pct")),
+                    _money(member.get("turnover_cny")),
+                    escape(str(member.get("turnover_rate_pct"))),
+                    _money(member.get("market_cap_cny")),
+                )
+            )
+            break
+    history = (normalized.get("stock_history") or {}).get(code) or {}
+    if history:
+        lines.append(
+            "历史行情：5日%s，20日%s。"
+            % (_pct(history.get("change_pct_5d")), _pct(history.get("change_pct_20d")))
+        )
+    return "<br>".join(lines)
+
+
 def _stock_fact_groups(stock: Dict[str, Any]) -> tuple[str, str, str]:
     market, news, disclosures = [], [], []
     for fact in stock.get("facts") or []:
@@ -81,7 +127,9 @@ def render_dashboard(
     )
     stock_rows_parts = []
     for x in review.get("stocks") or []:
-        market_facts, news_facts, disclosure_facts = _stock_fact_groups(x)
+        model_market_facts, news_facts, disclosure_facts = _stock_fact_groups(x)
+        canonical_market_facts = _canonical_stock_market_facts(x, normalized or {})
+        market_facts = canonical_market_facts or model_market_facts
         stock_rows_parts.append(
             "<tr><td><b>%s</b><br><small>%s</small></td><td>%s</td><td>%s</td>"
             "<td>%s</td><td>%s</td><td>%s</td></tr>" % (
