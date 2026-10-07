@@ -5,6 +5,7 @@ collection completeness against the Production Capability Set.
 """
 
 from __future__ import annotations
+import time
 
 import datetime as dt
 from dataclasses import dataclass, field
@@ -94,6 +95,16 @@ def collect(caller: Any, date: str, clock: Optional[Callable[[], str]] = None) -
     def call_and_record(tool, arguments, category, kind):
         requested_at = now()
         result = caller.call(tool, arguments)
+        # Live public-data endpoints occasionally fail transiently. Retry only
+        # transport/network failures, never semantic/data errors, and only for
+        # REQUIRED evidence so optional enrichment cannot amplify traffic.
+        if category == "required" and result.get("error_code") == "NETWORK_ERROR":
+            for retry_no in range(1, 3):
+                print("COLLECT_RETRY|%s|%d/2|NETWORK_ERROR" % (tool, retry_no), flush=True)
+                time.sleep(0.5 * retry_no)
+                result = caller.call(tool, arguments)
+                if result.get("success") or result.get("error_code") != "NETWORK_ERROR":
+                    break
         success = bool(result.get("success"))
         error_code = result.get("error_code")
         record = RawRecord(
@@ -167,7 +178,8 @@ def collect(caller: Any, date: str, clock: Optional[Callable[[], str]] = None) -
                         if len(selected) >= 5:
                             break
                     # Strong-stock ranking needs a comparable 5d return
-                    # for every current member, not only today's top movers.
+                    # for every observable member; restricting this to today's
+                    # movers would silently change the product definition.
                     for member in members:
                         code = member.get("stock_code")
                         if code:
