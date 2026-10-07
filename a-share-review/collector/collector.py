@@ -294,4 +294,9 @@ def collect(caller: Any, date: str, clock: Optional[Callable[[], str]] = None) -
 
 
 def normalized_for(collection: Collection) -> Dict[str, Any]:
-    return normalize_records(collection.records, collection.date)
+    quarantined = set(collection.temporal_quarantine or [])
+    reasoning_records = [
+        r for r in collection.records
+        if _signature(r.tool, r.arguments) not in quarantined
+    ]
+    return normalize_records(reasoning_records, collection.date)
