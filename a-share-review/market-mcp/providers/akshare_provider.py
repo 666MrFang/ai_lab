@@ -942,6 +942,56 @@ class AkShareProvider(MarketDataProvider):
             definitions=definitions,
         )
 
+    def get_limit_up_stocks(self, date: str, limit: int = 10) -> List[Dict[str, Any]]:
+        """Return date-exact limit-up/continuation candidates from Eastmoney.
+
+        This is a historical short-term-attention fact set, not a popularity
+        ranking and not a causal/leader conclusion. Ranking is deterministic:
+        consecutive boards desc, turnover desc, code asc.
+        """
+        if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
+            raise MarketError(ErrorCode.INVALID_WINDOW, "limit must be a positive integer")
+        if not self.is_trading_day(date):
+            raise MarketError(ErrorCode.NOT_TRADING_DAY, "%s is not a trading day" % date)
+        records, reason = self._fetch_pool("zt", date)
+        if records is None:
+            raise MarketError(
+                ErrorCode.DATA_NOT_AVAILABLE,
+                "limit-up stock pool unavailable for %s: %s" % (date, reason),
+            )
+        items: List[Dict[str, Any]] = []
+        for row in records:
+            code = _pad_symbol(row.get("代码"))
+            if not code:
+                continue
+            items.append({
+                "date": date,
+                "stock_code": code,
+                "stock_name": _clean_text(row.get("名称")),
+                "change_pct": to_float(row.get("涨跌幅")),
+                "consecutive_limit_up": _to_int(row.get("连板数")),
+                "turnover_cny": to_float(row.get("成交额")),
+                "turnover_rate_pct": to_float(row.get("换手率")),
+                "total_market_cap_cny": to_float(row.get("总市值")),
+                "circulating_market_cap_cny": to_float(row.get("流通市值")),
+                "industry_name": _clean_text(row.get("所属行业")),
+                "first_limit_time": _clean_text(row.get("首次封板时间")),
+                "last_limit_time": _clean_text(row.get("最后封板时间")),
+                "broken_count": _to_int(row.get("炸板次数")),
+                "temporal_semantics": "EXACT_TRADING_DATE",
+                "source_family": "eastmoney_limit_pool",
+                "lineage": {
+                    "library": "akshare", "source": "eastmoney",
+                    "endpoint": "stock_zt_pool_em",
+                },
+            })
+        items.sort(key=lambda x: (
+            -(x.get("consecutive_limit_up") or 0),
+            -(x.get("turnover_cny") or 0),
+            x.get("stock_code") or "",
+        ))
+        return items[:limit]
+
     def get_market_metric_baseline(
         self, date: str, metric: str, window: int
     ) -> MetricBaseline:

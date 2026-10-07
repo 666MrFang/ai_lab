@@ -35,6 +35,7 @@ REQUIRED_BASELINE_METRICS: Tuple[Tuple[str, int], ...] = (
 )
 OPTIONAL_REQUESTS: Tuple[Tuple[str, Dict[str, Any]], ...] = (
     ("get_stock_detail", {"stock_code": "600519.SH"}),
+    ("get_limit_up_stocks", {"limit": 10}),
 )
 UNIMPLEMENTED_TOOLS: Tuple[str, ...] = ()
 

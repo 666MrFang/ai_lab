@@ -89,6 +89,12 @@ class MarketService:
         provider = self._get_provider()
         return provider.get_market_metric_baseline(date, metric, window)
 
+    def get_limit_up_stocks(self, date: str, limit: int = 10):
+        self._validate_date(date)
+        if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
+            raise MarketError(ErrorCode.INVALID_WINDOW, "limit must be a positive integer")
+        return self._get_provider().get_limit_up_stocks(date, limit)
+
     def get_sector_ranking(self, date: str, direction: str = "top", limit: int = 10):
         self._validate_date(date)
         provider = self._get_provider()

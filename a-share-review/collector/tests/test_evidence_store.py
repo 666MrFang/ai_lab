@@ -85,6 +85,11 @@ def base_responses(broken20=True, promotion20=True):
             "stock": {"code": "600519.SH", "name": "贵州茅台", "close": 1258.62,
                       "change_pct": 1.86},
         },
+        key("get_limit_up_stocks", date=DATE, limit=10): {
+            "success": True, "date": DATE, "count": 0,
+            "temporal_semantics": "EXACT_TRADING_DATE",
+            "stocks": [],
+        },
         key("get_sector_ranking", date=DATE, direction="top", limit=1000): {
             "success": True, "date": DATE, "direction": "top", "count": 2,
             "sectors": [

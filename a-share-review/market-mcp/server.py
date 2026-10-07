@@ -100,6 +100,29 @@ def get_index_performance(date: str) -> dict[str, Any]:
 
 
 @mcp.tool()
+def get_limit_up_stocks(date: str, limit: int = 10) -> dict[str, Any]:
+    """获取指定交易日涨停/连板核心候选。历史日期严格使用当日涨停池。
+
+    这是短线关注度事实，不等同于东方财富人气榜，也不直接判定“龙头”。
+    """
+    mode_error = config_mode_error(SETTINGS)
+    if mode_error is not None:
+        return mode_error
+    if SETTINGS.data_mode != DATA_MODE_REAL:
+        return error_payload(ErrorCode.MOCK_NOT_SUPPORTED, "real market data required", date=date)
+    try:
+        stocks = SERVICE.get_limit_up_stocks(date, limit)
+    except MarketError as exc:
+        return error_payload(exc.error_code, exc.message, date=date)
+    return {
+        "success": True, "date": date, "count": len(stocks),
+        "temporal_semantics": "EXACT_TRADING_DATE",
+        "ranking_definition": "consecutive_limit_up desc, turnover_cny desc, stock_code asc",
+        "stocks": stocks,
+    }
+
+
+@mcp.tool()
 def get_sector_ranking(
     date: str,
     direction: str = "gainers",
