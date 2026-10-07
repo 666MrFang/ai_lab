@@ -92,6 +92,14 @@ class MarketDataProvider(ABC):
             f"{type(self).__name__} does not implement get_stock_history_summary",
         )
 
+    def get_limit_up_stocks(self, date: str, limit: int = 10) -> list[dict]:
+        """Historical limit-up/continuation candidates for one trading date."""
+
+        raise MarketError(
+            ErrorCode.REAL_PROVIDER_NOT_IMPLEMENTED,
+            f"{type(self).__name__} does not implement get_limit_up_stocks",
+        )
+
     def get_stock_news(self, date: str, stock_code: str, limit: int = 10) -> list[dict]:
         """Timestamped stock-news facts; never a causal conclusion."""
 
