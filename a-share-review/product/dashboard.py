@@ -129,7 +129,7 @@ small{color:#6b7280}.warn{background:#fff7ed}.secondary{opacity:.82}.section-not
 <div class="card"><h2>① 市场温度</h2><div class="section-note">指数、量能、市场宽度与情绪事实</div><ul>%s</ul></div>
 <div class="card"><h2>② 强弱行业</h2><div class="section-note">当日强弱 + 5D/20D 持续性 + 成交额</div><table><thead><tr><th>板块</th><th>当日</th><th>5D</th><th>20D</th><th>成交额(元)</th></tr></thead><tbody>%s</tbody></table></div>
 <div class="card secondary"><h2>历史相似场景</h2><table><thead><tr><th>板块</th><th>当日</th><th>历史相似场景</th></tr></thead><tbody>%s</tbody></table></div>
-<div class="card"><h2>③ 核心个股与事件</h2><div class="section-note">强势股 / 容量候选，以及行情事实、媒体新闻和正式公告三类独立 Evidence</div><table><thead><tr><th>股票</th><th>板块</th><th>角色</th><th>行情 / 历史</th><th>新闻</th><th>公司公告</th></tr></thead><tbody>%s</tbody></table><small>CAPACITY_CORE_CANDIDATE 仅表示市值候选，不等同于龙头确认。</small></div>
+<div class="card"><h2>③ 核心个股与事件</h2><div class="section-note">强势股 / 涨停连板核心候选 / 容量候选，以及行情事实、媒体新闻和正式公告三类独立 Evidence</div><table><thead><tr><th>股票</th><th>板块</th><th>角色</th><th>行情 / 历史</th><th>新闻</th><th>公司公告</th></tr></thead><tbody>%s</tbody></table><small>LIMIT_UP_CORE_CANDIDATE 仅表示当日涨停/连板短线核心候选；CAPACITY_CORE_CANDIDATE 仅表示市值候选；二者都不等同于龙头确认。</small></div>
 <div class="card"><h2>④ 明日观察与验证</h2><ul>%s</ul></div>
 <div class="card secondary"><h2>D+1 自动回验</h2><table><thead><tr><th>指标</th><th>条件值</th><th>实际值</th><th>结果</th></tr></thead><tbody>%s</tbody></table><small>NOT_OBSERVABLE 既不计为通过，也不计为失败。</small></div>
 <div class="card warn"><h2>⑤ Evidence Gap</h2><ul>%s</ul><small>Historical Pattern ≠ Future Fact；样本不足时不会生成概率性结论。</small></div>

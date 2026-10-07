@@ -517,6 +517,7 @@
             "enum": [
               "STRONG_STOCK",
               "CAPACITY_CORE_CANDIDATE",
+              "LIMIT_UP_CORE_CANDIDATE",
               "POPULARITY_STOCK",
               "OTHER"
             ]
