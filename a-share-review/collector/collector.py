@@ -5,6 +5,7 @@ collection completeness against the Production Capability Set.
 """
 
 from __future__ import annotations
+import time
 
 import datetime as dt
 from dataclasses import dataclass, field
@@ -94,6 +95,16 @@ def collect(caller: Any, date: str, clock: Optional[Callable[[], str]] = None) -
     def call_and_record(tool, arguments, category, kind):
         requested_at = now()
         result = caller.call(tool, arguments)
+        # Live public-data endpoints occasionally fail transiently. Retry only
+        # transport/network failures, never semantic/data errors, and only for
+        # REQUIRED evidence so optional enrichment cannot amplify traffic.
+        if category == "required" and result.get("error_code") == "NETWORK_ERROR":
+            for retry_no in range(1, 3):
+                print("COLLECT_RETRY|%s|%d/2|NETWORK_ERROR" % (tool, retry_no), flush=True)
+                time.sleep(0.5 * retry_no)
+                result = caller.call(tool, arguments)
+                if result.get("success") or result.get("error_code") != "NETWORK_ERROR":
+                    break
         success = bool(result.get("success"))
         error_code = result.get("error_code")
         record = RawRecord(
@@ -166,17 +177,18 @@ def collect(caller: Any, date: str, clock: Optional[Callable[[], str]] = None) -
                                 selected.append(code)
                         if len(selected) >= 5:
                             break
-                    # Strong-stock ranking needs a comparable 5d return
-                    # for every current member, not only today's top movers.
-                    for member in members:
-                        code = member.get("stock_code")
-                        if code:
-                            call_and_record(
-                                "get_stock_history_summary",
-                                {"date": date, "stock_code": code},
-                                "optional",
-                                "stock_history",
-                            )
+                    # Bound enrichment to the actionable candidate set.
+                    # Querying every constituent caused hundreds of serial calls
+                    # and many INVALID_STOCK_CODE errors from stale/delisted
+                    # current-membership rows. The candidate set already
+                    # contains today's top movers plus capacity candidates.
+                    for code in selected:
+                        call_and_record(
+                            "get_stock_history_summary",
+                            {"date": date, "stock_code": code},
+                            "optional",
+                            "stock_history",
+                        )
                     for code in selected:
                         call_and_record(
                             "get_stock_news",
