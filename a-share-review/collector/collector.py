@@ -125,6 +125,13 @@ def collect(caller: Any, date: str, clock: Optional[Callable[[], str]] = None) -
             ),
             flush=True,
         )
+        if not success and result.get("diagnostic"):
+            diag = result["diagnostic"]
+            print(
+                "COLLECT_DIAGNOSTIC|%s|provider=%s|endpoint=%s|exception=%s"
+                % (tool, diag.get("provider"), diag.get("endpoint"), diag.get("exception_type")),
+                flush=True,
+            )
         return record
 
     for tool, arguments, category, kind in plan:
