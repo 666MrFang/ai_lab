@@ -391,6 +391,25 @@ class EvidenceStoreTest(unittest.TestCase):
         self.assertEqual(collection.status, STATUS_FAILED)
 
 
+    def test_historical_current_membership_does_not_trigger_stock_history(self):
+        responses = base_responses()
+        responses[key("get_sector_membership", sector_name="半导体")] = {
+            "success": True,
+            "date": "2026-10-06",
+            "observed_session_date": "2026-10-06",
+            "temporal_semantics": "CURRENT_ONLY",
+            "membership_semantics": "CURRENT_MEMBERSHIP_ONLY",
+            "stocks": [{"stock_code": "600001", "change_pct": 9.9}],
+        }
+        caller = FakeCaller(responses)
+        collection = collect(caller, DATE)
+        historical_member_calls = [
+            args for tool, args in caller.calls
+            if tool == "get_stock_history_summary" and args.get("stock_code") == "600001"
+        ]
+        self.assertEqual(historical_member_calls, [])
+        self.assertTrue(collection.temporal_quarantine)
+
 if __name__ == "__main__":
     unittest.main()
 
