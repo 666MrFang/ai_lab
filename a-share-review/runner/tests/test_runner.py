@@ -166,6 +166,15 @@ class RunnerTest(unittest.TestCase):
         self.assertEqual(manifest["evidence_mode_used"], "live")
         self.assertTrue(EvidenceStore(self.data).exists(DATE))
 
+    def test_live_overwrite_replaces_existing_evidence(self):
+        self.save_evidence()
+        manifest = self.execute(
+            mode="live", factory=FakeFactory(base_responses()), overwrite=True
+        )
+        self.assertEqual(self.stage(manifest, "resolve_evidence"), "PASS")
+        self.assertEqual(manifest["evidence_mode_used"], "live")
+        self.assertTrue(EvidenceStore(self.data).exists(DATE))
+
     # 3
     def test_03_replay_missing_fails(self):
         manifest = self.execute(mode="replay")
