@@ -69,4 +69,45 @@ def validate_integrity(review: Dict[str, Any], stored_normalized: Dict[str, Any]
                 if entry.get(field) != stored.get(field):
                     errors.append("baseline %s mismatch for %s" % (field, ident))
 
+    # Stock identity/role integrity: a model must never attach a date-exact
+    # limit-up record to another stock code. Natural-language wording is not
+    # trusted as provenance; the role itself is permitted only for codes that
+    # exist in the canonical normalized hot-stock evidence.
+    hot_by_code = {
+        str(item.get("stock_code") or ""): item
+        for item in (stored_normalized.get("hot_stocks") or [])
+        if item.get("stock_code")
+    }
+    review_stocks = review.get("stocks") or []
+    for stock in review_stocks:
+        code = str(stock.get("code") or "")
+        roles = set(stock.get("roles") or [])
+        if "LIMIT_UP_CORE_CANDIDATE" in roles and code not in hot_by_code:
+            errors.append(
+                "LIMIT_UP_CORE_CANDIDATE has no canonical hot-stock evidence: %s" % code
+            )
+
+    # Sector persistence fields are canonical facts, not model discretion.
+    # If the review emits a sector that has stored 5D/20D history, rejecting
+    # contradictory non-null values prevents the dashboard from displaying a
+    # model-mutated history number. Missing values remain allowed and the
+    # product renderer fills them from normalized evidence.
+    sector_history = stored_normalized.get("sector_history") or {}
+    sectors = review.get("sectors") or {}
+    for group in ("top_gainers", "top_losers"):
+        for sector in sectors.get(group) or []:
+            name = str(sector.get("sector_name") or "")
+            hist = sector_history.get(name) or {}
+            for review_key, store_key in (
+                ("change_5d_pct", "change_pct_5d"),
+                ("change_20d_pct", "change_pct_20d"),
+            ):
+                value = sector.get(review_key)
+                stored_value = hist.get(store_key)
+                if value is not None and stored_value is not None and not _close(value, stored_value):
+                    errors.append(
+                        "sector %s mismatch for %s: review=%s store=%s"
+                        % (review_key, name, value, stored_value)
+                    )
+
     return errors
