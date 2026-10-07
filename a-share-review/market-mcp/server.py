@@ -160,7 +160,7 @@ def get_sector_ranking(
             sectors = SERVICE.get_sector_ranking(date, direction, limit)
         except MarketError as exc:
             return error_payload(
-                exc.error_code, exc.message, date=date, direction=direction
+                exc.error_code, exc.message, diagnostic=getattr(exc, "diagnostic", None), date=date, direction=direction
             )
         return {
             "success": True,
@@ -259,7 +259,7 @@ def get_sector_history_summary(date: str, sector_name: str) -> dict[str, Any]:
         summary = SERVICE.get_sector_history_summary(date, sector_name)
     except MarketError as exc:
         return error_payload(
-            exc.error_code, exc.message, date=date, sector_name=sector_name
+            exc.error_code, exc.message, diagnostic=getattr(exc, "diagnostic", None), date=date, sector_name=sector_name
         )
 
     return {
@@ -467,7 +467,7 @@ def get_market_metric_baseline(
         baseline = SERVICE.get_market_metric_baseline(date, metric, window)
     except MarketError as exc:
         return error_payload(
-            exc.error_code, exc.message, date=date, metric=metric
+            exc.error_code, exc.message, diagnostic=getattr(exc, "diagnostic", None), date=date, metric=metric
         )
 
     return {
@@ -629,7 +629,7 @@ def get_sector_detail(date: str, sector_name: str) -> dict[str, Any]:
             history = SERVICE.get_sector_history_summary(date, sector_name)
         except MarketError as exc:
             return error_payload(
-                exc.error_code, exc.message, date=date, sector_name=sector_name
+                exc.error_code, exc.message, diagnostic=getattr(exc, "diagnostic", None), date=date, sector_name=sector_name
             )
         return {
             "success": True,
@@ -867,7 +867,7 @@ def get_stock_news(date: str, stock_code: str, limit: int = 10) -> dict[str, Any
             items = SERVICE.get_stock_news(date, stock_code, limit)
         except MarketError as exc:
             return error_payload(
-                exc.error_code, exc.message, date=date, stock_code=stock_code
+                exc.error_code, exc.message, diagnostic=getattr(exc, "diagnostic", None), date=date, stock_code=stock_code
             )
         return {
             "success": True,
