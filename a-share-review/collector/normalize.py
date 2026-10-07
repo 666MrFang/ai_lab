@@ -73,7 +73,11 @@ def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
         result = record.result
 
         if record.tool == "get_sector_ranking":
-            for sector in result.get("sectors") or []:
+            ranking_sectors = list(result.get("sectors") or [])
+            semantics = {s.get("date_semantics") for s in ranking_sectors if s.get("date_semantics")}
+            if len(semantics) == 1:
+                sector_ranking["date_semantics"] = next(iter(semantics))
+            for sector in ranking_sectors:
                 sector_ranking["sectors"].append(
                     {
                         "sector_id": sector.get("sector_id"),
