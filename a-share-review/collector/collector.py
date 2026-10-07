@@ -155,8 +155,26 @@ def collect(caller: Any, date: str, clock: Optional[Callable[[], str]] = None) -
                     "optional",
                     "sector_membership",
                 )
-                if membership_record.success:
-                    members = list((membership_record.result or {}).get("stocks") or [])
+                membership_result = membership_record.result or {}
+                observed_membership_date = (
+                    membership_result.get("observed_session_date")
+                    or membership_result.get("date")
+                )
+                membership_semantics = (
+                    membership_result.get("temporal_semantics")
+                    or membership_result.get("membership_semantics")
+                )
+                membership_usable_for_date = membership_record.success and not (
+                    membership_semantics in ("CURRENT_ONLY", "CURRENT_MEMBERSHIP_ONLY")
+                    and observed_membership_date != date
+                )
+                if membership_record.success and not membership_usable_for_date:
+                    # Preserve the raw current-membership evidence, but never
+                    # use it to derive historical strong-stock candidates.
+                    # Historical constituent identity needs an as-of source.
+                    pass
+                if membership_usable_for_date:
+                    members = list(membership_result.get("stocks") or [])
                     members.sort(
                         key=lambda item: item.get("change_pct")
                         if item.get("change_pct") is not None else float("-inf"),
