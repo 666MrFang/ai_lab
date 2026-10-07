@@ -14,6 +14,8 @@ import sys
 import urllib.error
 import urllib.request
 
+from runner.agent import ReferenceAgent
+
 
 API_URL = "https://api.deepseek.com/chat/completions"
 
@@ -80,42 +82,44 @@ def main(argv=None) -> int:
     if model not in {"deepseek-flash", "deepseek-v4-pro"}:
         return _fail("unsupported DeepSeek model: %s" % model)
 
+    # Generate only the judgment layer. Deterministic facts, metric claims and
+    # the closed-world evidence registry are hydrated locally after the call.
+    base_review = ReferenceAgent().build_review({
+        "date": request_obj["date"],
+        "manifest": request_obj.get("evidence_manifest") or {},
+        "normalized": request_obj.get("normalized_evidence") or {},
+    })
+    analysis_task = {
+        "protocol": "a-share-review-analysis-patch/v1",
+        "date": request_obj["date"],
+        "normalized_evidence": request_obj.get("normalized_evidence") or {},
+        "base_review": {
+            "market_facts": base_review["market"]["facts"],
+            "top_gainers": base_review["sectors"]["top_gainers"],
+            "top_losers": base_review["sectors"]["top_losers"],
+            "stocks": [{"code": x["code"], "name": x["name"], "sector_name": x["sector_name"],
+                        "roles": x["roles"]} for x in base_review["stocks"][:12]],
+        },
+        "output_contract": {
+            "market_inferences": "array max4: claim/confidence/evidence_gaps",
+            "theme_candidates": "array max3: sector_name/confidence/reason/evidence_gaps",
+            "stock_insights": "array max8: code/driver/confidence/evidence_gaps; omit without driver",
+            "profit_effect": "summary/confidence/evidence_gaps",
+            "loss_effect": "summary/confidence/evidence_gaps",
+            "tomorrow_watch": "array max5: target/condition/meaning",
+            "evidence_gaps": "string array max8",
+        },
+    }
     system = (
-        "You are the generator inside an independently evaluated A-share daily-review "
-        "pipeline. Use ONLY the supplied evidence. Follow the supplied Skill and JSON "
-        "Schema. Do not use outside market knowledge. Do not infer causality from news "
-        "existence. Evidence gaps must remain explicit. The supplied allowed_evidence_registry "
-        "is CLOSED-WORLD: copy only exact entries from it into evidence_registry and reference "
-        "their evidence_id values; never invent, rename, aggregate, or reconstruct evidence. "
-        "Index quotes outside that registry may be stated as facts from normalized_evidence but "
-        "must not be converted into invented metric_claims/evidence_registry entries. "
-        "For stock possible_drivers, set causal_status to HYPOTHESIS or UNSUPPORTED unless "
-        "the supplied evidence explicitly establishes causality. SUPPORTED requires non-empty "
-        "causal_evidence_refs; news existence or timing alone is not causal proof. "
-        "Write for an experienced A-share investor, not for a compliance checklist. The review "
-        "must answer the decision-useful questions in this order: what happened today; where profit "
-        "and loss effects concentrated; which sectors are merely one-day movers versus persistent "
-        "theme candidates; which stocks matter and why; what verified events or disclosures may be "
-        "related; and what concrete observations tomorrow would strengthen or falsify each thesis. "
-        "Synthesize facts into a coherent market narrative while keeping FACT, INFERENCE and "
-        "EVIDENCE_GAP boundaries explicit. Prefer comparative statements (today vs previous/5d/20d, "
-        "sector vs market, candidate vs counter-evidence) over isolated numbers. A top-gaining sector "
-        "is not automatically the main theme and a limit-up stock is not automatically the leader. "
-        "Do not waste output repeating boilerplate caveats: state each important limitation once, "
-        "near the conclusion it limits. Be concise but information-dense; keep evidence_gaps "
-        "deduplicated and include only decision-relevant facts, inferences, theme candidates, stocks "
-        "and watch conditions. Copy evidence_registry entries only when actually referenced by "
-        "metric_claims. OUTPUT BUDGET IS A HARD CONTRACT: never exhaust max_tokens. Keep market.facts "
-        "to at most 6, market.inferences at most 4, main_theme_candidates at most 3, stocks at most 8, "
-        "each stock facts at most 3 and possible_drivers at most 2, tomorrow_watch_conditions at most 5, "
-        "and root evidence_gaps at most 8. Do not copy raw evidence payloads or restate the same caveat "
-        "inside every stock; put shared limitations once in root evidence_gaps. Sector top_gainers and "
-        "top_losers are the only exception: preserve the schema-required market ranking coverage supplied "
-        "by evidence. Prefer one information-dense sentence over several repetitive sentences. "
-        "Return exactly one JSON object matching the schema; "
-        "no markdown fences and no prose outside JSON."
+        "You are the judgment layer of an A-share daily review. Deterministic code hydrates facts "
+        "and numeric tables. Do NOT reproduce raw facts, numeric tables, metric_claims, evidence_registry, "
+        "schema, or source payloads. Use only supplied evidence. Produce compact investment synthesis: "
+        "market structure, profit/loss effect, persistent-theme candidates versus one-day movers, stock "
+        "driver hypotheses, and tomorrow strengthen/falsify conditions. News timing alone is not causality. "
+        "Do not invent numeric values. Shared gaps appear once at root. Return exactly one JSON object "
+        "containing only keys in output_contract."
     )
-    user = json.dumps(request_obj, ensure_ascii=False, separators=(",", ":"))
+    user = json.dumps(analysis_task, ensure_ascii=False, separators=(",", ":"))
     body = json.dumps({
         "model": model,
         "messages": [
@@ -145,7 +149,45 @@ def main(argv=None) -> int:
 
     try:
         content = payload["choices"][0]["message"]["content"]
-        review = _decode_review_content(content)
+        patch = _decode_review_content(content)
+        review = base_review
+        def _ev(statement):
+            return {"statement": statement, "source": "evidence_store", "strength": "MEDIUM"}
+        review["market"]["inferences"] = [{
+            "claim": x.get("claim", ""), "confidence": x.get("confidence", "LOW"),
+            "evidence": [_ev("synthesis from stored evidence")], "counter_evidence": [],
+            "evidence_gaps": x.get("evidence_gaps") or [], "causal_status": None,
+            "causal_evidence_refs": [],
+        } for x in (patch.get("market_inferences") or [])[:4] if x.get("claim")]
+        review["sectors"]["main_theme_candidates"] = [{
+            "sector_name": x.get("sector_name", "UNKNOWN"), "confidence": x.get("confidence", "LOW"),
+            "evidence": [_ev(x.get("reason") or "candidate synthesized from stored evidence")],
+            "evidence_gaps": x.get("evidence_gaps") or [],
+        } for x in (patch.get("theme_candidates") or [])[:3] if x.get("sector_name")]
+        insights = {str(x.get("code")): x for x in (patch.get("stock_insights") or [])[:8] if x.get("code")}
+        for stock in review["stocks"]:
+            insight = insights.get(str(stock.get("code")))
+            if insight and insight.get("driver"):
+                stock["possible_drivers"] = [{
+                    "claim": insight["driver"], "confidence": insight.get("confidence", "LOW"),
+                    "evidence": [_ev("driver hypothesis synthesized from stored evidence")],
+                    "counter_evidence": [], "evidence_gaps": insight.get("evidence_gaps") or [],
+                    "causal_status": "HYPOTHESIS", "causal_evidence_refs": [],
+                }]
+        for key in ("profit_effect", "loss_effect"):
+            value = patch.get(key) or {}
+            if value.get("summary"):
+                review[key] = {"summary": value["summary"], "confidence": value.get("confidence", "LOW"),
+                               "evidence": [_ev("synthesis from stored evidence")],
+                               "evidence_gaps": value.get("evidence_gaps") or []}
+        review["tomorrow_watch_conditions"] = [{
+            "target": x.get("target", ""), "condition": x.get("condition", ""),
+            "meaning": x.get("meaning", ""), "condition_id": None, "metric": None,
+            "operator": None, "expected_value": None, "horizon_sessions": 1,
+            "evidence_ref": None,
+        } for x in (patch.get("tomorrow_watch") or [])[:5]
+          if x.get("target") and x.get("condition") and x.get("meaning")]
+        review["evidence_gaps"] = list(dict.fromkeys((patch.get("evidence_gaps") or [])[:8]))
     except Exception as exc:
         # Include only shape/length diagnostics; never echo provider content,
         # because generated text may contain evidence or unexpected material.
