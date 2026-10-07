@@ -287,6 +287,11 @@ class AkShareProvider(MarketDataProvider):
             raise MarketError(
                 _classify_exception(exc),
                 f"{endpoint} call failed ({type(exc).__name__})",
+                diagnostic={
+                    "provider": "akshare",
+                    "endpoint": endpoint,
+                    "exception_type": type(exc).__name__,
+                },
             ) from exc
 
     # ------------------------------------------------------------------

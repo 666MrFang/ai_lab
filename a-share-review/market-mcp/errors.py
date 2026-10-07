@@ -38,10 +38,11 @@ class ErrorCode:
 class MarketError(Exception):
     """Domain error carrying a stable machine-readable ``error_code``."""
 
-    def __init__(self, error_code: str, message: str):
+    def __init__(self, error_code: str, message: str, *, diagnostic: Dict[str, Any] | None = None):
         super().__init__(message)
         self.error_code = error_code
         self.message = message
+        self.diagnostic = dict(diagnostic or {})
 
 
 def error_payload(error_code: str, message: str, **context: Any) -> Dict[str, Any]:
@@ -52,6 +53,9 @@ def error_payload(error_code: str, message: str, **context: Any) -> Dict[str, An
         "error_code": error_code,
         "error": message,
     }
+    diagnostic = context.pop("diagnostic", None)
+    if diagnostic:
+        payload["diagnostic"] = diagnostic
     for key, value in context.items():
         payload[key] = value
     return payload

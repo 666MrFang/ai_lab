@@ -90,7 +90,7 @@ def get_index_performance(date: str) -> dict[str, Any]:
     try:
         quotes = SERVICE.get_index_performance(date)
     except MarketError as exc:
-        return error_payload(exc.error_code, exc.message, date=date)
+        return error_payload(exc.error_code, exc.message, diagnostic=getattr(exc, "diagnostic", None), date=date)
 
     return {
         "success": True,
@@ -113,7 +113,7 @@ def get_limit_up_stocks(date: str, limit: int = 10) -> dict[str, Any]:
     try:
         stocks = SERVICE.get_limit_up_stocks(date, limit)
     except MarketError as exc:
-        return error_payload(exc.error_code, exc.message, date=date)
+        return error_payload(exc.error_code, exc.message, diagnostic=getattr(exc, "diagnostic", None), date=date)
     return {
         "success": True, "date": date, "count": len(stocks),
         "temporal_semantics": "EXACT_TRADING_DATE",
@@ -160,7 +160,7 @@ def get_sector_ranking(
             sectors = SERVICE.get_sector_ranking(date, direction, limit)
         except MarketError as exc:
             return error_payload(
-                exc.error_code, exc.message, date=date, direction=direction
+                exc.error_code, exc.message, diagnostic=getattr(exc, "diagnostic", None), date=date, direction=direction
             )
         return {
             "success": True,
@@ -259,7 +259,7 @@ def get_sector_history_summary(date: str, sector_name: str) -> dict[str, Any]:
         summary = SERVICE.get_sector_history_summary(date, sector_name)
     except MarketError as exc:
         return error_payload(
-            exc.error_code, exc.message, date=date, sector_name=sector_name
+            exc.error_code, exc.message, diagnostic=getattr(exc, "diagnostic", None), date=date, sector_name=sector_name
         )
 
     return {
@@ -298,7 +298,7 @@ def get_sector_membership(sector_name: str) -> dict[str, Any]:
     try:
         membership = SERVICE.get_sector_membership(sector_name)
     except MarketError as exc:
-        return error_payload(exc.error_code, exc.message, sector_name=sector_name)
+        return error_payload(exc.error_code, exc.message, diagnostic=getattr(exc, "diagnostic", None), sector_name=sector_name)
 
     return {
         "success": True,
@@ -335,7 +335,7 @@ def get_market_breadth(date: str) -> dict[str, Any]:
         try:
             breadth = SERVICE.get_market_breadth(date)
         except MarketError as exc:
-            return error_payload(exc.error_code, exc.message, date=date)
+            return error_payload(exc.error_code, exc.message, diagnostic=getattr(exc, "diagnostic", None), date=date)
         return {
             "success": True,
             "date": date,
@@ -467,7 +467,7 @@ def get_market_metric_baseline(
         baseline = SERVICE.get_market_metric_baseline(date, metric, window)
     except MarketError as exc:
         return error_payload(
-            exc.error_code, exc.message, date=date, metric=metric
+            exc.error_code, exc.message, diagnostic=getattr(exc, "diagnostic", None), date=date, metric=metric
         )
 
     return {
@@ -508,7 +508,7 @@ def get_market_history_summary(date: str) -> dict[str, Any]:
     try:
         summary = SERVICE.get_market_history_summary(date)
     except MarketError as exc:
-        return error_payload(exc.error_code, exc.message, date=date)
+        return error_payload(exc.error_code, exc.message, diagnostic=getattr(exc, "diagnostic", None), date=date)
 
     return {
         "success": True,
@@ -629,7 +629,7 @@ def get_sector_detail(date: str, sector_name: str) -> dict[str, Any]:
             history = SERVICE.get_sector_history_summary(date, sector_name)
         except MarketError as exc:
             return error_payload(
-                exc.error_code, exc.message, date=date, sector_name=sector_name
+                exc.error_code, exc.message, diagnostic=getattr(exc, "diagnostic", None), date=date, sector_name=sector_name
             )
         return {
             "success": True,
@@ -716,7 +716,7 @@ def get_stock_detail(date: str, stock_code: str) -> dict[str, Any]:
     try:
         quote = SERVICE.get_stock_detail(date, stock_code)
     except MarketError as exc:
-        return error_payload(exc.error_code, exc.message, date=date, stock_code=stock_code)
+        return error_payload(exc.error_code, exc.message, diagnostic=getattr(exc, "diagnostic", None), date=date, stock_code=stock_code)
 
     return {
         "success": True,
@@ -808,7 +808,7 @@ def get_stock_history_summary(date: str, stock_code: str) -> dict[str, Any]:
     try:
         summary = SERVICE.get_stock_history_summary(date, stock_code)
     except MarketError as exc:
-        return error_payload(exc.error_code, exc.message, date=date, stock_code=stock_code)
+        return error_payload(exc.error_code, exc.message, diagnostic=getattr(exc, "diagnostic", None), date=date, stock_code=stock_code)
     return {"success": True, **summary}
 
 
@@ -827,7 +827,7 @@ def get_stock_disclosures(date: str, stock_code: str, limit: int = 10) -> dict[s
     try:
         items = SERVICE.get_stock_disclosures(date, stock_code, limit)
     except MarketError as exc:
-        return error_payload(exc.error_code, exc.message, date=date, stock_code=stock_code)
+        return error_payload(exc.error_code, exc.message, diagnostic=getattr(exc, "diagnostic", None), date=date, stock_code=stock_code)
     return {
         "success": True, "date": date, "stock_code": stock_code,
         "count": len(items), "disclosures": items,
@@ -867,7 +867,7 @@ def get_stock_news(date: str, stock_code: str, limit: int = 10) -> dict[str, Any
             items = SERVICE.get_stock_news(date, stock_code, limit)
         except MarketError as exc:
             return error_payload(
-                exc.error_code, exc.message, date=date, stock_code=stock_code
+                exc.error_code, exc.message, diagnostic=getattr(exc, "diagnostic", None), date=date, stock_code=stock_code
             )
         return {
             "success": True,
