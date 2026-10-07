@@ -105,7 +105,14 @@ def main(argv=None) -> int:
         "near the conclusion it limits. Be concise but information-dense; keep evidence_gaps "
         "deduplicated and include only decision-relevant facts, inferences, theme candidates, stocks "
         "and watch conditions. Copy evidence_registry entries only when actually referenced by "
-        "metric_claims. Return exactly one JSON object matching the schema; "
+        "metric_claims. OUTPUT BUDGET IS A HARD CONTRACT: never exhaust max_tokens. Keep market.facts "
+        "to at most 6, market.inferences at most 4, main_theme_candidates at most 3, stocks at most 8, "
+        "each stock facts at most 3 and possible_drivers at most 2, tomorrow_watch_conditions at most 5, "
+        "and root evidence_gaps at most 8. Do not copy raw evidence payloads or restate the same caveat "
+        "inside every stock; put shared limitations once in root evidence_gaps. Sector top_gainers and "
+        "top_losers are the only exception: preserve the schema-required market ranking coverage supplied "
+        "by evidence. Prefer one information-dense sentence over several repetitive sentences. "
+        "Return exactly one JSON object matching the schema; "
         "no markdown fences and no prose outside JSON."
     )
     user = json.dumps(request_obj, ensure_ascii=False, separators=(",", ":"))
