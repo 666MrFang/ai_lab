@@ -269,9 +269,12 @@ def collect(caller: Any, date: str, clock: Optional[Callable[[], str]] = None) -
         if not r.success:
             continue
         result = r.result or {}
-        temporal_semantics = result.get("temporal_semantics")
+        temporal_semantics = (
+            result.get("temporal_semantics")
+            or result.get("membership_semantics")
+        )
         observed_date = result.get("observed_session_date") or result.get("date")
-        if temporal_semantics == "CURRENT_ONLY" and observed_date != date:
+        if temporal_semantics in ("CURRENT_ONLY", "CURRENT_MEMBERSHIP_ONLY") and observed_date != date:
             temporal_quarantine.append(_signature(r.tool, r.arguments))
 
     if required_failed:
