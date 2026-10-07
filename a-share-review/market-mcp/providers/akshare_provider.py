@@ -1073,51 +1073,101 @@ class AkShareProvider(MarketDataProvider):
             raise MarketError(ErrorCode.INVALID_WINDOW, "limit must be a positive integer")
         if not self.is_trading_day(date):
             raise MarketError(ErrorCode.NOT_TRADING_DAY, "%s is not a trading day" % date)
-        latest = self._latest_completed_trading_day()
-        if date != latest:
-            raise MarketError(
-                ErrorCode.HISTORICAL_RANKING_UNAVAILABLE,
-                "sector ranking is CURRENT_ONLY (latest=%s); %s cannot be replayed upstream"
-                % (latest, date),
-            )
 
-        frame = self._call("stock_board_industry_summary_ths")
-        self._require_columns(
-            frame, ("板块", "涨跌幅", "总成交额", "上涨家数", "下跌家数"),
-            "stock_board_industry_summary_ths",
-        )
+        latest = self._latest_completed_trading_day()
         taxonomy = self._ths_industry_taxonomy()
-        lineage = DataLineage(
-            library="akshare", source="ths", endpoint="stock_board_industry_summary_ths"
-        )
         snapshots: List[SectorSnapshot] = []
-        for row in self._to_records(frame):
-            name = _clean_text(row.get("板块"))
-            if name is None or name not in taxonomy:
-                continue  # SECTOR_ID_UNRESOLVED: never fabricate an id
-            snapshots.append(
-                SectorSnapshot(
-                    date=date,
-                    sector_id=taxonomy[name],
-                    sector_name=name,
-                    taxonomy="industry",
-                    source_family="ths",
-                    change_pct=to_float(row.get("涨跌幅")),
-                    turnover_cny=yi_yuan_to_cny(row.get("总成交额")),
-                    up_count=_to_int(row.get("上涨家数")),
-                    down_count=_to_int(row.get("下跌家数")),
-                    flat_count=None,
-                    constituent_count=None,
-                    date_semantics="CURRENT_ONLY",
-                    lineage=lineage,
-                )
+
+        if date == latest:
+            frame = self._call("stock_board_industry_summary_ths")
+            self._require_columns(
+                frame, ("板块", "涨跌幅", "总成交额", "上涨家数", "下跌家数"),
+                "stock_board_industry_summary_ths",
             )
+            lineage = DataLineage(
+                library="akshare", source="ths",
+                endpoint="stock_board_industry_summary_ths"
+            )
+            for row in self._to_records(frame):
+                name = _clean_text(row.get("板块"))
+                if name is None or name not in taxonomy:
+                    continue
+                snapshots.append(
+                    SectorSnapshot(
+                        date=date, sector_id=taxonomy[name], sector_name=name,
+                        taxonomy="industry", source_family="ths",
+                        change_pct=to_float(row.get("涨跌幅")),
+                        turnover_cny=yi_yuan_to_cny(row.get("总成交额")),
+                        up_count=_to_int(row.get("上涨家数")),
+                        down_count=_to_int(row.get("下跌家数")),
+                        flat_count=None, constituent_count=None,
+                        date_semantics="CURRENT_ONLY", lineage=lineage,
+                    )
+                )
+        else:
+            # Reconstruct the historical cross-section from THS industry-index
+            # history. We require the target session and its immediately
+            # preceding trading session; no current snapshot is substituted.
+            trading_days = self._trading_days_up_to(date)
+            if len(trading_days) < 2:
+                raise MarketError(
+                    ErrorCode.DATA_NOT_AVAILABLE,
+                    "no previous trading session for historical sector ranking",
+                )
+            previous = trading_days[-2]
+            start_date = to_provider_date(shift_calendar_days(previous, -3))
+            end_date = to_provider_date(date)
+            lineage = DataLineage(
+                library="akshare", source="ths",
+                endpoint="stock_board_industry_index_ths"
+            )
+            for name, sector_id in taxonomy.items():
+                try:
+                    frame = self._call(
+                        "stock_board_industry_index_ths", symbol=name,
+                        start_date=start_date, end_date=end_date,
+                    )
+                    self._require_columns(
+                        frame, ("日期", "收盘价", "成交额"),
+                        "stock_board_industry_index_ths",
+                    )
+                except MarketError:
+                    # One unavailable industry must not manufacture a value or
+                    # erase the independently observable industries.
+                    continue
+                by_date: Dict[str, Dict[str, Any]] = {}
+                for row in self._to_records(frame):
+                    iso = coerce_to_iso_date(row.get("日期"))
+                    if iso in (previous, date):
+                        by_date[iso] = row
+                if previous not in by_date or date not in by_date:
+                    continue
+                prev_close = to_float(by_date[previous].get("收盘价"))
+                close = to_float(by_date[date].get("收盘价"))
+                if prev_close in (None, 0) or close is None:
+                    continue
+                snapshots.append(
+                    SectorSnapshot(
+                        date=date, sector_id=sector_id, sector_name=name,
+                        taxonomy="industry", source_family="ths",
+                        change_pct=round((close / prev_close - 1) * 100, 2),
+                        turnover_cny=to_float(by_date[date].get("成交额")),
+                        up_count=None, down_count=None, flat_count=None,
+                        constituent_count=None,
+                        date_semantics="HISTORICAL_RECONSTRUCTED",
+                        lineage=lineage,
+                    )
+                )
+
         if not snapshots:
             raise MarketError(
-                ErrorCode.EMPTY_UPSTREAM_RESPONSE, "THS industry ranking is empty"
+                ErrorCode.EMPTY_UPSTREAM_RESPONSE,
+                "THS industry ranking has no observable sectors for %s" % date,
             )
         snapshots.sort(
-            key=lambda item: (item.change_pct if item.change_pct is not None else float("-inf")),
+            key=lambda item: (
+                item.change_pct if item.change_pct is not None else float("-inf")
+            ),
             reverse=(normalized_direction == "top"),
         )
         return snapshots[:limit]
