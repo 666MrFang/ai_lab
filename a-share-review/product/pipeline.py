@@ -111,7 +111,7 @@ def run_product_day(
     (day_dir / "outlook.json").write_text(
         json.dumps(outlook, ensure_ascii=False, indent=2), encoding="utf-8"
     )
-    dashboard = render_dashboard(review, outlook, current)
+    dashboard = render_dashboard(review, outlook, current, normalized)
     (day_dir / "dashboard.html").write_text(dashboard, encoding="utf-8")
 
     golden_result = None
