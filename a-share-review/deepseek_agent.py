@@ -92,8 +92,12 @@ def main(argv=None) -> int:
         "For stock possible_drivers, set causal_status to HYPOTHESIS or UNSUPPORTED unless "
         "the supplied evidence explicitly establishes causality. SUPPORTED requires non-empty "
         "causal_evidence_refs; news existence or timing alone is not causal proof. "
-        "Return exactly one JSON object "
-        "matching the schema; no markdown fences and no prose outside JSON."
+        "Be concise: include only evidence needed for the review; do not repeat the same fact "
+        "across sections unless the schema requires it; keep evidence_gaps deduplicated; limit "
+        "market facts/inferences, theme candidates, stock facts/drivers, and watch conditions to "
+        "the smallest useful set supported by evidence. Copy evidence_registry entries only when "
+        "actually referenced by metric_claims. Return exactly one JSON object matching the schema; "
+        "no markdown fences and no prose outside JSON."
     )
     user = json.dumps(request_obj, ensure_ascii=False, separators=(",", ":"))
     body = json.dumps({
@@ -104,7 +108,7 @@ def main(argv=None) -> int:
         ],
         "response_format": {"type": "json_object"},
         "stream": False,
-        "max_tokens": int(os.environ.get("DEEPSEEK_MAX_TOKENS", "16000")),
+        "max_tokens": int(os.environ.get("DEEPSEEK_MAX_TOKENS", "24000")),
     }, ensure_ascii=False).encode("utf-8")
 
     req = urllib.request.Request(
@@ -132,9 +136,10 @@ def main(argv=None) -> int:
         content_len = len(content) if isinstance(locals().get("content"), str) else -1
         finish = ((payload.get("choices") or [{}])[0].get("finish_reason")
                   if isinstance(payload, dict) else None)
+        reason = "OUTPUT_TRUNCATED" if finish == "length" else "INVALID_JSON"
         return _fail(
-            "DeepSeek response is not valid review JSON: %s; content_len=%s; finish_reason=%s"
-            % (type(exc).__name__, content_len, finish), 5
+            "DeepSeek response is not valid review JSON: %s; content_len=%s; finish_reason=%s; reason=%s"
+            % (type(exc).__name__, content_len, finish, reason), 5
         )
 
     # stdout is deliberately review JSON only: the parent adapter persists raw
