@@ -136,10 +136,13 @@ class SectorTest(unittest.TestCase):
         self.assertEqual(rows[0].date_semantics, "CURRENT_ONLY")
 
     # 10
-    def test_10_historical_current_endpoint_rejected(self):
-        with self.assertRaises(MarketError) as ctx:
-            provider().get_sector_ranking("2026-09-29", "top", 5)
-        self.assertEqual(ctx.exception.error_code, ErrorCode.HISTORICAL_RANKING_UNAVAILABLE)
+    def test_10_historical_ranking_reconstructed_from_ths_index(self):
+        rows = provider().get_sector_ranking("2026-09-29", "top", 5)
+        self.assertEqual([r.sector_name for r in rows], ["半导体", "房地产"])
+        self.assertTrue(all(r.date_semantics == "HISTORICAL_RECONSTRUCTED" for r in rows))
+        # equal-weight fixture closes 122 -> 123 on 09-29
+        self.assertEqual(rows[0].change_pct, round((123 / 122 - 1) * 100, 2))
+        self.assertEqual(rows[0].lineage.endpoint, "stock_board_industry_index_ths")
 
     # 11 + 13
     def test_11_5d_return_formula(self):
