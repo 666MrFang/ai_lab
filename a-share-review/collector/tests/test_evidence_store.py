@@ -414,6 +414,8 @@ class EvidenceStoreTest(unittest.TestCase):
         ]
         self.assertEqual(historical_member_calls, [])
         self.assertTrue(collection.temporal_quarantine)
+        normalized = normalized_for(collection)
+        self.assertEqual(normalized.get("sector_memberships"), {})
 
 if __name__ == "__main__":
     unittest.main()
