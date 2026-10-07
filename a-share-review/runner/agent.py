@@ -197,8 +197,8 @@ class ReferenceAgent:
                 "sector_name": name,
                 "change_pct": row.get("change_pct"),
                 "turnover_cny": row.get("turnover_cny"),
-                "change_5d_pct": hist.get("change_5d_pct"),
-                "change_20d_pct": hist.get("change_20d_pct"),
+                "change_5d_pct": hist.get("change_pct_5d"),
+                "change_20d_pct": hist.get("change_pct_20d"),
             }
 
         top_gainers = [sector_view(row) for row in sector_rows[:5]]
@@ -337,6 +337,38 @@ class ReferenceAgent:
                 "possible_drivers": [], "historical_behavior": None,
                 "evidence_gaps": ["no verified sector membership / news evidence"],
             })
+
+        # Date-exact limit-up / continuation candidates are a separate
+        # historical short-term-attention evidence family. They are not an
+        # Eastmoney popularity ranking and do not establish "leader" status.
+        for item in normalized.get("hot_stocks") or []:
+            code = str(item.get("stock_code") or "")
+            if not code or code in seen_stock_codes:
+                continue
+            stocks.append({
+                "code": code,
+                "name": item.get("stock_name") or "UNKNOWN",
+                "sector_name": item.get("industry_name") or "UNKNOWN",
+                "roles": ["LIMIT_UP_CORE_CANDIDATE"],
+                "facts": [{
+                    "statement": (
+                        "当日涨停池：连板数 %s，涨跌幅 %s%%，成交额 %s 元，换手率 %s%%，"
+                        "首次封板 %s，最后封板 %s，炸板次数 %s。"
+                        % (item.get("consecutive_limit_up"), item.get("change_pct"),
+                           item.get("turnover_cny"), item.get("turnover_rate_pct"),
+                           item.get("first_limit_time"), item.get("last_limit_time"),
+                           item.get("broken_count"))
+                    ),
+                    "source": "evidence_store:eastmoney_limit_pool",
+                }],
+                "possible_drivers": [],
+                "historical_behavior": None,
+                "evidence_gaps": [
+                    "涨停/连板候选不等于市场人气榜，也不自动等于龙头",
+                    "涨停事实不能单独证明上涨原因",
+                ],
+            })
+            seen_stock_codes.add(code)
 
         # News is timestamped event evidence only. Existence of an item is
         # never promoted to a price-move cause without minute-level ordering
