@@ -39,6 +39,7 @@ def render_dashboard(
     review: Dict[str, Any],
     outlook: Dict[str, Any],
     memory_record: Dict[str, Any],
+    normalized: Dict[str, Any] | None = None,
 ) -> str:
     date = escape(str(review.get("date", "")))
     regime = review.get("market_regime") or {}
@@ -93,13 +94,20 @@ def render_dashboard(
     stock_rows = "".join(stock_rows_parts)
     gainers = (review.get("sectors") or {}).get("top_gainers") or []
     losers = (review.get("sectors") or {}).get("top_losers") or []
-    sector_detail_rows = "".join(
-        "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (
+    sector_history = (normalized or {}).get("sector_history") or {}
+    def _sector_row(x: Dict[str, Any]) -> str:
+        hist = sector_history.get(str(x.get("sector_name") or "")) or {}
+        change_5d = x.get("change_5d_pct")
+        change_20d = x.get("change_20d_pct")
+        if change_5d is None:
+            change_5d = hist.get("change_pct_5d")
+        if change_20d is None:
+            change_20d = hist.get("change_pct_20d")
+        return "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (
             escape(str(x.get("sector_name") or "—")), _pct(x.get("change_pct")),
-            _pct(x.get("change_5d_pct")), _pct(x.get("change_20d_pct")),
-            _money(x.get("turnover_cny")),
-        ) for x in gainers + losers
-    )
+            _pct(change_5d), _pct(change_20d), _money(x.get("turnover_cny")),
+        )
+    sector_detail_rows = "".join(_sector_row(x) for x in gainers + losers)
     status = escape(str(memory_record.get("status", "OPEN")))
     verification = memory_record.get("d1_verification") or {}
     verification_rows = "".join(
