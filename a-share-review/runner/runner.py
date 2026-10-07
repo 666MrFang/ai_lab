@@ -147,7 +147,9 @@ def run_review(
                             flush=True,
                         )
             else:
-                target = store.save(date, collection, normalized)
+                target = store.save(
+                    date, collection, normalized, overwrite=overwrite_output
+                )
                 data = store.load(date)
                 manifest = data["manifest"]
                 normalized = data["normalized"]
