@@ -65,6 +65,7 @@ def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
     stock_news: Dict[str, Any] = {}
     stock_disclosures: Dict[str, Any] = {}
     stock_history: Dict[str, Any] = {}
+    hot_stocks: List[Dict[str, Any]] = []
     market_context: Dict[str, Any] = {"turnover": {}, "breadth": {}}
 
     for record in records:
@@ -91,6 +92,9 @@ def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
                         "constituent_count": sector.get("constituent_count"),
                     }
                 )
+
+        if record.tool == "get_limit_up_stocks":
+            hot_stocks.extend(list(result.get("stocks") or []))
 
         if record.tool == "get_stock_history_summary":
             code = result.get("stock_code") or record.arguments.get("stock_code")
@@ -271,5 +275,6 @@ def normalize_records(records: List[Any], date: str) -> Dict[str, Any]:
         "stock_news": stock_news,
         "stock_disclosures": stock_disclosures,
         "stock_history": stock_history,
+        "hot_stocks": hot_stocks,
         "market_context": market_context,
     }
