@@ -174,21 +174,33 @@ def run_review(
                          overwrite_output=overwrite_output,
                          extra_partials={})
 
-    # Temporal integrity is a hard pre-Agent gate. Quarantined CURRENT_ONLY
-    # evidence must never be reasoned over as historical evidence.
-    if (manifest or {}).get("temporal_integrity") == "QUARANTINED":
-        add_stage("temporal_integrity", FAIL, "CURRENT_ONLY evidence date mismatch")
-        errors.append("temporal evidence quarantined")
-        skip_rest("resolve_evidence")
-        return _finalize(run_id, date, started, now(), mode, evidence_mode_used,
-                         evidence_manifest_path, collection_status, stages, errors,
-                         review, review_md, normalized, eval_payload,
-                         execution="FAIL", quality=SKIPPED,
-                         output_root=output_root, failed_root=failed_root,
-                         overwrite_output=overwrite_output,
-                         extra_partials={"temporal_quarantine.json": json.dumps(
-                             (manifest or {}).get("temporal_quarantine") or [],
-                             ensure_ascii=False, indent=2)})
+    # CURRENT_ONLY optional evidence is quarantined by the collector and
+    # excluded from the normalized reasoning view. It remains in raw evidence
+    # and the manifest for auditability, but must not kill an otherwise valid
+    # historical review. Required temporal violations are still fatal.
+    quarantined = list((manifest or {}).get("temporal_quarantine") or [])
+    if quarantined:
+        required_sigs = {
+            item for item in quarantined
+            if any(item.startswith(tool + "(") for tool in (
+                "get_index_performance", "get_market_history_summary",
+                "get_market_breadth", "get_sector_ranking",
+                "get_market_metric_baseline",
+            ))
+        }
+        if required_sigs:
+            add_stage("temporal_integrity", FAIL, "required CURRENT_ONLY evidence date mismatch")
+            errors.append("required temporal evidence quarantined")
+            skip_rest("resolve_evidence")
+            return _finalize(run_id, date, started, now(), mode, evidence_mode_used,
+                             evidence_manifest_path, collection_status, stages, errors,
+                             review, review_md, normalized, eval_payload,
+                             execution="FAIL", quality=SKIPPED,
+                             output_root=output_root, failed_root=failed_root,
+                             overwrite_output=overwrite_output,
+                             extra_partials={"temporal_quarantine.json": json.dumps(
+                                 quarantined, ensure_ascii=False, indent=2)})
+        print("TEMPORAL_QUARANTINE|OPTIONAL|count=%d" % len(quarantined))
 
     # --- Stage 2: run agent -------------------------------------------
     agent_input = {"date": date, "manifest": manifest, "normalized": normalized,
